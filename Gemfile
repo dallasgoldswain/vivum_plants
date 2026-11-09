@@ -49,6 +49,12 @@ gem "rqrcode"
 # Transactional email delivery [https://resend.com/docs/send-with-rails]
 gem "resend"
 
+# In-app notifications and delivery (email, push) [https://github.com/excid3/noticed]
+gem "noticed"
+
+# Platform operator management area at /madmin [https://github.com/excid3/madmin]
+gem "madmin"
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 

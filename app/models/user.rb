@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :sellers, through: :memberships
   has_many :otp_backup_codes, dependent: :delete_all
+  has_many :notifications, as: :recipient, class_name: "Noticed::Notification", dependent: :destroy
 
   encrypts :otp_secret
 

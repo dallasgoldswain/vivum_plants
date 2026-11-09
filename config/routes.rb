@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  draw :madmin
   resource :session
   resources :passwords, param: :token
   resource :registration, only: %i[ new create ]
