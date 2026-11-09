@@ -22,7 +22,7 @@ Make sure PostgreSQL is running locally, then:
 bin/setup
 ```
 
-This installs gems, prepares the database and starts the server at http://localhost:3000. Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later.
+This installs gems, prepares the database and starts the server at http://localhost:3001 (set `PORT` to change it). Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later.
 
 Emails (verification, password reset) are not sent in development; preview them at http://localhost:3000/rails/mailers. Production sends through [Resend](https://resend.com).
 
@@ -84,4 +84,4 @@ GitHub Actions runs the same checks on every push and pull request (`.github/wor
 
 ## Deployment
 
-Kamal is configured (`config/deploy.yml`, `.kamal/secrets`) but not yet set up for a production server or database. Production needs `RAILS_MASTER_KEY` and the credentials above. Set the real domain for email links in `config.action_mailer.default_url_options` in `config/environments/production.rb` (currently `example.com`).
+Production runs at https://plants.vivumlabs.co.za. Kamal (`config/deploy.yml`) serves that host through kamal-proxy with a Let's Encrypt certificate; Rails assumes SSL from the proxy, forces HTTPS and only accepts that host (except `/up`). The server address and image registry in `config/deploy.yml` are still placeholders, and the production database is not set up yet. Production needs `RAILS_MASTER_KEY` and the credentials above.

@@ -2,9 +2,9 @@
 
 **Version 1.3** · 9 November 2026 · Implementation requirements
 **Status:** Draft for product owner sign-off. Supersedes v1.2.
-**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D31)
+**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D32)
 
-Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.* Brand, domain and trademark clearance are outside this PRD and unverified.
+Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.* Production domain: `plants.vivumlabs.co.za` (D32); the parent name VIVUM Labs plays on a tissue culture lab and a software lab. Trademark clearance is outside this PRD and unverified.
 
 ---
 
@@ -82,6 +82,7 @@ Collectors need to connect what a plant is with where it grows, what substrate i
 | D29 | Founder edits the library; species list from pilot sellers' most-traded stock; AI may draft, founder publishes. |
 | D30 | Help topics and screenshots written in the same change as each feature; founder reviews before flag goes live. |
 | D31 | Widening a pilot flag is a founder judgement, recorded with evidence in the flag audit trail. |
+| D32 | Production domain is plants.vivumlabs.co.za under the VIVUM Labs name. |
 
 ### Product principles
 

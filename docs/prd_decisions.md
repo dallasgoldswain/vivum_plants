@@ -78,3 +78,9 @@ Decisions captured interactively on 2026-11-09 while revising PRD v1.2 → v1.3.
 - O2 WhatsApp route — decided during pilot (D22).
 - O6 Yoco third-party and shared-domain approval — provider-controlled gate.
 - O8 Email and push providers — decided at build (D28).
+
+## Round 9 — Domain
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D32 | Production domain | The app runs at `plants.vivumlabs.co.za`. The parent brand `vivumlabs.co.za` is a play on words: a tissue culture lab and a software lab. |
