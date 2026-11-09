@@ -10,7 +10,7 @@ A South African plant collection and seller operations platform. Collectors reco
 - Ruby 4.0.7 (`.ruby-version`), Rails 8.1
 - PostgreSQL 18
 - Hotwire (Turbo, Stimulus) with importmap; PWA and Hotwire Native clients planned
-- Solid Queue, Solid Cache, Solid Cable
+- Solid Queue (jobs), Solid Cache, Solid Cable in development and production, each in its own database (`*_cache`, `*_queue`, `*_cable`). Jobs run inside Puma in development; in production when `SOLID_QUEUE_IN_PUMA` is set, or via `bin/jobs`. Tests use the in-process test adapters.
 - Kamal for deployment
 - Node.js, only for the Herb linter and formatter (run via `npx`)
 
