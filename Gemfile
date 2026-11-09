@@ -58,6 +58,27 @@ gem "madmin"
 # Referral codes and links [https://github.com/excid3/refer]
 gem "refer"
 
+# Import and export (not built yet): caxlsx writes Excel templates (with dropdowns) and exports,
+# roo reads uploaded workbooks and CSVs (e.g. stock import, PRD IM01/IM02)
+gem "caxlsx"
+gem "roo"
+
+# Rich text editor on Action Text for care sheets and notes [https://github.com/basecamp/lexxy]
+gem "lexxy"
+
+# AI via one client for Anthropic and OpenAI (PRD D09/D23); the provider gems are for
+# provider-specific features RubyLLM doesn't cover
+gem "ruby_llm", "~> 2.1.1"
+gem "anthropic"
+gem "openai"
+
+# Markdown rendering for AI-generated care content before it's saved as rich text
+gem "redcarpet"
+
+# PDF generation in pure Ruby: care packs, receipts/tax invoices, packing slips, QR labels
+gem "prawn"
+gem "prawn-table"
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
