@@ -1,9 +1,18 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
+# Records required in every environment. Safe to run repeatedly (bin/rails db:seed).
+
+# Platform operator account, from credentials:
 #
-# Example:
+#   user:
+#     admin_email: ...
+#     admin_password: ...
 #
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# Creates the account once; later runs leave the password alone so a changed
+# password is never reset by a deploy. Two-step sign-in is set up on first sign-in.
+admin_email = Rails.application.credentials.dig(:user, :admin_email)
+admin_password = Rails.application.credentials.dig(:user, :admin_password)
+
+if admin_email.present? && admin_password.present?
+  User.ensure_platform_operator!(email_address: admin_email, password: admin_password)
+elsif !Rails.env.test?
+  puts "Skipping admin user: set user.admin_email and user.admin_password in credentials."
+end

@@ -20,6 +20,17 @@ class User < ApplicationRecord
     [ email_address, email_verified_at ]
   end
 
+  # Creates a verified platform operator, or promotes an existing account.
+  # Never changes the password of an existing account.
+  def self.ensure_platform_operator!(email_address:, password:)
+    find_or_initialize_by(email_address: email_address).tap do |user|
+      user.password = password if user.new_record?
+      user.platform_operator = true
+      user.email_verified_at ||= Time.current
+      user.save!
+    end
+  end
+
   def email_verified?
     email_verified_at.present?
   end

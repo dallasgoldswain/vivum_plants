@@ -69,4 +69,29 @@ class UserTest < ActiveSupport::TestCase
     assert_nil user.reload.otp_secret
     assert_empty user.otp_backup_codes
   end
+
+  test "ensure_platform_operator! creates a verified operator" do
+    admin = User.ensure_platform_operator!(email_address: "Admin@Example.com", password: "an-admin-password")
+
+    assert_equal "admin@example.com", admin.email_address
+    assert admin.platform_operator?
+    assert admin.email_verified?
+    assert admin.authenticate("an-admin-password")
+    assert admin.two_factor_required?
+  end
+
+  test "ensure_platform_operator! keeps an existing password" do
+    User.ensure_platform_operator!(email_address: "admin@example.com", password: "an-admin-password")
+    User.ensure_platform_operator!(email_address: "admin@example.com", password: "a-different-password")
+
+    assert_equal 1, User.where(email_address: "admin@example.com").count
+    assert User.find_by!(email_address: "admin@example.com").authenticate("an-admin-password")
+  end
+
+  test "ensure_platform_operator! promotes an existing account" do
+    user = User.ensure_platform_operator!(email_address: users(:collector).email_address, password: "ignored-password")
+
+    assert user.platform_operator?
+    assert user.authenticate("password-long-enough")
+  end
 end

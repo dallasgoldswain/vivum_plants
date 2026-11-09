@@ -46,6 +46,9 @@ gem "rotp"
 # QR codes (authenticator enrolment, care labels)
 gem "rqrcode"
 
+# Transactional email delivery [https://resend.com/docs/send-with-rails]
+gem "resend"
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 

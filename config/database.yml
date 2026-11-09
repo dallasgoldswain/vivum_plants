@@ -94,7 +94,7 @@ production:
     <<: *default
     database: vivum_plants_production
     username: vivum_plants
-    password: <%= ENV["VIVUM_PLANTS_DATABASE_PASSWORD"] %>
+    password: <%= ENV["VIVUM_PLANTS_DATABASE_PASSWORD"] || Rails.application.credentials.dig(:db, :password) %>
   cache:
     <<: *primary_production
     database: vivum_plants_production_cache

@@ -24,7 +24,23 @@ bin/setup
 
 This installs gems, prepares the database and starts the server at http://localhost:3000. Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later.
 
-Emails (verification, password reset) are not sent in development; preview them at http://localhost:3000/rails/mailers.
+Emails (verification, password reset) are not sent in development; preview them at http://localhost:3000/rails/mailers. Production sends through [Resend](https://resend.com).
+
+`bin/setup` also runs the seeds, which create your platform operator account from `user.admin_email` and `user.admin_password` in credentials (`bin/rails db:seed` to run them on their own). The account is created once and its password is never overwritten. You'll be asked to set up two-step sign-in the first time you sign in.
+
+## Credentials
+
+Edit with `bin/rails credentials:edit`.
+
+| Key | Used for |
+|---|---|
+| `active_record_encryption.*` | Encrypting TOTP secrets in production (see below) |
+| `user.admin_email`, `user.admin_password` | Seeded platform operator account |
+| `resend.api_key` | Email delivery in production |
+| `mailer_from` | From address on all emails, e.g. `VIVUM <hello@your-domain>` (must be a domain verified in Resend) |
+| `db.password` | Production database password (`VIVUM_PLANTS_DATABASE_PASSWORD` overrides it) |
+| `ai.anthropic_api_key`, `ai.openai_api_key` | AI features (not wired up yet) |
+| `support_email` | Not used yet |
 
 ## Authentication and authorisation
 
@@ -68,4 +84,4 @@ GitHub Actions runs the same checks on every push and pull request (`.github/wor
 
 ## Deployment
 
-Kamal is configured (`config/deploy.yml`, `.kamal/secrets`) but not yet set up for a production server or database. Production needs `RAILS_MASTER_KEY`, the encryption keys above in credentials, and `VIVUM_PLANTS_DATABASE_PASSWORD` (read by `config/database.yml`).
+Kamal is configured (`config/deploy.yml`, `.kamal/secrets`) but not yet set up for a production server or database. Production needs `RAILS_MASTER_KEY` and the credentials above. Set the real domain for email links in `config.action_mailer.default_url_options` in `config/environments/production.rb` (currently `example.com`).
