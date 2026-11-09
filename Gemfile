@@ -75,6 +75,10 @@ gem "openai"
 # Markdown rendering for AI-generated care content before it's saved as rich text
 gem "redcarpet"
 
+# Text extraction from uploaded PDF and Word documents
+gem "pdf-reader"
+gem "docx"
+
 # PDF generation in pure Ruby: care packs, receipts/tax invoices, packing slips, QR labels
 gem "prawn"
 gem "prawn-table"

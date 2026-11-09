@@ -12,7 +12,7 @@ A South African plant collection and seller operations platform. Collectors reco
 - Hotwire (Turbo, Stimulus) with importmap; PWA and Hotwire Native clients planned
 - Solid Queue (jobs), Solid Cache, Solid Cable in development and production, each in its own database (`*_cache`, `*_queue`, `*_cable`). Jobs run inside Puma in development; in production when `SOLID_QUEUE_IN_PUMA` is set, or via `bin/jobs`. Tests use the in-process test adapters.
 - Kamal for deployment
-- Installed for upcoming features (not used yet): RubyLLM with the `anthropic` and `openai` gems (keys from `ai.*` credentials, `config/initializers/ruby_llm.rb`), caxlsx and roo (Excel/CSV import and export), Lexxy (rich text on Action Text), Redcarpet (Markdown), Prawn and prawn-table (PDFs)
+- Installed for upcoming features (not used yet): RubyLLM with the `anthropic` and `openai` gems (keys from `ai.*` credentials, `config/initializers/ruby_llm.rb`), caxlsx and roo (Excel/CSV import and export), Lexxy (rich text on Action Text), Redcarpet (Markdown), Prawn and prawn-table (PDFs), pdf-reader and docx (text from uploaded documents)
 - Node.js, only for the Herb linter and formatter (run via `npx`)
 
 ## Getting started
