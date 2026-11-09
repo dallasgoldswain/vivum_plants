@@ -65,6 +65,15 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+      - name: Lint HTML+ERB templates
+        run: bundle exec herb lint
+
+      - name: Check HTML+ERB formatting
+        run: bundle exec herb format --check
+
+      - name: Check architecture boundaries
+        run: bundle exec archspec check
+
   test:
     runs-on: ubuntu-latest
 

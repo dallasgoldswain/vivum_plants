@@ -52,6 +52,12 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Static architecture boundary checks [https://archspecrb.dev]
+  gem "archspec", require: false
+
+  # HTML+ERB parser, linter and formatter [https://herb-tools.dev]
+  gem "herb", require: false
 end
 
 group :development do
