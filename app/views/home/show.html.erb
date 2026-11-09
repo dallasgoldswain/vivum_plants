@@ -1,0 +1,48 @@
+<h1>VIVUM</h1>
+
+<%= render "shared/flash" %>
+
+<p>Signed in as <%= Current.user.email_address %>.</p>
+
+<% if @memberships.any? %>
+  <h2>Seller businesses</h2>
+
+  <ul>
+    <% @memberships.each do |membership| %>
+      <li>
+        <%= membership.seller.name %> (<%= membership.role.humanize %>)
+        <% if membership == Current.membership %>
+          <strong>current</strong>
+        <% else %>
+          <%= button_to "Work as #{membership.seller.name}", current_seller_path, method: :patch, params: { seller_id: membership.seller_id } %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<h2>Two-step sign-in</h2>
+
+<% if Current.user.two_factor_enabled? %>
+  <p>On.</p>
+
+  <%= form_with url: two_factor_backup_codes_path do |form| %>
+    <%= form.label :code, "Current code", for: "backup_code_regenerate" %>
+    <%= form.text_field :code, id: "backup_code_regenerate", required: true, autocomplete: "one-time-code" %>
+    <%= form.submit "Replace backup codes" %>
+  <% end %>
+
+  <% unless Current.user.two_factor_required? %>
+    <%= form_with url: two_factor_enrolment_path, method: :delete do |form| %>
+      <%= form.label :code, "Current code", for: "two_factor_disable" %>
+      <%= form.text_field :code, id: "two_factor_disable", required: true, autocomplete: "one-time-code" %>
+      <%= form.submit "Turn off" %>
+    <% end %>
+  <% end %>
+<% else %>
+  <p>
+    Off. <%= link_to "Set up two-step sign-in", new_two_factor_enrolment_path %>
+  </p>
+<% end %>
+
+<%= button_to "Sign out", session_path, method: :delete %>

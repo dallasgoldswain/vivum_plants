@@ -1,0 +1,23 @@
+<h1>Set up two-step sign-in</h1>
+
+<%= render "shared/flash" %>
+
+<p>
+  Scan this QR code with an authenticator app, then enter the 6-digit code it
+  shows.
+</p>
+
+<%= image_tag @qr_data_uri, alt: "QR code for your authenticator app", width: 200, height: 200 %>
+
+<p>Can't scan it? Enter this key instead: <code><%= @secret %></code></p>
+
+<%= form_with url: two_factor_enrolment_path do |form| %>
+  <div>
+    <%= form.label :code, "6-digit code" %>
+    <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric" %>
+  </div>
+
+  <%= form.submit "Turn on" %>
+<% end %>
+
+<%= button_to "Sign out", session_path, method: :delete %>

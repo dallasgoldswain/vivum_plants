@@ -1,0 +1,36 @@
+<% password_digest = BCrypt::Password.create("password-long-enough") %>
+
+# Verified collector with no seller memberships.
+collector:
+  email_address: collector@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.day.ago.to_fs(:db) %>
+
+# Signed up but has not verified their email.
+unverified:
+  email_address: unverified@example.com
+  password_digest: <%= password_digest %>
+
+# Owner of Fern & Frond with two-step sign-in on (secret below).
+owner:
+  email_address: owner@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.day.ago.to_fs(:db) %>
+  otp_secret: JBSWY3DPEHPK3PXP
+  otp_enabled_at: <%= 1.day.ago.to_fs(:db) %>
+
+# Owner of Aroid Attic who has not set up two-step sign-in yet.
+unenrolled_owner:
+  email_address: unenrolled-owner@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.day.ago.to_fs(:db) %>
+
+manager:
+  email_address: manager@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.day.ago.to_fs(:db) %>
+
+packer:
+  email_address: packer@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.day.ago.to_fs(:db) %>

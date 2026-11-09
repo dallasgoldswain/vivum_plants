@@ -1,0 +1,12 @@
+<h1>Check your email</h1>
+
+<%= render "shared/flash" %>
+
+<p>
+  We sent a verification link to
+  <strong><%= Current.user.email_address %></strong>. Open it to finish setting
+  up your account.
+</p>
+
+<%= button_to "Send a new link", email_verification_path %>
+<%= button_to "Sign out", session_path, method: :delete %>

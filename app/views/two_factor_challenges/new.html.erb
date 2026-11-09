@@ -1,0 +1,14 @@
+<h1>Two-step sign-in</h1>
+
+<%= render "shared/flash" %>
+
+<%= form_with url: two_factor_challenge_path do |form| %>
+  <div>
+    <%= form.label :code, "Code from your authenticator app, or a backup code" %>
+    <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code" %>
+  </div>
+
+  <%= form.submit "Verify" %>
+<% end %>
+
+<p><%= link_to "Start again", new_session_path %></p>

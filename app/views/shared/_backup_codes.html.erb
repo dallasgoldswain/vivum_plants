@@ -1,0 +1,14 @@
+<h2>Your backup codes</h2>
+
+<p>
+  Save these somewhere safe. Each code works once if you lose your authenticator
+  app. They won't be shown again.
+</p>
+
+<ul>
+  <% backup_codes.each do |code| %>
+    <li><code><%= code %></code></li>
+  <% end %>
+</ul>
+
+<p><%= link_to "Continue", root_path %></p>

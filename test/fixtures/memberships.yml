@@ -1,0 +1,25 @@
+fern_owner:
+  seller: fern_and_frond
+  user: owner
+  role: owner
+
+fern_manager:
+  seller: fern_and_frond
+  user: manager
+  role: manager
+
+fern_packer:
+  seller: fern_and_frond
+  user: packer
+  role: host_packer
+
+# The manager also works for a second business.
+attic_manager:
+  seller: aroid_attic
+  user: manager
+  role: manager
+
+attic_owner:
+  seller: aroid_attic
+  user: unenrolled_owner
+  role: owner
