@@ -26,4 +26,23 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_response :unprocessable_entity
   end
+
+  test "sign up through a referral link credits the referrer" do
+    code = users(:collector).referral_codes.create!(code: "fernfriend")
+
+    get new_registration_path(ref: "fernfriend")
+    post registration_path, params: { user: { email_address: "referred@example.com", password: "a-long-password", password_confirmation: "a-long-password" } }
+
+    referee = User.find_by!(email_address: "referred@example.com")
+    assert_equal users(:collector), referee.referrer
+    assert_equal code, referee.referral.referral_code
+    assert_empty Refer::Visit.all, "visit tracking is off"
+  end
+
+  test "sign up with an unknown referral code still works" do
+    get new_registration_path(ref: "no-such-code")
+    post registration_path, params: { user: { email_address: "plain@example.com", password: "a-long-password", password_confirmation: "a-long-password" } }
+
+    assert_nil User.find_by!(email_address: "plain@example.com").referral
+  end
 end

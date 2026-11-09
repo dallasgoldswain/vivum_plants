@@ -55,6 +55,9 @@ gem "noticed"
 # Platform operator management area at /madmin [https://github.com/excid3/madmin]
 gem "madmin"
 
+# Referral codes and links [https://github.com/excid3/refer]
+gem "refer"
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 

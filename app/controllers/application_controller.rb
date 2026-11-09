@@ -1,5 +1,9 @@
 class ApplicationController < ActionController::Base
   include Authentication
+
+  # Store ?ref=CODE in a cookie so a later sign-up can be credited (config/initializers/refer.rb).
+  set_referral_cookie
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 

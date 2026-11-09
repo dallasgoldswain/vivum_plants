@@ -11,6 +11,7 @@ class RegistrationsController < ApplicationController
     @user = User.new(params.expect(user: %i[ email_address password password_confirmation ]))
 
     if @user.save
+      refer @user
       EmailVerificationMailer.verify(@user).deliver_later
       start_new_session_for @user
       redirect_to new_email_verification_path

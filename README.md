@@ -57,6 +57,10 @@ Edit with `bin/rails credentials:edit`.
 
 [Noticed](https://github.com/excid3/noticed) stores notifications in `noticed_events` and `noticed_notifications` (`user.notifications`). No notifiers exist yet; delivery channels from the PRD (email, native push, web push, WhatsApp) are added per notifier as features need them.
 
+## Referrals
+
+[Refer](https://github.com/excid3/refer) tracks who referred whom. Any link with `?ref=CODE` stores the code in a 30-day cookie, and sign-up credits the code's owner (`user.referral_codes`, `user.referrals`, `user.referrer`). Visit tracking is off (`config/initializers/refer.rb`) so no click data is stored. Nothing creates codes or rewards yet.
+
 ## Encryption keys
 
 TOTP secrets use Active Record encryption.

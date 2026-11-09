@@ -3,6 +3,7 @@ class User < ApplicationRecord
   BACKUP_CODE_COUNT = 10
 
   has_secure_password
+  has_referrals
   has_many :sessions, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :sellers, through: :memberships
