@@ -82,7 +82,8 @@ Every product capability has a key in `config/features.yml` (PRD §28): its doma
 
 Every operator view and change in Madmin, every flag change, and account security events (sign-ins, failed sign-ins, sign-outs, password resets, email verification, two-step sign-in changes) are written to `audit_events` (D49–D52).
 
-- **Recording:** `Audit.record("action.name", target: record, details: {...})`. The actor and request details (IP, user agent, request id) come from `Current`. Secrets are stripped by `Audit::SECRET_PATTERNS`; email addresses are kept.
+- **Recording:** `Audit.record("action.name", target: record, details: {...})`. The actor (stored as an id) and request details (IP, user agent, request id) come from `Current`.
+- **Personal data (D53):** never put names, emails, phones or addresses in `details`. Use `Audit.email_fingerprint(email)` for a keyed hash that can be matched but not reversed. Madmin changes record field names only, with values just for the non-personal fields in `AUDITED_VALUES`; deletes record type and id; searches record that a search happened. `Audit::SECRET_PATTERNS` strips secrets as a backstop. IP address and user agent are kept for security investigations.
 - **Protection:** PostgreSQL triggers (managed with `fx`, see `db/functions` and `db/triggers`) reject updates and any delete younger than 2 years. `PurgeAuditEventsJob` deletes older events daily at 03:00 (`config/recurring.yml`).
 - **Reading:** operators open **Audit Events** in `/madmin` (read-only; viewing it is audited too).
 - **Flag changes** are captured from Flipper's instrumentation; `FlagConsoleContext` tells the console who the operator is.

@@ -127,3 +127,9 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D50 | Audit implementation | Custom append-only `audit_events` table and `Audit.record` API; PostgreSQL blocks updates and early deletes. paper_trail and audited not used. |
 | D51 | Flag change reasons | Optional for now; required once VIVUM has its own flag screens. |
 | D52 | Audit retention | 2 years, then purged by a daily job; confirm with the attorney (O13). |
+
+## Round 13 — Personal data in the audit log (2026-11-10)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D53 | Personal data in audit events | Minimise (POPIA s10): actor stored as a user id only; attempted emails stored as a keyed HMAC fingerprint, never the address; Madmin changes record field names, with before/after values only for allowlisted non-personal fields; deletes record type and id; searches record that a search happened, not its text. IP address and user agent are kept for security investigation and must be named in the privacy notice. Account deletion (B08) should soft-delete or anonymise users so audit ids stay meaningful; confirm with the attorney. |

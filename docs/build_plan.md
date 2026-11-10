@@ -138,7 +138,8 @@ URL is refused when its flag is off; a seller-targeted flag is on for that selle
 - Retention: 2 years, purged by a daily Solid Queue recurring job. To confirm with the
   attorney (O13).
 
-**Decisions:** custom table rather than paper_trail or audited; flag-change reasons optional
+**Decisions:** custom table rather than paper_trail or audited; personal data minimised
+(D53: actor id only, email fingerprints, field names instead of values for personal fields); flag-change reasons optional
 until we build our own flag screens (Flipper's console has no reason field).
 
 **Deferred:** required reasons for flag changes; export of audit events; seller-facing

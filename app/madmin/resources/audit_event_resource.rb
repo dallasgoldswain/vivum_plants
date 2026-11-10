@@ -3,8 +3,7 @@ class AuditEventResource < Madmin::Resource
   attribute :id, form: false
   attribute :created_at, form: false
   attribute :action, index: true
-  attribute :actor_email, index: true
-  attribute :actor, index: false
+  attribute :actor, index: true
   attribute :target_type, index: true
   attribute :target_id, index: true
   attribute :target_key, index: true

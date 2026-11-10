@@ -17,23 +17,35 @@ module Madmin
         raise ActionController::RoutingError, "Not Found" unless Current.user&.platform_operator?
       end
 
-      IGNORED_CHANGES = %w[ created_at updated_at ].freeze
+      IGNORED_FIELDS = %w[ created_at updated_at ].freeze
+
+      # Fields whose before/after values are safe to keep (not personal data). Every other
+      # change is recorded by field name only (D53).
+      AUDITED_VALUES = {
+        "User" => %w[ platform_operator email_verified_at ],
+        "Membership" => %w[ role seller_id user_id ]
+      }.freeze
 
       def audit_operator_action
         case action_name
         when "index"
-          Audit.record("madmin.index", target_key: resource.model.name, details: { query: request.query_parameters.except("page") })
+          Audit.record("madmin.index", target_key: resource.model.name,
+            details: { searched: params[:q].present?, filtered: params[:filters].present?, scope: params[:scope] }.compact)
         when "show", "edit"
           Audit.record("madmin.#{action_name}", target: @record)
         when "create", "update"
           return unless response.redirect? && @record&.persisted?
 
-          Audit.record("madmin.#{action_name}", target: @record, details: { changes: @record.saved_changes.except(*IGNORED_CHANGES) })
+          Audit.record("madmin.#{action_name}", target: @record, details: change_details(@record))
         when "destroy"
-          return unless @record&.destroyed?
-
-          Audit.record("madmin.destroy", target: @record, details: { attributes: @record.attributes.except(*IGNORED_CHANGES) })
+          Audit.record("madmin.destroy", target: @record) if @record&.destroyed?
         end
+      end
+
+      def change_details(record)
+        changes = record.saved_changes.except(*IGNORED_FIELDS)
+        allowed = AUDITED_VALUES.fetch(record.class.base_class.name, [])
+        { changed_fields: changes.keys, values: changes.slice(*allowed) }
       end
   end
 end

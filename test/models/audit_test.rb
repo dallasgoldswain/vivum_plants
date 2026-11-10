@@ -9,23 +9,28 @@ class AuditTest < ActiveSupport::TestCase
     event = Audit.record("madmin.update", target: users(:collector), details: { changes: { "platform_operator" => [ false, true ] } })
 
     assert_equal users(:owner), event.actor
-    assert_equal "owner@example.com", event.actor_email
     assert_equal [ "User", users(:collector).id ], [ event.target_type, event.target_id ]
     assert_equal({ "changes" => { "platform_operator" => [ false, true ] } }, event.details)
     assert_equal "203.0.113.7", event.ip_address
     assert_equal "req-1", event.request_id
   end
 
-  test "filters secrets but keeps email addresses" do
-    event = Audit.record("madmin.update", actor: nil, details: {
-      changes: { "password_digest" => [ "a", "b" ], "otp_secret" => [ nil, "S" ], "email_address" => [ "a@x.test", "b@x.test" ] },
-      code: "123456"
-    })
+  test "filters secrets as a backstop" do
+    event = Audit.record("test.event", actor: nil, details: { values: { "password_digest" => [ "a", "b" ], "otp_secret" => [ nil, "S" ] }, code: "123456" })
 
-    assert_equal "[FILTERED]", event.details["changes"]["password_digest"]
-    assert_equal "[FILTERED]", event.details["changes"]["otp_secret"]
+    assert_equal "[FILTERED]", event.details["values"]["password_digest"]
+    assert_equal "[FILTERED]", event.details["values"]["otp_secret"]
     assert_equal "[FILTERED]", event.details["code"]
-    assert_equal [ "a@x.test", "b@x.test" ], event.details["changes"]["email_address"]
+  end
+
+  test "email fingerprints are stable, normalised and not the address" do
+    fingerprint = Audit.email_fingerprint(" Collector@Example.com ")
+
+    assert_equal Audit.email_fingerprint("collector@example.com"), fingerprint
+    assert_not_equal Audit.email_fingerprint("other@example.com"), fingerprint
+    assert_match(/\A\h{64}\z/, fingerprint)
+    assert_not_includes fingerprint, "collector"
+    assert_nil Audit.email_fingerprint("  ")
   end
 
   test "saved events are read-only in Ruby" do

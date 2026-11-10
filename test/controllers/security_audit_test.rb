@@ -13,12 +13,13 @@ class SecurityAuditTest < ActionDispatch::IntegrationTest
     assert event.ip_address.present?
   end
 
-  test "a failed sign-in records the attempted email and no actor" do
+  test "a failed sign-in records a fingerprint of the attempted email, never the address" do
     post session_path, params: { email_address: "Someone@Example.com", password: "wrong" }
 
     event = AuditEvent.find_by!(action: "session.failed")
     assert_nil event.actor_id
-    assert_equal "someone@example.com", event.details["email_address"]
+    assert_equal Audit.email_fingerprint("someone@example.com"), event.details["email_fingerprint"]
+    assert_not_includes event.details.to_json, "someone@example.com"
   end
 
   test "two-step sign-in records the password step and the method used" do

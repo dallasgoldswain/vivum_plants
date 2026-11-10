@@ -46,6 +46,10 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   flag changes (Flipper instrumentation, `FlagConsoleContext`) and account security events;
   PostgreSQL triggers via `fx` block updates and early deletes; `PurgeAuditEventsJob` purges
   after 2 years; read-only Audit Events in Madmin (D49–D52).
+- Audit log keeps personal data to a minimum (D53): actor stored as an id only
+  (`actor_email` column removed), attempted emails stored as HMAC fingerprints, Madmin
+  changes recorded by field name with values only for allowlisted non-personal fields,
+  deletes and searches recorded without record contents or search text.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

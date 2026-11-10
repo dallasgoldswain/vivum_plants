@@ -11,7 +11,7 @@ class PasswordsController < ApplicationController
   def create
     user = User.find_by(email_address: params[:email_address])
     PasswordsMailer.reset(user).deliver_later if user
-    Audit.record("password.reset_requested", actor: nil, target: user, details: { email_address: params[:email_address].to_s.strip.downcase })
+    Audit.record("password.reset_requested", actor: nil, target: user, details: { email_fingerprint: Audit.email_fingerprint(params[:email_address]) })
 
     redirect_to new_session_path, notice: "Password reset instructions sent (if user with that email address exists)."
   end
