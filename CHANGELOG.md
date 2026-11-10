@@ -37,6 +37,8 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   Redcarpet, Prawn, prawn-table, pdf-reader, docx (D44).
 - Checks: ArchSpec architecture rules, Herb HTML+ERB lint and format, alongside RuboCop,
   Brakeman, bundler-audit and importmap audit, in `bin/ci` and GitHub Actions.
+- Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
+  bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).
 
 ### Configuration

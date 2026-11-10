@@ -107,7 +107,9 @@ Or individually:
 | Architecture boundaries | `bundle exec archspec check` (rules in `Archspec.rb`) |
 | Security | `bin/brakeman`, `bin/bundler-audit`, `bin/importmap audit` |
 
-GitHub Actions runs the same checks on every push and pull request (`.github/workflows/ci.yml`).
+GitHub Actions runs the same checks on every push to `main` and every pull request (`.github/workflows/ci.yml`).
+
+A git `pre-push` hook (`.githooks/pre-push`) runs Brakeman, bundler-audit (with a fresh advisory database) and importmap audit before every push, and blocks the push if any fails. `bin/setup` installs it with `git config core.hooksPath .githooks`. Skip it once with `git push --no-verify`.
 
 ## Deployment
 
