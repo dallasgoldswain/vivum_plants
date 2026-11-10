@@ -12,8 +12,9 @@ A South African plant collection and seller operations platform. Collectors reco
 - Hotwire (Turbo, Stimulus) with importmap; PWA and Hotwire Native clients planned
 - Tailwind CSS v4 (`tailwindcss-rails`, standalone CLI, no Node) with BasecoatUI 0.3.11 components, themed to the [VIVUM Labs Design System](https://claude.ai/artifact/MhirAvmvZEph7unauXUNjM)
 - Solid Queue (jobs), Solid Cache, Solid Cable in development and production, each in its own database (`*_cache`, `*_queue`, `*_cable`). Jobs run inside Puma in development; in production when `SOLID_QUEUE_IN_PUMA` is set, or via `bin/jobs`. Tests use the in-process test adapters.
+- Action Text with Lexxy for rich text; Active Storage for uploads
 - Kamal for deployment
-- Installed for upcoming features (not used yet): RubyLLM with the `anthropic` and `openai` gems (keys from `ai.*` credentials, `config/initializers/ruby_llm.rb`), caxlsx and roo (Excel/CSV import and export), Lexxy (rich text on Action Text), Redcarpet (Markdown), Prawn and prawn-table (PDFs), pdf-reader and docx (text from uploaded documents)
+- Installed for upcoming features (not used yet): RubyLLM with the `anthropic` and `openai` gems (keys from `ai.*` credentials, `config/initializers/ruby_llm.rb`), caxlsx and roo (Excel/CSV import and export), Redcarpet (Markdown), Prawn and prawn-table (PDFs), pdf-reader and docx (text from uploaded documents)
 - Node.js, only for the Herb linter and formatter (run via `npx`)
 
 ## Getting started
@@ -26,7 +27,7 @@ bin/setup
 
 This installs gems, prepares the database and starts the server at http://localhost:3001 (set `PORT` to change it). Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later. `bin/dev` runs the web server (with the job worker inside Puma) and the Tailwind watcher via `Procfile.dev`.
 
-Emails (verification, password reset) are not sent in development; preview them at http://localhost:3000/rails/mailers. Production sends through [Resend](https://resend.com).
+Emails (verification, password reset) are not sent in development; preview them at http://localhost:3001/rails/mailers. Production sends through [Resend](https://resend.com).
 
 `bin/setup` also runs the seeds, which create your platform operator account from `user.admin_email` and `user.admin_password` in credentials (`bin/rails db:seed` to run them on their own). The account is created once and its password is never overwritten. You'll be asked to set up two-step sign-in the first time you sign in.
 

@@ -84,3 +84,28 @@ Decisions captured interactively on 2026-11-09 while revising PRD v1.2 → v1.3.
 | ID | Question | Decision |
 |----|----------|----------|
 | D32 | Production domain | The app runs at `plants.vivumlabs.co.za`. The parent brand `vivumlabs.co.za` is a play on words: a tissue culture lab and a software lab. |
+
+## Round 10 — Build stack (2026-11-09 to 2026-11-10)
+
+Decisions made while setting up the codebase. They implement the PRD; none changes product scope.
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D33 | Authentication | Rails 8 authentication generator, extended with sign-up, email verification and database-stored sessions. ReviseAuth and Devise rejected (no stored sessions / heavier); Rodauth kept as the alternative if passkeys are needed. |
+| D34 | Two-step sign-in | TOTP (`rotp`) with 10 single-use backup codes; required for platform operators and seller owners, optional for others. Secrets encrypted with Active Record encryption. QR codes via `rqrcode`. |
+| D35 | Authorisation | Action Policy with `user` and current `membership` context; `verify_authorized` on every controller. Seller members: owner, manager, host_packer (SO02). |
+| D36 | Multi-tenancy | Shared database with `seller_id` scoping and policy relation scopes. `activerecord-tenanted` rejected: SQLite-only and database-per-tenant, while VIVUM data crosses tenants (CP03, SE04, D05). PostgreSQL row-level security is a later option. |
+| D37 | Operator area | Madmin at `/madmin`, operators with two-step sign-in only (404 for others); TOTP secrets and backup codes never shown. An operator audit log (PR08) is still to be built. |
+| D38 | Notifications framework | Noticed for in-app notifications and delivery; web push and WhatsApp need custom delivery methods. |
+| D39 | Email delivery | Resend in production (resolves the email half of O8; push provider still open). |
+| D40 | Referrals | Refer installed: `?ref=` cookie (30 days), sign-up credits the referrer. Visit tracking off to minimise personal data under POPIA. Codes, sharing UI and rewards not built. |
+| D41 | Jobs, cache, cable | Solid Queue, Solid Cache and Solid Cable in development and production, each in its own database; jobs run inside Puma in development. |
+| D42 | Styling | Tailwind v4 (`tailwindcss-rails`) with BasecoatUI 0.3.11, themed to the VIVUM Labs Design System (sister product). Moss and cork are not used as text on linen (contrast). |
+| D43 | Product name in the UI | "VIVUM Plants", following the "VIVUM Labs" wordmark pattern; VIVUM Plant Codex stays the working name in the PRD. |
+| D44 | PDF generation | Prawn and prawn-table for receipts, slips and labels. ferrum_pdf (headless Chrome) deferred; reconsider for care packs and sale cards if Prawn makes them slow to build. |
+
+## Still open after round 10
+
+- O2 WhatsApp route — decided during pilot (D22).
+- O6 Yoco third-party and shared-domain approval — provider-controlled gate.
+- O8 Push provider (APNs/FCM/Web Push service) — decided at build (D28); email is Resend (D39).

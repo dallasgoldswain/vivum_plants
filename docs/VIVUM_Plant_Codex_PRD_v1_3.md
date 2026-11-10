@@ -2,7 +2,7 @@
 
 **Version 1.3** · 9 November 2026 · Implementation requirements
 **Status:** Draft for product owner sign-off. Supersedes v1.2.
-**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D32)
+**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D44)
 
 Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.* Production domain: `plants.vivumlabs.co.za` (D32); the parent name VIVUM Labs plays on a tissue culture lab and a software lab. Trademark clearance is outside this PRD and unverified.
 
@@ -19,7 +19,7 @@ Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.*
 
 ## Document status
 
-**Confirmed** = explicitly decided (C01–C08, D01–D31). **Baseline** = detailed requirement adopted for build, subject to product owner sign-off of this version. **Open** = decision still required (§32). Numeric performance and retention targets are planning targets until confirmed.
+**Confirmed** = explicitly decided (C01–C08, D01–D44). **Baseline** = detailed requirement adopted for build, subject to product owner sign-off of this version. **Open** = decision still required (§32). Numeric performance and retention targets are planning targets until confirmed.
 
 ## Reading guide
 
@@ -83,6 +83,7 @@ Collectors need to connect what a plant is with where it grows, what substrate i
 | D30 | Help topics and screenshots written in the same change as each feature; founder reviews before flag goes live. |
 | D31 | Widening a pilot flag is a founder judgement, recorded with evidence in the flag audit trail. |
 | D32 | Production domain is plants.vivumlabs.co.za under the VIVUM Labs name. |
+| D33–D44 | Build stack: Rails 8 authentication, TOTP two-step sign-in, Action Policy, shared-database tenancy, Madmin, Noticed, Resend, Refer, Solid Queue/Cache/Cable, Tailwind v4 with BasecoatUI and the VIVUM Labs design system, "VIVUM Plants" in the UI, Prawn for PDFs (see §29 and the decision log). |
 
 ### Product principles
 
@@ -719,9 +720,14 @@ Business records, not a database design. Stable IDs, ownership, created/modified
 | PostgreSQL | Version 18 baseline in dev, CI, production. Transactions, row locks, FKs, check constraints, unique indexes for invariants. |
 | Jobs and deploy | Solid Queue for reminders, notifications, provider events, AI calls, retries. Kamal deploy of web and worker roles; managed or persistent PostgreSQL; off-host backups; tested restore. |
 | AI | RubyLLM with `anthropic` and `openai` gems; per-use-case provider/model config; structured output schemas; cost logging. |
-| Notifications | APNs and FCM (native), Web Push (VAPID), transactional email, WhatsApp templates. Push and email providers chosen at build (D28) behind adapters. |
+| Notifications | Noticed for in-app notifications and delivery (D38). APNs and FCM (native), Web Push (VAPID), transactional email via Resend (D39), WhatsApp templates. Push provider chosen at build (D28). |
 | Integrations | Tenant-scoped adapters: WhatsApp, Bob Pay, Yoco, Bob Go, Paystack. Separate sandbox and production credentials (Rails encrypted credentials / Active Record encryption). Provider errors never lose the VIVUM record. |
-| Storage | Active Storage on private object storage; signed URLs; server-side resize; EXIF location stripped; per-account quota. |
+| Storage | Active Storage on private object storage; signed URLs; server-side resize; EXIF location stripped; per-account quota. Action Text with Lexxy for rich text. |
+| Authentication | Rails 8 authentication generator with sign-up, email verification and database-stored sessions; TOTP two-step sign-in (`rotp`) required for operators and seller owners (D33, D34). |
+| Authorisation and tenancy | Action Policy with user and membership context; every action authorised. Shared database scoped by `seller_id`; no database-per-tenant (D35, D36). |
+| Operator area | Madmin at `/madmin` for platform operators with two-step sign-in (D37). |
+| UI | Tailwind v4 (`tailwindcss-rails`) with BasecoatUI 0.3.11, themed to the VIVUM Labs Design System (D42). |
+| Documents | Prawn and prawn-table for PDFs (D44); caxlsx and roo for spreadsheet import/export; pdf-reader and docx for text from uploads. |
 
 **Records and ownership:** `seller_id` on all seller records; plants belong to accounts; guest links bound to exact purpose and record; buyers seller-scoped; UTC storage, Africa/Johannesburg display; ZAR integer cents.
 
@@ -842,9 +848,10 @@ O1, O3, O4, O5 (ownership), O7, O9, O10 and O11 were resolved by D21–D31. Rema
 | O2 | WhatsApp access route (Cloud API direct vs BSP) and platform reminder number | WhatsApp live flags | Pilot test with a +27 number (D22) |
 | O5 | Final retention periods and sub-processor list | Production launch | Attorney review (D26) |
 | O6 | Yoco third-party and shared-domain approval | payments.yoco live | Provider approval |
-| O8 | Email and push providers | Notifications build | Engineering choice at build (D28) |
+| O8 | Push provider (email is Resend, D39) | Notifications build | Engineering choice at build (D28) |
 | O12 | Exact Pilot/Comp end dates and conversion offer for pilot sellers | End of pilot | Founder |
 | O13 | Proposed values still to confirm: subscription grace period (7 days), DSR response time (30 days), address redaction (12 months), raw payload retention (90 days), photo max size (2560 px) | Production launch | Founder + attorney |
+| O14 | Operator audit log for Madmin changes (PR08) | Production launch | Engineering |
 
 ### Ready for development when
 
