@@ -57,6 +57,15 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   `/consent_acceptance/new`; draft v0 terms and privacy notice at `/legal/terms` and
   `/legal/privacy`; Settings → Privacy (`/settings/privacy`) with one-action grant and
   withdraw and the full history; `privacy.consents` marked implemented (D54–D57).
+- Seller and staff invites (B06): `Invitation` (seller and staff kinds, 14-day expiry,
+  signed acceptance tokens voided by resend or revoke, accepted only by the invited verified
+  email); operator seller invites in Madmin with resend, revoke and copy-link;
+  `InvitationMailer`; invite page and acceptance that create the seller and owner membership
+  and record the new `seller_terms` consent (owners must hold the current version); Sell area
+  (`/sell`) with Members page for owners to invite, resend, cancel, change roles and remove;
+  last-owner guard on `Membership`; `InvitationPolicy`; draft v0 seller terms with the POPIA
+  operator agreement at `/legal/seller-terms`; `seller.workspace`, `seller.members` and
+  `seller.invites` marked implemented; invitation and membership changes audited (D58–D63).
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

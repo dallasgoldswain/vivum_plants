@@ -10,4 +10,9 @@ module ApplicationHelper
     user.present? && user.email_verified? && !(user.two_factor_required? && !user.two_factor_enabled?) &&
       user.required_consents_accepted?
   end
+
+  # The public page for a legal document consent purpose.
+  def legal_document_path(purpose_key)
+    { "terms" => legal_terms_path, "privacy" => legal_privacy_path, "seller_terms" => legal_seller_terms_path }.fetch(purpose_key)
+  end
 end

@@ -1,0 +1,50 @@
+<% content_for :title, "Accept your invite · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">You're invited</p>
+
+  <h2 class="vv-h2">
+    <%= @invitation.seller? ? "Start selling on VIVUM" : "Join #{@invitation.business_label}" %>
+  </h2>
+
+  <% if @invitation.staff? %>
+    <p class="vv-caption mt-2">
+      You'll join as <%= @invitation.role.humanize.downcase %>.
+    </p>
+  <% end %>
+</div>
+
+<div class="card card-raised">
+  <section>
+    <%= form_with url: invitation_acceptance_path(params[:token]), class: "form grid gap-6" do |form| %>
+      <% if @invitation.seller? %>
+        <div class="grid gap-2">
+          <%= form.label :business_name, "Business name" %>
+          <%= form.text_field :business_name, value: @invitation.business_name, required: true, maxlength: 100 %>
+
+          <p class="vv-caption">You can change this later.</p>
+        </div>
+      <% end %>
+
+      <% if @invitation.role_owner? %>
+        <div class="flex items-start gap-3">
+          <%= form.check_box :seller_terms, required: true, class: "mt-1" %>
+
+          <%= form.label :seller_terms, class: "block text-sm leading-normal font-normal" do %>
+            I agree to the
+            <%= link_to "seller terms", legal_seller_terms_path, class: "text-forest underline underline-offset-4", target: "_blank" %>,
+            including the agreement on how we handle my buyers' data.
+          <% end %>
+        </div>
+
+        <% unless Current.user.two_factor_enabled? %>
+          <p class="vv-caption">
+            Owners use two-step sign-in. You'll set it up next.
+          </p>
+        <% end %>
+      <% end %>
+
+      <%= form.submit "Accept invite", class: "btn w-full" %>
+    <% end %>
+  </section>
+</div>

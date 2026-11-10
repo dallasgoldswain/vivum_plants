@@ -1,4 +1,4 @@
-# Public terms of use and privacy notice (draft v0 for the pilot, D55).
+# Public terms of use, privacy notice and seller terms (draft v0 for the pilot, D55, D60).
 class LegalController < ApplicationController
   layout "legal"
   allow_unauthenticated_access
@@ -10,5 +10,9 @@ class LegalController < ApplicationController
 
   def privacy
     @purpose = ConsentRecord.purpose(:privacy)
+  end
+
+  def seller_terms
+    @purpose = ConsentRecord.purpose(:seller_terms)
   end
 end

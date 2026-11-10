@@ -88,11 +88,21 @@ Every operator view and change in Madmin, every flag change, and account securit
 - **Reading:** operators open **Audit Events** in `/madmin` (read-only; viewing it is audited too).
 - **Flag changes** are captured from Flipper's instrumentation; `FlagConsoleContext` tells the console who the operator is.
 
+## Invites and the Sell area
+
+Sellers join by invitation (SO03, D58–D63).
+
+- **Seller invites:** operators create them in `/madmin` → Invitations with an email and business name, then resend, revoke or copy the link. Accepting creates the business and the owner membership.
+- **Staff invites:** owners invite by email and role from Sell → Members, and change roles or remove members there. A business always keeps one owner (`Membership#last_owner?`).
+- **Links** are signed tokens (`generates_token_for :acceptance`), not stored. They only work for a verified account with the invited email, expire after 14 days, and stop working once resent, revoked or used.
+- **Owners** must accept the seller terms (`seller_terms` consent) and use two-step sign-in; both are enforced on their next request.
+- **Flags:** `seller.workspace` (Sell area), `seller.members` (Members page and staff invites) and `seller.invites` (invite links). In development `bin/rails db:seed` turns them on; in production switch them on in `/madmin/flags`.
+
 ## Consents
 
 Consents live in `consent_records`, one row per grant or withdrawal; the latest row per purpose is the current choice (PR03, D54–D57).
 
-- **Purposes and versions:** `ConsentRecord::PURPOSES` (terms, privacy, marketing_email, ai_processing, whatsapp_reminders). Bump a purpose's version when its wording changes: older grants stop counting. Bumping terms or privacy sends everyone to the acceptance page on their next request.
+- **Purposes and versions:** `ConsentRecord::PURPOSES` (terms and privacy for everyone, seller_terms for owners, then marketing_email, ai_processing and whatsapp_reminders). Bump a purpose's version when its wording changes: older grants stop counting. Bumping terms or privacy sends everyone to the acceptance page on their next request.
 - **API:** `user.consented_to?(:ai_processing)`, `user.record_consent!(:marketing_email, granted: false, source: "settings")`. Check `consented_to?` before any AI request or WhatsApp send.
 - **Gate:** `Authentication#require_current_consents` runs after email verification and two-step enrolment; skip it with `allow_without_current_consents` only for pages a user needs before accepting.
 - **Pages:** `/legal/terms` and `/legal/privacy` (draft v0, pending legal review; text in `app/views/legal`), and Settings → Privacy at `/settings/privacy`. These are privacy controls and are never behind a feature flag.

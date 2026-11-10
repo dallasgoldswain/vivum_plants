@@ -11,6 +11,18 @@ Rails.application.routes.draw do
   resource :current_seller, only: :update
   resource :consent_acceptance, only: %i[ new create ]
 
+  resources :invitations, only: :show, param: :token do
+    resource :acceptance, only: :create, module: :invitations
+  end
+
+  namespace :sell do
+    root "home#show"
+    resources :members, only: %i[ index update destroy ], controller: "memberships"
+    resources :invitations, only: %i[ create destroy ] do
+      post :resend, on: :member
+    end
+  end
+
   namespace :settings do
     resource :privacy, only: :show, controller: "privacy"
     resources :consents, only: :update, param: :purpose
@@ -19,6 +31,7 @@ Rails.application.routes.draw do
   scope :legal, controller: :legal, as: :legal do
     get :terms
     get :privacy
+    get "seller-terms", action: :seller_terms, as: :seller_terms
   end
 
   root "home#show"

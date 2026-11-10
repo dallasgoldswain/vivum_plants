@@ -3,5 +3,6 @@ class HomeController < ApplicationController
 
   def show
     @memberships = Current.user.memberships.includes(:seller)
+    @invitations = capability?("seller.invites") ? Invitation.pending.for_email(Current.user.email_address).includes(:seller) : Invitation.none
   end
 end

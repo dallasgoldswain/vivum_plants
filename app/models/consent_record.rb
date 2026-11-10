@@ -1,29 +1,36 @@
 # One grant or withdrawal of consent (PRD PR03, decisions D54–D57). Append-only: a change of
 # mind is a new record, and the latest record per purpose is the user's current choice.
 class ConsentRecord < ApplicationRecord
-  Purpose = Data.define(:key, :version, :required, :label, :description)
+  # audience: everyone (required to use VIVUM), owners (required for seller owners) or
+  # optional (the user chooses).
+  Purpose = Data.define(:key, :version, :audience, :label, :description) do
+    def required = audience != :optional
+  end
 
   # Code-owned. Bump a version whenever the text the user agrees to changes: a grant of an
-  # older version no longer counts, so everyone is asked again. Terms and privacy versions
-  # are shown on the legal pages (app/views/legal).
+  # older version no longer counts, so everyone is asked again. Versions of the legal
+  # documents are shown on their pages (app/views/legal).
   PURPOSES = [
-    Purpose.new(key: "terms", version: "0.1", required: true,
+    Purpose.new(key: "terms", version: "0.1", audience: :everyone,
       label: "Terms of use", description: "The rules for using VIVUM Plants."),
-    Purpose.new(key: "privacy", version: "0.1", required: true,
+    Purpose.new(key: "privacy", version: "0.1", audience: :everyone,
       label: "Privacy notice", description: "What we collect, why, who processes it and your rights."),
-    Purpose.new(key: "marketing_email", version: "1", required: false,
+    Purpose.new(key: "seller_terms", version: "0.1", audience: :owners,
+      label: "Seller terms", description: "The terms for running a business on VIVUM, including how you and VIVUM handle your buyers' data."),
+    Purpose.new(key: "marketing_email", version: "1", audience: :optional,
       label: "News and offers by email",
       description: "Occasional emails about new features and offers. Account and order emails are sent either way."),
-    Purpose.new(key: "ai_processing", version: "1", required: false,
+    Purpose.new(key: "ai_processing", version: "1", audience: :optional,
       label: "AI assistance",
       description: "Send the plant details and messages you choose to our AI providers (Anthropic, OpenAI) for care suggestions and extraction. Without it, AI features stay off."),
-    Purpose.new(key: "whatsapp_reminders", version: "1", required: false,
+    Purpose.new(key: "whatsapp_reminders", version: "1", audience: :optional,
       label: "WhatsApp reminders",
       description: "Care and order reminders by WhatsApp, sent through Meta.")
   ].index_by(&:key).freeze
 
-  REQUIRED = PURPOSES.values.select(&:required).map(&:key).freeze
-  SOURCES = %w[ sign_up settings in_context re_acceptance ].freeze
+  EVERYONE = PURPOSES.values.select { it.audience == :everyone }.map(&:key).freeze
+  OWNERS = PURPOSES.values.select { it.audience == :owners }.map(&:key).freeze
+  SOURCES = %w[ sign_up settings in_context re_acceptance invitation ].freeze
 
   belongs_to :user
 

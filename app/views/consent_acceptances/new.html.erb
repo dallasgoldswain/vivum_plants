@@ -19,7 +19,7 @@
             border border-line bg-linen px-3 py-2
           "
         >
-          <%= link_to purpose.label, purpose.key == "terms" ? legal_terms_path : legal_privacy_path, class: "font-medium text-forest underline-offset-4 hover:underline", target: "_blank" %>
+          <%= link_to purpose.label, legal_document_path(purpose.key), class: "font-medium text-forest underline-offset-4 hover:underline", target: "_blank" %>
           <span class="badge-outline">Version <%= purpose.version %></span>
         </li>
       <% end %>
@@ -28,7 +28,7 @@
     <%= form_with url: consent_acceptance_path, class: "form grid gap-6" do |form| %>
       <div class="flex items-start gap-3">
         <%= form.check_box :accept, required: true, class: "mt-1" %>
-        <%= form.label :accept, "I agree to the terms of use and have read the privacy notice.", class: "block text-sm leading-normal font-normal" %>
+        <%= form.label :accept, "I agree to the documents above.", class: "block text-sm leading-normal font-normal" %>
       </div>
 
       <%= form.submit "Accept and continue", class: "btn w-full" %>

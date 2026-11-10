@@ -17,7 +17,7 @@
 
   <section>
     <ul class="grid gap-3">
-      <% ConsentRecord::PURPOSES.each_value do |purpose| %>
+      <% @purposes.each do |purpose| %>
         <% record = @current[purpose.key] %>
         <% on = record&.in_force? %>
 
@@ -30,7 +30,7 @@
           <div class="grid gap-1">
             <p class="font-medium">
               <% if purpose.required %>
-                <%= link_to purpose.label, purpose.key == "terms" ? legal_terms_path : legal_privacy_path, class: "text-forest underline-offset-4 hover:underline" %>
+                <%= link_to purpose.label, legal_document_path(purpose.key), class: "text-forest underline-offset-4 hover:underline" %>
               <% else %>
                 <%= purpose.label %>
               <% end %>

@@ -26,3 +26,6 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Read our terms of use and privacy notice in plain language. See and change what you've
   agreed to, including news emails, AI assistance and WhatsApp reminders, under Privacy.
   Turning something off takes effect straight away.
+- Sellers join by invitation during the pilot. Accept your invite to set up your business,
+  then invite your team from Sell, choose what each person can do, and remove access when
+  someone leaves.

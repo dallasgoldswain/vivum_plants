@@ -1,0 +1,16 @@
+<% content_for :title, "Your invite · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">You're invited</p>
+  <h2 class="vv-h2"><%= @invitation.business_label %></h2>
+
+  <p class="vv-caption mt-2">
+    Sign in, or create an account, with the email address this invite was sent
+    to. You'll come back here to accept it.
+  </p>
+</div>
+
+<div class="grid gap-3">
+  <%= link_to "Sign in", new_session_path, class: "btn w-full" %>
+  <%= link_to "Create an account", new_registration_path, class: "btn-outline w-full" %>
+</div>

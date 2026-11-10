@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -97,6 +97,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_170000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["feature_key", "key", "value"], name: "index_flipper_gates_on_feature_key_and_key_and_value", unique: true
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "email_address", null: false
+    t.string "role", null: false
+    t.bigint "seller_id"
+    t.string "business_name"
+    t.bigint "invited_by_id"
+    t.bigint "accepted_by_id"
+    t.datetime "expires_at", null: false
+    t.datetime "accepted_at"
+    t.datetime "revoked_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_invitations_on_accepted_by_id"
+    t.index ["email_address"], name: "index_invitations_on_email_address"
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
+    t.index ["seller_id"], name: "index_invitations_on_seller_id"
   end
 
   create_table "memberships", force: :cascade do |t|
@@ -214,6 +233,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_170000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "consent_records", "users", on_delete: :cascade
+  add_foreign_key "invitations", "sellers", on_delete: :cascade
+  add_foreign_key "invitations", "users", column: "accepted_by_id", on_delete: :nullify
+  add_foreign_key "invitations", "users", column: "invited_by_id", on_delete: :nullify
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade

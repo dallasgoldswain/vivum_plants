@@ -70,9 +70,9 @@ billing.subscriptions: { domain: billing, state: pilot, depends_on: [seller.work
 billing.comp_accounts: { domain: billing, state: core, depends_on: [seller.workspace], description: "Pilot and comp billing modes (SB03)" }
 
 # --- Seller business ---
-seller.workspace: { domain: seller, state: core, description: "Seller workspace (Sell area) for invited sellers (SO03)" }
-seller.members: { domain: seller, state: core, depends_on: [seller.workspace], description: "Member management and roles (SO02)" }
-seller.invites: { domain: seller, state: core, description: "Operator-issued seller invites (SO03)" }
+seller.workspace: { domain: seller, state: core, implemented: true, description: "Seller workspace (Sell area) for invited sellers (SO03)" }
+seller.members: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Member management and roles (SO02)" }
+seller.invites: { domain: seller, state: core, implemented: true, description: "Operator-issued seller invites (SO03)" }
 seller.profile: { domain: seller, state: core, depends_on: [seller.workspace], description: "Business profile (BR01)" }
 seller.logo: { domain: seller, state: core, depends_on: [seller.profile], description: "Logo upload and display (BR01)" }
 seller.social_links: { domain: seller, state: core, depends_on: [seller.profile], description: "YouTube, Instagram and Facebook links (BR01)" }

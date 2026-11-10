@@ -23,7 +23,8 @@ module Madmin
       # change is recorded by field name only (D53).
       AUDITED_VALUES = {
         "User" => %w[ platform_operator email_verified_at ],
-        "Membership" => %w[ role seller_id user_id ]
+        "Membership" => %w[ role seller_id user_id ],
+        "Invitation" => %w[ kind role seller_id expires_at accepted_at revoked_at ]
       }.freeze
 
       def audit_operator_action

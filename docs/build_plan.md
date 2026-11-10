@@ -21,8 +21,8 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Done (entitlements stubbed until B07; audit via B04) |
 | B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Done |
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
-| B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Next (discussed) |
-| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Planned |
+| B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
+| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Next |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Planned |
 | B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
 
@@ -181,7 +181,7 @@ existing users to re-accept; withdrawing marketing or AI consent takes effect at
 recorded as a new record; consent history shows who, what version, when and where; withdrawing
 is as easy as granting (one action on the Privacy page).
 
-### B06 Seller and staff invites — discussed 2026-11-10
+### B06 Seller and staff invites — discussed and built 2026-11-10
 
 **Scope**
 - **One invite model** for both kinds: email, seller (or business name for a new seller),

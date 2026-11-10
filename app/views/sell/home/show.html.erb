@@ -1,0 +1,26 @@
+<% content_for :title, "Sell · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Sell</p>
+    <h1 class="vv-h2"><%= Current.seller.name %></h1>
+
+    <p class="vv-caption mt-1">
+      You're <%= Current.membership.role.humanize.downcase %> of this business.
+    </p>
+  </div>
+
+  <%= render "sell/tabs" %>
+</div>
+
+<div class="card">
+  <header>
+    <p class="vv-kicker">Coming next</p>
+    <h2>Your selling tools</h2>
+
+    <p>
+      Stock, listings, live sales, orders and packing arrive here during the
+      pilot. We'll let you know as each one is ready.
+    </p>
+  </header>
+</div>

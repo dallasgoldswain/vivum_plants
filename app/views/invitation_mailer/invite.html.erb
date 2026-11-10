@@ -1,0 +1,19 @@
+<% if @invitation.seller? %>
+  <p>
+    You're invited to run <strong><%= @invitation.business_label %></strong> on
+    VIVUM Plants.
+  </p>
+<% else %>
+  <p>
+    You're invited to join <strong><%= @invitation.business_label %></strong> on
+    VIVUM Plants as <%= @invitation.role.humanize.downcase %>.
+  </p>
+<% end %>
+
+<p>
+  <%= link_to "Accept your invite", @url %>. Sign in or create your account with
+  this email address. The link expires on
+  <%= l @invitation.expires_at.to_date, format: :long %>.
+</p>
+
+<p>If you weren't expecting this, you can ignore this email.</p>

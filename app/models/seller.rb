@@ -1,5 +1,6 @@
 class Seller < ApplicationRecord
   has_many :memberships, dependent: :destroy
+  has_many :invitations, dependent: :delete_all
   has_many :users, through: :memberships
 
   validates :name, presence: true

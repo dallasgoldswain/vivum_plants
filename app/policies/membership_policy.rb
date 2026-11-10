@@ -17,9 +17,9 @@ class MembershipPolicy < ApplicationPolicy
     current_seller_record? && owner?
   end
 
-  # Owners may remove anyone but themselves, so a business always keeps an owner.
+  # Owners may remove anyone; the model keeps the last owner (Membership#ensure_not_last_owner).
   def destroy?
-    update? && record.user_id != user.id
+    update?
   end
 
   relation_scope do |relation|

@@ -2,6 +2,12 @@
 namespace :madmin do
   resources :sellers
   resources :memberships
+  resources :invitations, except: %i[ edit update destroy ] do
+    member do
+      post :resend
+      post :revoke
+    end
+  end
   resources :users
   resources :sessions
   resources :audit_events, only: %i[ index show ]

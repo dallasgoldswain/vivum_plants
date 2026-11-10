@@ -1,7 +1,8 @@
-# Every verified fixture user has accepted the current terms and privacy notice, so the
-# re-acceptance gate (Authentication#require_current_consents) lets them in.
-<% %w[ collector owner unenrolled_owner manager packer ].each do |user| %>
-  <% ConsentRecord::REQUIRED.each do |purpose| %>
+# Every verified fixture user has accepted the current terms and privacy notice, and owners
+# the seller terms, so the re-acceptance gate (Authentication#require_current_consents) lets
+# them in.
+<% { collector: [], owner: ConsentRecord::OWNERS, unenrolled_owner: ConsentRecord::OWNERS, manager: [], packer: [] }.each do |user, extra| %>
+  <% (ConsentRecord::EVERYONE + extra).each do |purpose| %>
 <%= user %>_<%= purpose %>:
   user: <%= user %>
   purpose: <%= purpose %>

@@ -19,7 +19,7 @@ class EmailVerificationsController < ApplicationController
     if user = User.find_by_token_for(:email_verification, params[:token])
       user.verify_email!
       Audit.record("email.verified", actor: user, target: user)
-      redirect_to(authenticated? ? root_path : new_session_path, notice: "Your email address is verified.")
+      redirect_to(authenticated? ? after_authentication_url : new_session_path, notice: "Your email address is verified.")
     else
       redirect_to new_session_path, alert: "That verification link is invalid or has expired."
     end

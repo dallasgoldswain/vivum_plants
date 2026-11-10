@@ -22,9 +22,14 @@ module User::Consentable
     current_consents[purpose.to_s]&.in_force? || false
   end
 
-  # Required purposes (terms, privacy) without a grant of the current version.
+  # Terms and privacy for everyone, plus the seller terms for owners.
+  def required_consent_purposes
+    memberships.owner.exists? ? ConsentRecord::EVERYONE + ConsentRecord::OWNERS : ConsentRecord::EVERYONE
+  end
+
+  # Required purposes without a grant of the current version.
   def pending_required_consents
-    ConsentRecord::REQUIRED.reject { consented_to?(it) }
+    required_consent_purposes.reject { consented_to?(it) }
   end
 
   def required_consents_accepted?
@@ -51,7 +56,7 @@ module User::Consentable
 
   private
     def record_sign_up_consents
-      ConsentRecord::REQUIRED.each { record_consent!(it, granted: true, source: "sign_up") }
+      ConsentRecord::EVERYONE.each { record_consent!(it, granted: true, source: "sign_up") }
       record_consent!(:marketing_email, granted: true, source: "sign_up") if marketing_email_opt_in
     end
 end

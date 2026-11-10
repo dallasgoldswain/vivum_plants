@@ -1,0 +1,130 @@
+<% content_for :title, "Members · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Sell</p>
+    <h1 class="vv-h2">Members</h1>
+
+    <p class="vv-caption mt-1">
+      Who works at <%= Current.seller.name %>, and what they can do.
+    </p>
+  </div>
+
+  <%= render "sell/tabs" %>
+</div>
+
+<div class="card">
+  <header>
+    <h2>Team</h2>
+  </header>
+
+  <section>
+    <ul class="grid gap-3">
+      <% @memberships.each do |membership| %>
+        <li
+          class="
+            flex flex-col gap-3 rounded-[4px] border border-line bg-linen px-4
+            py-3 sm:flex-row sm:items-center sm:justify-between
+          "
+        >
+          <div>
+            <p class="font-medium">
+              <%= membership.user.email_address %>
+
+              <% if membership.user == Current.user %>
+                <span class="vv-caption">(you)</span>
+              <% end %>
+            </p>
+
+            <p class="vv-caption">
+              <%= membership.role.humanize %><%= " · the only owner" if membership.last_owner? %>
+            </p>
+          </div>
+
+          <% if allowed_to?(:update?, membership) && !membership.last_owner? %>
+            <div class="flex flex-wrap items-center gap-2">
+              <%= form_with model: membership, url: sell_member_path(membership), method: :patch, class: "form flex gap-2" do |form| %>
+                <%= form.select :role, Membership.roles.keys.map { [ it.humanize, it ] }, {}, class: "select", aria: { label: "Role for #{membership.user.email_address}" } %>
+                <%= form.submit "Change", class: "btn-sm-outline" %>
+              <% end %>
+
+              <%= button_to "Remove", sell_member_path(membership), method: :delete, class: "btn-sm-destructive", data: { turbo_confirm: "Remove #{membership.user.email_address}? They lose access straight away." } %>
+            </div>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+</div>
+
+<% if allowed_to?(:create?, Membership) %>
+  <div class="card">
+    <header>
+      <h2>Invite someone</h2>
+
+      <p>
+        We'll email them a link. You can also copy it to send another way; it
+        only works for the email you enter. Invites last 14 days.
+      </p>
+    </header>
+
+    <section class="grid gap-6">
+      <%= form_with model: @invitation, url: sell_invitations_path, class: "form grid gap-4 sm:grid-cols-[1fr_auto_auto] sm:items-end" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :email_address, "Email" %>
+          <%= form.email_field :email_address, required: true %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :role %>
+          <%= form.select :role, Membership.roles.keys.map { [ it.humanize, it ] }, {}, class: "select" %>
+        </div>
+
+        <%= form.submit "Send invite", class: "btn" %>
+      <% end %>
+
+      <% if @invitations.any? %>
+        <div class="grid gap-3">
+          <h3 class="vv-h4">Waiting to accept</h3>
+
+          <ul class="grid gap-3">
+            <% @invitations.each do |invitation| %>
+              <li
+                class="
+                  grid gap-3 rounded-[4px] border border-line bg-linen px-4
+                  py-3
+                "
+              >
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p>
+                    <span class="font-medium"><%= invitation.email_address %></span>
+
+                    <span class="vv-caption">
+                      · <%= invitation.role.humanize %> · expires
+                      <%= l invitation.expires_at.to_date, format: :long %>
+                    </span>
+                  </p>
+
+                  <div class="flex gap-2">
+                    <%= button_to "Resend", resend_sell_invitation_path(invitation), class: "btn-sm-outline" %>
+                    <%= button_to "Cancel", sell_invitation_path(invitation), method: :delete, class: "btn-sm-ghost" %>
+                  </div>
+                </div>
+
+                <input
+                  type="text"
+                  class="input font-mono text-xs"
+                  readonly
+                  autocomplete="off"
+                  value="<%= invitation_url(invitation.acceptance_token) %>"
+                  aria-label="Invite link for <%= invitation.email_address %>"
+                  onclick="this.select()"
+                >
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </section>
+  </div>
+<% end %>

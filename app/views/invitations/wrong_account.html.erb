@@ -1,0 +1,14 @@
+<% content_for :title, "Different account · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Invite</p>
+  <h2 class="vv-h2">This invite is for another email</h2>
+
+  <p class="vv-caption mt-2">
+    You're signed in as <%= Current.user.email_address %>, but the invite was
+    sent to a different address. Sign out, then sign in or create an account
+    with the invited address.
+  </p>
+</div>
+
+<%= button_to "Sign out", session_path, method: :delete, class: "btn w-full" %>

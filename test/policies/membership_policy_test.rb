@@ -12,11 +12,6 @@ class MembershipPolicyTest < ActiveSupport::TestCase
     assert policy(owner, memberships(:fern_packer)).apply(:destroy?)
   end
 
-  test "owners cannot remove themselves" do
-    owner = memberships(:fern_owner)
-    assert_not policy(owner, owner).apply(:destroy?)
-  end
-
   test "managers and packers cannot manage members" do
     [ memberships(:fern_manager), memberships(:fern_packer) ].each do |membership|
       assert_not policy(membership, Membership).apply(:create?)
