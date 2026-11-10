@@ -37,6 +37,11 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   Redcarpet, Prawn, prawn-table, pdf-reader, docx (D44).
 - Checks: ArchSpec architecture rules, Herb HTML+ERB lint and format, alongside RuboCop,
   Brakeman, bundler-audit and importmap audit, in `bin/ci` and GitHub Actions.
+- Feature flags (B03): Flipper with the Active Record adapter, a code-owned registry of
+  all 103 PRD capabilities in `config/features.yml`, `Capabilities.enabled?` implementing
+  FF01's evaluation order, `requires_capability` / `capability?` helpers, the flag console
+  at `/madmin/flags` behind `OperatorConstraint`, and `bin/rails capabilities:sync`
+  (D46–D48).
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

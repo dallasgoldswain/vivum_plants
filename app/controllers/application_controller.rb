@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Authentication
+  include CapabilityGating
 
   # Store ?ref=CODE in a cookie so a later sign-up can be credited (config/initializers/refer.rb).
   set_referral_cookie

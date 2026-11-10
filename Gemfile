@@ -57,6 +57,11 @@ gem "noticed"
 # Platform operator management area at /madmin [https://github.com/excid3/madmin]
 gem "madmin"
 
+# Feature flags: state in the database, console at /madmin/flags (see config/features.yml)
+gem "flipper"
+gem "flipper-active_record"
+gem "flipper-ui"
+
 # Referral codes and links [https://github.com/excid3/refer]
 gem "refer"
 

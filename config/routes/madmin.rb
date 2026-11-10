@@ -8,5 +8,7 @@ namespace :madmin do
     resources :events
     resources :notifications
   end
+  # Feature flag console (PRD §28): operators with two-step sign-in only.
+  mount Flipper::UI.app(Flipper), at: "flags", constraints: OperatorConstraint
   root to: "dashboard#show"
 end

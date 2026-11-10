@@ -18,7 +18,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 |---|---|---|---|---|
 | B01 | Accounts, sign-up, email verification, two-step sign-in | §3, D33–D34 | — | Done |
 | B02 | Sellers, memberships, roles, Action Policy | SO01, SO02, D35 | B01 | Done (no member management UI) |
-| B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Next (discussed) |
+| B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Done (entitlements stubbed until B07; audit via B04) |
 | B04 | Operator audit log (Madmin and flag changes) | PR08, FF04, O14 | B03 | Planned |
 | B05 | Consent records and onboarding consent | PR03, ST06, D15 | B01 | Planned |
 | B06 | Seller invites and onboarding (invite-only) | SO03, D17 | B02, B04 | Planned |

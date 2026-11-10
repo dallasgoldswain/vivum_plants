@@ -68,6 +68,16 @@ Edit with `bin/rails credentials:edit`.
 
 [Madmin](https://github.com/excid3/madmin) at `/madmin`, for platform operators only. Visitors must be signed in, verified, a platform operator and enrolled in two-step sign-in; anyone else gets a 404. Resources live in `app/madmin/resources`. TOTP secrets and backup codes are never shown, and sessions and notifications are read-only.
 
+## Feature flags
+
+Every product capability has a key in `config/features.yml` (PRD §28): its domain, state (core, pilot, roadmap), whether it is implemented, its dependencies and any paid entitlement. [Flipper](https://www.flippercloud.io) stores which flags are on.
+
+- **Checking a flag:** use `Capabilities.enabled?("seller.stock", user:, seller:)`, `requires_capability "seller.stock"` in a controller (404 when off) or `capability?("seller.stock")` in a view. Never call Flipper directly.
+- **Rules:** unknown and unimplemented keys are always off; dependencies must be on for the same user and seller; paid entitlements deny until billing exists. Authorisation still runs after the flag check.
+- **Console:** `/madmin/flags` (operators with two-step sign-in only). Turn a flag on for everyone, a seller (`Seller;3`) or a user (`User;12`). Disabling clears every target and acts as the emergency stop. Flags can't be created or deleted there.
+- **Adding a feature:** add its key to `config/features.yml` (CI fails if code uses an unregistered key), set `implemented: true` when it ships, then run `bin/rails capabilities:sync` (also run by the seeds). In development, sync switches on implemented core flags.
+- **Tests:** Flipper uses an in-memory store per test; enable flags with `Flipper.enable` or `Flipper.enable_actor`.
+
 ## Notifications
 
 [Noticed](https://github.com/excid3/noticed) stores notifications in `noticed_events` and `noticed_notifications` (`user.notifications`). No notifiers exist yet; delivery channels from the PRD (email, native push, web push, WhatsApp) are added per notifier as features need them.

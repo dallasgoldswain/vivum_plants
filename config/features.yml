@@ -1,0 +1,151 @@
+# Feature registry (PRD §28, decisions D46–D48). Code-owned: every product capability is
+# listed here before it is built, and Capabilities.enabled? refuses any key not listed.
+#
+# Fields
+#   domain        grouping for the console and docs
+#   state         core     – baseline pilot feature, production starts on an allowlist
+#                 pilot    – off until its provider/readiness checks pass
+#                 roadmap  – unavailable; may not be implemented
+#   implemented   false until the feature is built; unimplemented keys always deny
+#   depends_on    keys that must also be enabled for the same user/seller
+#   entitlement   subscription entitlement the seller must hold (checked from B07)
+#   off           what still works when the flag is off (default: new actions are blocked,
+#                 existing data stays readable, reconciliation and recovery keep running)
+#   description   one line, shown in the flag console
+
+# --- Account and access ---
+account.profile: { domain: account, state: core, description: "Account profile and email address" }
+account.preferences: { domain: account, state: core, description: "Timezone, units and notification preferences" }
+account.export: { domain: account, state: core, description: "Machine-readable export of a user's data" }
+account.deletion: { domain: account, state: core, description: "Self-service account deletion" }
+account.onboarding: { domain: account, state: core, description: "Onboarding: guidance sources and AI consent (ST06)" }
+help.manual: { domain: help, state: core, description: "Searchable product manual (HM01)" }
+help.contextual: { domain: help, state: core, depends_on: [help.manual], description: "Contextual help links from screens" }
+
+# --- Privacy ---
+privacy.consents: { domain: privacy, state: core, description: "Versioned consent records (PR03)" }
+privacy.dsr: { domain: privacy, state: core, description: "Data subject requests for account holders (PR05)" }
+privacy.buyer_dsr: { domain: privacy, state: core, depends_on: [seller.buyers], description: "Seller tools to export and delete a buyer's data" }
+
+# --- Clients ---
+client.pwa: { domain: clients, state: core, description: "Installable PWA" }
+client.offline_queue: { domain: clients, state: core, depends_on: [client.pwa], description: "Offline cached reads and queued care logs (OF02)" }
+client.ios: { domain: clients, state: core, description: "Hotwire Native iOS app" }
+client.android: { domain: clients, state: core, description: "Hotwire Native Android app" }
+
+# --- Collector ---
+collection.plants: { domain: collector, state: core, description: "Plant records, acquisition and status (PL01–PL03)" }
+collection.search: { domain: collector, state: core, depends_on: [collection.plants], description: "Search and filters (UX01)" }
+collection.media: { domain: collector, state: core, depends_on: [collection.plants], description: "Photos and observations (PL04)" }
+collection.acquisition: { domain: collector, state: core, depends_on: [collection.plants], description: "Purchase and acquisition details (PL02)" }
+collection.environments: { domain: collector, state: core, depends_on: [collection.plants], description: "Growing environments and occupants (EN01, EN03)" }
+collection.measurements: { domain: collector, state: core, depends_on: [collection.environments], description: "Dated environment measurements (EN02)" }
+collection.tissue_culture: { domain: collector, state: core, depends_on: [collection.plants], description: "Purchased tissue culture tracking (TC01–TC05)" }
+
+# --- Care and library ---
+care.logs: { domain: care, state: core, depends_on: [collection.plants], description: "Care events and quick care entry (CA01)" }
+care.shared_maintenance: { domain: care, state: core, depends_on: [collection.environments, care.reminders], description: "Environment maintenance tasks (EN04)" }
+care.reminders: { domain: care, state: core, depends_on: [care.logs], description: "Schedules, reminders and the Today inbox (CA02–CA05)" }
+care.library_guidance: { domain: care, state: core, depends_on: [library.profiles, care.reminders], description: "Suggestions from built-in profiles" }
+care.ai_guidance: { domain: care, state: pilot, depends_on: [ai.care_suggestions, care.reminders], description: "AI care suggestions in the care plan" }
+library.profiles: { domain: care, state: core, description: "Built-in species reference profiles (GU01)" }
+substrate.ingredients: { domain: care, state: core, description: "Ingredient library (SU01)" }
+substrate.recipes: { domain: care, state: core, depends_on: [substrate.ingredients], description: "Versioned substrate recipes (SU02, SU04)" }
+substrate.scaling: { domain: care, state: core, depends_on: [substrate.recipes], description: "Scale a mix to a target volume (SU03)" }
+
+# --- Notifications ---
+notifications.native_push: { domain: notifications, state: core, description: "APNs and FCM push via the native apps" }
+notifications.web_push: { domain: notifications, state: core, depends_on: [client.pwa], description: "Browser push for the PWA" }
+notifications.email_digest: { domain: notifications, state: core, depends_on: [care.reminders], description: "Daily email digest of due tasks (NT04)" }
+notifications.whatsapp: { domain: notifications, state: pilot, depends_on: [privacy.consents, whatsapp.outbound], description: "WhatsApp template reminders (NT03)", off: "Queued template sends stop before delivery" }
+
+# --- AI ---
+ai.care_suggestions: { domain: ai, state: pilot, depends_on: [privacy.consents, collection.plants], description: "AI care suggestion requests (GU02, AI01)", off: "Accepted plans and history stay; no new requests" }
+ai.dm_extraction: { domain: ai, state: pilot, depends_on: [privacy.consents, whatsapp.connection], description: "AI extraction of claims from WhatsApp DMs (AI02)" }
+ai.request_extraction: { domain: ai, state: pilot, depends_on: [privacy.consents, whatsapp.request_capture], description: "AI extraction of plant requests from DMs" }
+ai.account_stop: { domain: ai, state: core, description: "Account-wide AI stop (ST05)" }
+
+# --- Billing ---
+billing.subscriptions: { domain: billing, state: pilot, depends_on: [seller.workspace], description: "Paystack seller subscriptions (SB01, SB02)" }
+billing.comp_accounts: { domain: billing, state: core, depends_on: [seller.workspace], description: "Pilot and comp billing modes (SB03)" }
+
+# --- Seller business ---
+seller.workspace: { domain: seller, state: core, description: "Seller workspace (Sell area) for invited sellers (SO03)" }
+seller.members: { domain: seller, state: core, depends_on: [seller.workspace], description: "Member management and roles (SO02)" }
+seller.invites: { domain: seller, state: core, description: "Operator-issued seller invites (SO03)" }
+seller.profile: { domain: seller, state: core, depends_on: [seller.workspace], description: "Business profile (BR01)" }
+seller.logo: { domain: seller, state: core, depends_on: [seller.profile], description: "Logo upload and display (BR01)" }
+seller.social_links: { domain: seller, state: core, depends_on: [seller.profile], description: "YouTube, Instagram and Facebook links (BR01)" }
+seller.paid_branding: { domain: seller, state: pilot, depends_on: [seller.profile], entitlement: paid_branding, description: "Paid colour palettes and layouts (BR02)", off: "New output reverts to standard identity; saved files keep working" }
+
+# --- Seller foundation ---
+seller.stock: { domain: seller, state: core, depends_on: [seller.workspace], description: "Stock items, lots and the stock ledger (SE01, SE02)" }
+seller.listings: { domain: seller, state: core, depends_on: [seller.stock], description: "Listings (SE03)" }
+seller.sale_cards: { domain: seller, state: core, depends_on: [seller.listings], description: "Sale card images and captions (SE07)" }
+seller.csv_import: { domain: seller, state: core, depends_on: [seller.stock], description: "CSV stock import with preview (IM01, IM02)" }
+seller.orders: { domain: seller, state: core, depends_on: [seller.reservations, seller.buyers], description: "Orders (SE05)" }
+seller.reservations: { domain: seller, state: core, depends_on: [seller.stock], description: "Holds and reservations (SE06)", off: "No new holds; existing holds can still be released and expire" }
+seller.receipts: { domain: seller, state: core, depends_on: [seller.orders], description: "Receipts (RC01)" }
+seller.vat_invoices: { domain: seller, state: core, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
+seller.buyers: { domain: seller, state: core, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
+seller.closeout: { domain: seller, state: core, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
+seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
+
+# --- Live sales ---
+sales.sessions: { domain: sales, state: core, depends_on: [seller.reservations], description: "Sale sessions and Host View (LS01)" }
+sales.auctions: { domain: sales, state: core, depends_on: [sales.sessions, seller.stock, seller.reservations], description: "Auction lots and results (LS02)" }
+sales.backup_bidder: { domain: sales, state: core, depends_on: [sales.auctions], description: "Transfer a failed win to the backup bidder (LS03)" }
+sales.quick_claim: { domain: sales, state: core, depends_on: [sales.sessions], description: "Quick Claim for group claims (LS04)" }
+sales.waitlist: { domain: sales, state: core, depends_on: [sales.quick_claim], description: "Waitlist when stock runs out (LS04)" }
+
+# --- WhatsApp ---
+whatsapp.share: { domain: whatsapp, state: core, depends_on: [seller.sale_cards], description: "Share and download sale cards (SE08)" }
+whatsapp.connection: { domain: whatsapp, state: pilot, depends_on: [seller.workspace], description: "Business number connection (WA01)", off: "Manual sharing and orders keep working" }
+whatsapp.dm_claims: { domain: whatsapp, state: pilot, depends_on: [whatsapp.connection, sales.quick_claim], description: "Claims from direct messages (WA02)" }
+whatsapp.auto_reserve: { domain: whatsapp, state: pilot, depends_on: [whatsapp.dm_claims, ai.dm_extraction, seller.reservations], description: "Auto-reserve on unambiguous DM claims (WA02)", off: "Queued claims stop reserving; claims go to review" }
+whatsapp.request_capture: { domain: whatsapp, state: pilot, depends_on: [whatsapp.connection, requests.manual], description: "Plant requests from DMs (RQ01)" }
+whatsapp.outbound: { domain: whatsapp, state: pilot, depends_on: [whatsapp.connection, privacy.consents], description: "Outbound template messages (WA04)" }
+
+# --- Plant requests ---
+requests.form: { domain: requests, state: core, depends_on: [requests.manual], description: "Seller request web form for buyers (RQ01)" }
+requests.manual: { domain: requests, state: core, depends_on: [seller.workspace, seller.buyers], description: "Manual request entry (RQ01)" }
+requests.matching: { domain: requests, state: core, depends_on: [requests.manual, seller.stock], description: "Match requests to stock (RQ02)" }
+requests.offers: { domain: requests, state: core, depends_on: [requests.matching, seller.reservations], description: "Offers with expiry (RQ02)" }
+requests.wanted_list: { domain: requests, state: core, depends_on: [requests.manual], description: "Demand by plant and form (WL01)" }
+
+# --- Payments and shipping ---
+payments.manual: { domain: payments, state: core, depends_on: [seller.orders], description: "Manual payment records" }
+payments.bob_pay: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Bob Pay hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
+payments.yoco: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Yoco hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
+shipping.pickup: { domain: shipping, state: core, depends_on: [seller.orders], description: "Pickup fulfilment" }
+shipping.manual: { domain: shipping, state: core, depends_on: [seller.orders], description: "Manual tracking references" }
+shipping.bob_go: { domain: shipping, state: pilot, depends_on: [seller.packing], description: "Bob Go quotes, bookings and tracking (SH01)", off: "No new bookings; tracking for existing parcels stays available" }
+shipping.tracking: { domain: shipping, state: core, depends_on: [seller.orders], description: "Shipment status tracking" }
+
+# --- Buyer pages ---
+buyer.order_link: { domain: buyer, state: core, depends_on: [seller.orders], description: "Buyer order review link (WB01)" }
+buyer.tracking_link: { domain: buyer, state: core, depends_on: [shipping.tracking], description: "Buyer tracking link (WB01)" }
+buyer.receipt_link: { domain: buyer, state: core, depends_on: [seller.receipts], description: "Buyer receipt link (WB01)" }
+buyer.phone_verification: { domain: buyer, state: core, depends_on: [seller.buyers], description: "Buyer phone verification by code (BY03)" }
+
+# --- Care handover ---
+care.sheets: { domain: handover, state: core, depends_on: [seller.workspace], description: "Care sheet templates and published versions (CP01)" }
+care.packs: { domain: handover, state: core, depends_on: [care.sheets, seller.orders], description: "Care packs per order (CP02)" }
+care.pdf: { domain: handover, state: core, depends_on: [care.packs], description: "Printable care pack PDF (CP02)" }
+substrate.share: { domain: handover, state: core, depends_on: [substrate.recipes], description: "Shareable substrate recipes (CP02)" }
+care.qr_labels: { domain: handover, state: core, depends_on: [care.sheets], description: "Printable care QR labels (QR01)" }
+buyer.collection_import: { domain: handover, state: core, depends_on: [collection.plants, care.packs], description: "Copy a care pack plant into a collection (CP03)" }
+care.sitter: { domain: handover, state: core, depends_on: [care.reminders], description: "Plant Sitter scoped access (PS01, PS02)" }
+
+# --- Roadmap (registered, unavailable) ---
+marketplace.discovery: { domain: roadmap, state: roadmap, description: "Public marketplace discovery" }
+marketplace.wanted_board: { domain: roadmap, state: roadmap, description: "Cross-seller Wanted Board" }
+storefront.native: { domain: roadmap, state: roadmap, description: "Native storefront builder" }
+storefront.shopify: { domain: roadmap, state: roadmap, description: "Shopify connector" }
+storefront.woocommerce: { domain: roadmap, state: roadmap, description: "WooCommerce connector" }
+whatsapp.catalogue_sync: { domain: roadmap, state: roadmap, description: "WhatsApp catalogue sync" }
+whatsapp.cart_import: { domain: roadmap, state: roadmap, description: "WhatsApp cart order intake" }
+branding.custom_domains: { domain: roadmap, state: roadmap, description: "Custom domains for seller pages" }
+branding.remove_footer: { domain: roadmap, state: roadmap, description: "Remove VIVUM attribution" }
+seller.self_signup: { domain: roadmap, state: roadmap, description: "Self-serve seller sign-up" }
+collection.sensors: { domain: roadmap, state: roadmap, description: "Sensor connections" }

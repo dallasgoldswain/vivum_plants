@@ -16,3 +16,7 @@ if admin_email.present? && admin_password.present?
 elsif !Rails.env.test?
   puts "Skipping admin user: set user.admin_email and user.admin_password in credentials."
 end
+
+# Feature flags: add every registered capability to Flipper so the console lists them.
+# In development, implemented core capabilities are switched on (PRD FF02).
+Capabilities.sync!
