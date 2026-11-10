@@ -20,7 +20,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B02 | Sellers, memberships, roles, Action Policy | SO01, SO02, D35 | B01 | Done (no member management UI) |
 | B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Done (entitlements stubbed until B07; audit via B04) |
 | B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Done |
-| B05 | Consent records and onboarding consent | PR03, ST06, D15 | B01 | Planned |
+| B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Next (discussed) |
 | B06 | Seller invites and onboarding (invite-only) | SO03, D17 | B02, B04 | Planned |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Planned |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Planned |
@@ -149,4 +149,35 @@ activity history (stock movements and order changes keep their own records, SE02
 operator; a failed sign-in records the attempted email and IP; audit rows can't be updated
 or deleted early; secrets (password digests, TOTP secrets, codes) never appear in changes;
 non-operators can't read the log.
+
+### B05 Consents — discussed 2026-11-10
+
+**Scope**
+- **Purposes:** terms of use, privacy notice, email marketing (off by default, PR04), AI
+  processing (required before any AI request, D15), WhatsApp reminders (NT03).
+- **Records:** an append-only `consent_records` table: user, purpose, version of the text
+  agreed to, granted or withdrawn, source (sign-up, settings, in context, re-acceptance), IP,
+  user agent, time. The current state is the latest record per purpose; withdrawing adds a
+  record rather than editing one. Records are deleted with the account (unlike the audit log).
+- **Legal text:** draft v0 terms of use and privacy notice in plain language, marked "Draft
+  for the pilot, pending legal review", served as public pages (`/legal/terms`,
+  `/legal/privacy`). Versions are code-owned; publishing a new version makes everyone accept
+  again. The privacy notice names the audit log's IP and browser data (D53) and the AI and
+  WhatsApp processors (PR06).
+- **When asked:** terms and privacy acceptance (required) and the marketing opt-in on the
+  sign-up form; AI and WhatsApp asked in context when those features arrive (B37, B38); all
+  of them viewable and changeable on a **Settings → Privacy** page.
+- **Existing accounts:** anyone without acceptance of the current terms and privacy versions
+  sees an acceptance page before using the app (including the seeded admin).
+- **Flags:** `privacy.consents` becomes implemented. Terms acceptance and the Privacy page are
+  privacy controls, so they are never switched off by a flag.
+
+**Deferred:** buyer consents per seller (with B21), the data subject request tools
+(`privacy.dsr`, B08), WhatsApp phone number capture (B38), consent wording for AI providers
+once models are chosen per use case (B37).
+
+**Acceptance:** sign-up without accepting terms and privacy fails; a new terms version sends
+existing users to re-accept; withdrawing marketing or AI consent takes effect at once and is
+recorded as a new record; consent history shows who, what version, when and where; withdrawing
+is as easy as granting (one action on the Privacy page).
 

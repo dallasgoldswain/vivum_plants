@@ -133,3 +133,12 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | ID | Question | Decision |
 |----|----------|----------|
 | D53 | Personal data in audit events | Minimise (POPIA s10): actor stored as a user id only; attempted emails stored as a keyed HMAC fingerprint, never the address; Madmin changes record field names, with before/after values only for allowlisted non-personal fields; deletes record type and id; searches record that a search happened, not its text. IP address and user agent are kept for security investigation and must be named in the privacy notice. Account deletion (B08) should soft-delete or anonymise users so audit ids stay meaningful; confirm with the attorney. |
+
+## Round 14 — Consents (2026-11-10)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D54 | Consent purposes now | Terms of use, privacy notice, email marketing, AI processing, WhatsApp reminders. Buyer consents come with buyers (B21). |
+| D55 | Legal text before attorney review | Draft v0 terms and privacy notice, clearly marked as drafts; versioned so users re-accept when the reviewed versions ship. |
+| D56 | When consent is asked | Terms, privacy and marketing on sign-up; AI and WhatsApp in context when those features ship; everything on Settings → Privacy. |
+| D57 | Existing accounts | Asked to accept current terms and privacy at their next request before using the app. |
