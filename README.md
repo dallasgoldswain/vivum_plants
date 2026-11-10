@@ -4,6 +4,10 @@ A South African plant collection and seller operations platform. Collectors reco
 
 - Product requirements: [docs/VIVUM_Plant_Codex_PRD_v1_3.md](docs/VIVUM_Plant_Codex_PRD_v1_3.md)
 - Decision log: [docs/prd_decisions.md](docs/prd_decisions.md)
+- Technical changelog: [CHANGELOG.md](CHANGELOG.md)
+- User-facing release notes (for the future What's new page): [WHATS_NEW.md](WHATS_NEW.md)
+
+Update `CHANGELOG.md` with every change, and `WHATS_NEW.md` whenever users would notice it.
 
 ## Stack
 
