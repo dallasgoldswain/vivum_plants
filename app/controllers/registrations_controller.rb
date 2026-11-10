@@ -9,9 +9,10 @@ class RegistrationsController < ApplicationController
   end
 
   def create
-    @user = User.new(params.expect(user: %i[ email_address password password_confirmation ]))
+    @user = User.new(params.expect(user: %i[ email_address password password_confirmation terms_acceptance marketing_email_opt_in ]))
 
-    if @user.save
+    # :create keeps has_secure_password's checks; :registration requires accepting the terms.
+    if @user.save(context: %i[ create registration ])
       refer @user
       EmailVerificationMailer.verify(@user).deliver_later
       start_new_session_for @user

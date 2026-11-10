@@ -9,6 +9,17 @@ Rails.application.routes.draw do
   resource :two_factor_challenge, only: %i[ new create ]
   resource :two_factor_backup_codes, only: :create
   resource :current_seller, only: :update
+  resource :consent_acceptance, only: %i[ new create ]
+
+  namespace :settings do
+    resource :privacy, only: :show, controller: "privacy"
+    resources :consents, only: :update, param: :purpose
+  end
+
+  scope :legal, controller: :legal, as: :legal do
+    get :terms
+    get :privacy
+  end
 
   root "home#show"
 

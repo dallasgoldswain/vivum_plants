@@ -8,6 +8,7 @@ module Authentication
     before_action :require_authentication
     before_action :require_verified_email
     before_action :require_two_factor_enrolment
+    before_action :require_current_consents
     helper_method :authenticated?, :current_user
   end
 
@@ -16,15 +17,22 @@ module Authentication
       skip_before_action :require_authentication, **options
       skip_before_action :require_verified_email, **options
       skip_before_action :require_two_factor_enrolment, **options
+      skip_before_action :require_current_consents, **options
     end
 
     def allow_unverified_email_access(**options)
       skip_before_action :require_verified_email, **options
       skip_before_action :require_two_factor_enrolment, **options
+      skip_before_action :require_current_consents, **options
     end
 
     def allow_without_two_factor_enrolment(**options)
       skip_before_action :require_two_factor_enrolment, **options
+      skip_before_action :require_current_consents, **options
+    end
+
+    def allow_without_current_consents(**options)
+      skip_before_action :require_current_consents, **options
     end
   end
 
@@ -50,6 +58,16 @@ module Authentication
       user = Current.user
       if user && user.two_factor_required? && !user.two_factor_enabled?
         redirect_to new_two_factor_enrolment_path, alert: "Set up two-step sign-in to continue."
+      end
+    end
+
+    # Everyone must accept the current terms and privacy notice before using the app (D56).
+    # A privacy control, so never behind a feature flag.
+    def require_current_consents
+      user = Current.user
+      if user && !user.required_consents_accepted?
+        session[:return_to_after_consenting] = request.url if request.get?
+        redirect_to new_consent_acceptance_path
       end
     end
 

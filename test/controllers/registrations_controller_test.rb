@@ -3,7 +3,7 @@ require "test_helper"
 class RegistrationsControllerTest < ActionDispatch::IntegrationTest
   test "sign up creates an unverified account, signs in and sends a verification email" do
     assert_difference -> { User.count } do
-      post registration_path, params: { user: { email_address: "new@example.com", password: "a-long-password", password_confirmation: "a-long-password" } }
+      post registration_path, params: { user: { email_address: "new@example.com", password: "a-long-password", password_confirmation: "a-long-password", terms_acceptance: "1" } }
     end
 
     user = User.find_by!(email_address: "new@example.com")
@@ -22,7 +22,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   test "sign up with a taken email fails" do
     assert_no_difference -> { User.count } do
-      post registration_path, params: { user: { email_address: users(:collector).email_address, password: "a-long-password", password_confirmation: "a-long-password" } }
+      post registration_path, params: { user: { email_address: users(:collector).email_address, password: "a-long-password", password_confirmation: "a-long-password", terms_acceptance: "1" } }
     end
     assert_response :unprocessable_entity
   end
@@ -31,7 +31,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     code = users(:collector).referral_codes.create!(code: "fernfriend")
 
     get new_registration_path(ref: "fernfriend")
-    post registration_path, params: { user: { email_address: "referred@example.com", password: "a-long-password", password_confirmation: "a-long-password" } }
+    post registration_path, params: { user: { email_address: "referred@example.com", password: "a-long-password", password_confirmation: "a-long-password", terms_acceptance: "1" } }
 
     referee = User.find_by!(email_address: "referred@example.com")
     assert_equal users(:collector), referee.referrer
@@ -41,7 +41,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
   test "sign up with an unknown referral code still works" do
     get new_registration_path(ref: "no-such-code")
-    post registration_path, params: { user: { email_address: "plain@example.com", password: "a-long-password", password_confirmation: "a-long-password" } }
+    post registration_path, params: { user: { email_address: "plain@example.com", password: "a-long-password", password_confirmation: "a-long-password", terms_acceptance: "1" } }
 
     assert_nil User.find_by!(email_address: "plain@example.com").referral
   end

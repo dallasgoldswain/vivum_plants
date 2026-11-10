@@ -23,7 +23,7 @@ help.manual: { domain: help, state: core, description: "Searchable product manua
 help.contextual: { domain: help, state: core, depends_on: [help.manual], description: "Contextual help links from screens" }
 
 # --- Privacy ---
-privacy.consents: { domain: privacy, state: core, description: "Versioned consent records (PR03)" }
+privacy.consents: { domain: privacy, state: core, implemented: true, description: "Versioned consent records (PR03). Terms acceptance and Settings → Privacy are never gated by this flag" }
 privacy.dsr: { domain: privacy, state: core, description: "Data subject requests for account holders (PR05)" }
 privacy.buyer_dsr: { domain: privacy, state: core, depends_on: [seller.buyers], description: "Seller tools to export and delete a buyer's data" }
 

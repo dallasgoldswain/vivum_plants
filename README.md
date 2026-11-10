@@ -88,6 +88,16 @@ Every operator view and change in Madmin, every flag change, and account securit
 - **Reading:** operators open **Audit Events** in `/madmin` (read-only; viewing it is audited too).
 - **Flag changes** are captured from Flipper's instrumentation; `FlagConsoleContext` tells the console who the operator is.
 
+## Consents
+
+Consents live in `consent_records`, one row per grant or withdrawal; the latest row per purpose is the current choice (PR03, D54–D57).
+
+- **Purposes and versions:** `ConsentRecord::PURPOSES` (terms, privacy, marketing_email, ai_processing, whatsapp_reminders). Bump a purpose's version when its wording changes: older grants stop counting. Bumping terms or privacy sends everyone to the acceptance page on their next request.
+- **API:** `user.consented_to?(:ai_processing)`, `user.record_consent!(:marketing_email, granted: false, source: "settings")`. Check `consented_to?` before any AI request or WhatsApp send.
+- **Gate:** `Authentication#require_current_consents` runs after email verification and two-step enrolment; skip it with `allow_without_current_consents` only for pages a user needs before accepting.
+- **Pages:** `/legal/terms` and `/legal/privacy` (draft v0, pending legal review; text in `app/views/legal`), and Settings → Privacy at `/settings/privacy`. These are privacy controls and are never behind a feature flag.
+- Records are deleted with the account; they are not in the audit log.
+
 ## Notifications
 
 [Noticed](https://github.com/excid3/noticed) stores notifications in `noticed_events` and `noticed_notifications` (`user.notifications`). No notifiers exist yet; delivery channels from the PRD (email, native push, web push, WhatsApp) are added per notifier as features need them.

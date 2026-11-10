@@ -1,0 +1,13 @@
+# Every verified fixture user has accepted the current terms and privacy notice, so the
+# re-acceptance gate (Authentication#require_current_consents) lets them in.
+<% %w[ collector owner unenrolled_owner manager packer ].each do |user| %>
+  <% ConsentRecord::REQUIRED.each do |purpose| %>
+<%= user %>_<%= purpose %>:
+  user: <%= user %>
+  purpose: <%= purpose %>
+  version: "<%= ConsentRecord.purpose(purpose).version %>"
+  granted: true
+  source: sign_up
+  created_at: <%= 1.day.ago.to_fs(:db) %>
+  <% end %>
+<% end %>

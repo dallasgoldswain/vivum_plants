@@ -1,0 +1,39 @@
+<% content_for :title, "Accept our terms · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Before you continue</p>
+  <h2 class="vv-h2">Accept our terms</h2>
+
+  <p class="vv-caption mt-2">
+    Please read and accept the current versions to keep using VIVUM Plants.
+  </p>
+</div>
+
+<div class="card card-raised">
+  <section class="grid gap-6">
+    <ul class="grid gap-2">
+      <% @pending.each do |purpose| %>
+        <li
+          class="
+            flex min-h-11 items-center justify-between gap-3 rounded-[4px]
+            border border-line bg-linen px-3 py-2
+          "
+        >
+          <%= link_to purpose.label, purpose.key == "terms" ? legal_terms_path : legal_privacy_path, class: "font-medium text-forest underline-offset-4 hover:underline", target: "_blank" %>
+          <span class="badge-outline">Version <%= purpose.version %></span>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= form_with url: consent_acceptance_path, class: "form grid gap-6" do |form| %>
+      <div class="flex items-start gap-3">
+        <%= form.check_box :accept, required: true, class: "mt-1" %>
+        <%= form.label :accept, "I agree to the terms of use and have read the privacy notice.", class: "block text-sm leading-normal font-normal" %>
+      </div>
+
+      <%= form.submit "Accept and continue", class: "btn w-full" %>
+    <% end %>
+  </section>
+</div>
+
+<%= button_to "Sign out instead", session_path, method: :delete, class: "btn-ghost w-full" %>

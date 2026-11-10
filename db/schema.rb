@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_150000) do
     t.index ["created_at"], name: "index_audit_events_on_created_at"
     t.index ["target_key"], name: "index_audit_events_on_target_key"
     t.index ["target_type", "target_id"], name: "index_audit_events_on_target_type_and_target_id"
+  end
+
+  create_table "consent_records", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "purpose", null: false
+    t.string "version", null: false
+    t.boolean "granted", null: false
+    t.string "source", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.index ["user_id", "purpose", "created_at"], name: "index_consent_records_on_user_id_and_purpose_and_created_at"
   end
 
   create_table "flipper_features", force: :cascade do |t|
@@ -201,6 +213,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_150000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "consent_records", "users", on_delete: :cascade
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade

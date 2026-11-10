@@ -50,6 +50,13 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   (`actor_email` column removed), attempted emails stored as HMAC fingerprints, Madmin
   changes recorded by field name with values only for allowlisted non-personal fields,
   deletes and searches recorded without record contents or search text.
+- Consents (B05): append-only `consent_records` (latest record per purpose is current,
+  versions code-owned in `ConsentRecord::PURPOSES`, deleted with the account) and
+  `User::Consentable`; terms and privacy acceptance required on sign-up with an optional
+  marketing opt-in; `require_current_consents` sends anyone without the current versions to
+  `/consent_acceptance/new`; draft v0 terms and privacy notice at `/legal/terms` and
+  `/legal/privacy`; Settings → Privacy (`/settings/privacy`) with one-action grant and
+  withdraw and the full history; `privacy.consents` marked implemented (D54–D57).
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

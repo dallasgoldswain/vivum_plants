@@ -7,6 +7,7 @@ module ApplicationHelper
   # The signed-in shell shows only once the user can actually use the app.
   def app_shell?
     user = Current.user
-    user.present? && user.email_verified? && !(user.two_factor_required? && !user.two_factor_enabled?)
+    user.present? && user.email_verified? && !(user.two_factor_required? && !user.two_factor_enabled?) &&
+      user.required_consents_accepted?
   end
 end

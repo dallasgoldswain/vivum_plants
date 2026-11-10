@@ -2,6 +2,8 @@ class User < ApplicationRecord
   OTP_ISSUER = "VIVUM"
   BACKUP_CODE_COUNT = 10
 
+  include Consentable
+
   has_secure_password
   has_referrals
   has_many :sessions, dependent: :destroy

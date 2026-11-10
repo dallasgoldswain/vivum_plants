@@ -23,3 +23,6 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - If you sell plants, you can belong to more than one seller business and switch between
   them.
 - A fresh look, in the colours and type of the VIVUM family.
+- Read our terms of use and privacy notice in plain language. See and change what you've
+  agreed to, including news emails, AI assistance and WhatsApp reminders, under Privacy.
+  Turning something off takes effect straight away.
