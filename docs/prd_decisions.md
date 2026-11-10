@@ -109,3 +109,12 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 - O2 WhatsApp route — decided during pilot (D22).
 - O6 Yoco third-party and shared-domain approval — provider-controlled gate.
 - O8 Push provider (APNs/FCM/Web Push service) — decided at build (D28); email is Resend (D39).
+
+## Round 11 — Build order and feature flags (2026-11-10)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D45 | Build order | Foundation first (flags B03, audit log B04, consents B05, seller invites B06), then the seller domain, then the collector domain. Plan: `docs/build_plan.md`. |
+| D46 | Flag implementation | Flipper (Active Record adapter) wrapped by a code-owned registry and one capability service implementing FF01's evaluation order. |
+| D47 | Flag console | flipper-ui at `/madmin/flags`, operators with two-step sign-in only; changes audited (B04). |
+| D48 | Flag registry and targeting | All PRD §28 keys registered now with state and `implemented: false` until built. Targeting by global, seller business and user account; no percentage rollouts. |
