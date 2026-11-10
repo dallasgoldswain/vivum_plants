@@ -36,3 +36,18 @@ Rails.application.config.to_prepare do
     end
   end
 end
+
+# Audit every flag change (FF04, D49): enable, disable, targets added or removed, and
+# features added by capabilities:sync. Checks (enabled?) are not recorded.
+FLAG_WRITE_OPERATIONS = %i[ enable disable add remove clear ].freeze
+
+ActiveSupport::Notifications.subscribe("feature_operation.flipper") do |*, payload|
+  next unless FLAG_WRITE_OPERATIONS.include?(payload[:operation])
+
+  thing = payload[:thing]
+  Audit.record(
+    "flag.#{payload[:operation]}",
+    target_key: payload[:feature_name].to_s,
+    details: { gate: payload[:gate_name], value: thing.respond_to?(:value) ? thing.value : thing }.compact
+  )
+end

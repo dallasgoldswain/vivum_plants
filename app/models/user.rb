@@ -88,10 +88,11 @@ class User < ApplicationRecord
   end
 
   # Accepts a current TOTP code (each time step once only) or an unused backup code.
+  # Returns :totp or :backup_code on success, false otherwise.
   def verify_second_factor(code)
     return false unless two_factor_enabled?
 
-    verify_totp(code) || OtpBackupCode.redeem(self, code)
+    (verify_totp(code) && :totp) || (OtpBackupCode.redeem(self, code) && :backup_code)
   end
 
   private

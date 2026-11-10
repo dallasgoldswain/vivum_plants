@@ -4,6 +4,7 @@ module Authentication
   TWO_FACTOR_CHALLENGE_TTL = 5.minutes
 
   included do
+    before_action { Current.request = request }
     before_action :require_authentication
     before_action :require_verified_email
     before_action :require_two_factor_enrolment
@@ -72,10 +73,12 @@ module Authentication
     # Signs in directly, or hands over to the second step when the user has one.
     def sign_in(user)
       if user.two_factor_enabled?
+        Audit.record("session.password_verified", actor: user, target: user)
         session[:two_factor_user] = user.signed_id(purpose: :two_factor, expires_in: TWO_FACTOR_CHALLENGE_TTL)
         redirect_to new_two_factor_challenge_path
       else
         start_new_session_for user
+        Audit.record("session.created", target: user)
         redirect_to after_authentication_url
       end
     end
@@ -96,6 +99,7 @@ module Authentication
     end
 
     def terminate_session
+      Audit.record("session.destroyed", target: Current.user)
       Current.session.destroy
       cookies.delete(:session_id)
     end

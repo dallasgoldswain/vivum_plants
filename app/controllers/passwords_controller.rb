@@ -9,9 +9,9 @@ class PasswordsController < ApplicationController
   end
 
   def create
-    if user = User.find_by(email_address: params[:email_address])
-      PasswordsMailer.reset(user).deliver_later
-    end
+    user = User.find_by(email_address: params[:email_address])
+    PasswordsMailer.reset(user).deliver_later if user
+    Audit.record("password.reset_requested", actor: nil, target: user, details: { email_address: params[:email_address].to_s.strip.downcase })
 
     redirect_to new_session_path, notice: "Password reset instructions sent (if user with that email address exists)."
   end
@@ -22,6 +22,7 @@ class PasswordsController < ApplicationController
   def update
     if @user.update(params.permit(:password, :password_confirmation))
       @user.sessions.destroy_all
+      Audit.record("password.reset_completed", actor: @user, target: @user)
       redirect_to new_session_path, notice: "Password has been reset."
     else
       redirect_to edit_password_path(params[:token]), alert: @user.errors.full_messages.to_sentence

@@ -10,11 +10,13 @@ class TwoFactorChallengesController < ApplicationController
   end
 
   def create
-    if @user.verify_second_factor(params[:code])
+    if (method = @user.verify_second_factor(params[:code]))
       clear_pending_two_factor
       start_new_session_for @user
+      Audit.record("session.created", target: @user, details: { second_factor: method })
       redirect_to after_authentication_url
     else
+      Audit.record("two_factor.failed", actor: @user, target: @user)
       redirect_to new_two_factor_challenge_path, alert: "That code didn't match."
     end
   end

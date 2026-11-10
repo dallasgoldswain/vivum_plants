@@ -78,6 +78,15 @@ Every product capability has a key in `config/features.yml` (PRD §28): its doma
 - **Adding a feature:** add its key to `config/features.yml` (CI fails if code uses an unregistered key), set `implemented: true` when it ships, then run `bin/rails capabilities:sync` (also run by the seeds). In development, sync switches on implemented core flags.
 - **Tests:** Flipper uses an in-memory store per test; enable flags with `Flipper.enable` or `Flipper.enable_actor`.
 
+## Audit log
+
+Every operator view and change in Madmin, every flag change, and account security events (sign-ins, failed sign-ins, sign-outs, password resets, email verification, two-step sign-in changes) are written to `audit_events` (D49–D52).
+
+- **Recording:** `Audit.record("action.name", target: record, details: {...})`. The actor and request details (IP, user agent, request id) come from `Current`. Secrets are stripped by `Audit::SECRET_PATTERNS`; email addresses are kept.
+- **Protection:** PostgreSQL triggers (managed with `fx`, see `db/functions` and `db/triggers`) reject updates and any delete younger than 2 years. `PurgeAuditEventsJob` deletes older events daily at 03:00 (`config/recurring.yml`).
+- **Reading:** operators open **Audit Events** in `/madmin` (read-only; viewing it is audited too).
+- **Flag changes** are captured from Flipper's instrumentation; `FlagConsoleContext` tells the console who the operator is.
+
 ## Notifications
 
 [Noticed](https://github.com/excid3/noticed) stores notifications in `noticed_events` and `noticed_notifications` (`user.notifications`). No notifiers exist yet; delivery channels from the PRD (email, native push, web push, WhatsApp) are added per notifier as features need them.

@@ -12,6 +12,7 @@ class SessionsController < ApplicationController
     if user = User.authenticate_by(params.permit(:email_address, :password))
       sign_in user
     else
+      Audit.record("session.failed", actor: nil, details: { email_address: params[:email_address].to_s.strip.downcase })
       redirect_to new_session_path, alert: "Try another email address or password."
     end
   end

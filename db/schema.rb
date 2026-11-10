@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_094826) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -50,6 +50,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_094826) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "audit_events", force: :cascade do |t|
+    t.bigint "actor_id"
+    t.string "actor_email"
+    t.string "action", null: false
+    t.string "target_type"
+    t.bigint "target_id"
+    t.string "target_key"
+    t.jsonb "details", default: {}, null: false
+    t.text "reason"
+    t.string "ip_address"
+    t.string "user_agent"
+    t.string "request_id"
+    t.datetime "created_at", null: false
+    t.index ["action"], name: "index_audit_events_on_action"
+    t.index ["actor_id"], name: "index_audit_events_on_actor_id"
+    t.index ["created_at"], name: "index_audit_events_on_created_at"
+    t.index ["target_key"], name: "index_audit_events_on_target_key"
+    t.index ["target_type", "target_id"], name: "index_audit_events_on_target_type_and_target_id"
   end
 
   create_table "flipper_features", force: :cascade do |t|
@@ -188,4 +208,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_094826) do
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "sessions", "sellers", on_delete: :nullify
   add_foreign_key "sessions", "users"
+
+  create_function :protect_audit_events, sql_definition: <<-'SQL'
+      CREATE OR REPLACE FUNCTION public.protect_audit_events()
+       RETURNS trigger
+       LANGUAGE plpgsql
+      AS $function$
+      BEGIN
+        IF TG_OP = 'UPDATE' THEN
+          RAISE EXCEPTION 'audit_events are append-only';
+        END IF;
+
+        IF TG_OP = 'DELETE' AND OLD.created_at > now() - interval '2 years' THEN
+          RAISE EXCEPTION 'audit_events can only be deleted after 2 years';
+        END IF;
+
+        RETURN OLD;
+      END;
+      $function$
+  SQL
+
+  create_trigger :protect_audit_events, sql_definition: <<-SQL
+      CREATE TRIGGER protect_audit_events BEFORE DELETE OR UPDATE ON public.audit_events FOR EACH ROW EXECUTE FUNCTION protect_audit_events()
+  SQL
 end

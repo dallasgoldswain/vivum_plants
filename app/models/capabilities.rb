@@ -38,7 +38,7 @@ module Capabilities
     # features; returns any that are not in the registry so they can be reviewed.
     def sync!(enable_implemented_core: Rails.env.development?)
       registry.each do |definition|
-        Flipper.add(definition.key)
+        Flipper.add(definition.key) unless Flipper.exist?(definition.key)
         Flipper.enable(definition.key) if enable_implemented_core && definition.implemented? && definition.state == "core"
       end
       Flipper.features.map(&:key) - registry.keys

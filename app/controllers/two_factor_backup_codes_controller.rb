@@ -6,6 +6,7 @@ class TwoFactorBackupCodesController < ApplicationController
   def create
     if Current.user.verify_second_factor(params[:code])
       @backup_codes = Current.user.regenerate_backup_codes!
+      Audit.record("two_factor.backup_codes_replaced", target: Current.user)
     else
       redirect_to root_path, alert: "That code didn't match."
     end

@@ -42,6 +42,10 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   FF01's evaluation order, `requires_capability` / `capability?` helpers, the flag console
   at `/madmin/flags` behind `OperatorConstraint`, and `bin/rails capabilities:sync`
   (D46–D48).
+- Audit log (B04): append-only `audit_events` with `Audit.record`; Madmin views and changes,
+  flag changes (Flipper instrumentation, `FlagConsoleContext`) and account security events;
+  PostgreSQL triggers via `fx` block updates and early deletes; `PurgeAuditEventsJob` purges
+  after 2 years; read-only Audit Events in Madmin (D49–D52).
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

@@ -21,6 +21,7 @@ class TwoFactorEnrolmentsController < ApplicationController
     if secret && User.valid_otp_for_secret?(secret, params[:code])
       session.delete(:pending_otp_secret)
       @backup_codes = Current.user.enable_two_factor!(secret)
+      Audit.record("two_factor.enabled", target: Current.user)
       render :create
     else
       redirect_to new_two_factor_enrolment_path, alert: "That code didn't match. Check your authenticator app and try again."
@@ -32,6 +33,7 @@ class TwoFactorEnrolmentsController < ApplicationController
       redirect_to root_path, alert: "Two-step sign-in is required for your account."
     elsif Current.user.verify_second_factor(params[:code])
       Current.user.disable_two_factor!
+      Audit.record("two_factor.disabled", target: Current.user)
       redirect_to root_path, notice: "Two-step sign-in is off."
     else
       redirect_to root_path, alert: "That code didn't match."

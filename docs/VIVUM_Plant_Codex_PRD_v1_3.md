@@ -851,7 +851,7 @@ O1, O3, O4, O5 (ownership), O7, O9, O10 and O11 were resolved by D21–D31. Rema
 | O8 | Push provider (email is Resend, D39) | Notifications build | Engineering choice at build (D28) |
 | O12 | Exact Pilot/Comp end dates and conversion offer for pilot sellers | End of pilot | Founder |
 | O13 | Proposed values still to confirm: subscription grace period (7 days), DSR response time (30 days), address redaction (12 months), raw payload retention (90 days), photo max size (2560 px) | Production launch | Founder + attorney |
-| O14 | Operator audit log (PR08): scope and design decided (D49–D52), build B04 | Production launch | Engineering |
+| O14 | Operator audit log (PR08): built (B04, D49–D52); retention to confirm with the attorney (O13) | Production launch | Founder + attorney |
 
 ### Ready for development when
 

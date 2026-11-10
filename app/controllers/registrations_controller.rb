@@ -15,6 +15,7 @@ class RegistrationsController < ApplicationController
       refer @user
       EmailVerificationMailer.verify(@user).deliver_later
       start_new_session_for @user
+      Audit.record("account.created", target: @user)
       redirect_to new_email_verification_path
     else
       render :new, status: :unprocessable_entity
