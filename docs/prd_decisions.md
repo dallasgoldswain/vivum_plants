@@ -142,3 +142,14 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D55 | Legal text before attorney review | Draft v0 terms and privacy notice, clearly marked as drafts; versioned so users re-accept when the reviewed versions ship. |
 | D56 | When consent is asked | Terms, privacy and marketing on sign-up; AI and WhatsApp in context when those features ship; everything on Settings → Privacy. |
 | D57 | Existing accounts | Asked to accept current terms and privacy at their next request before using the app. |
+
+## Round 15 — Seller and staff invites (2026-11-10)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D58 | Who can accept an invite | Only an account with the invited email address (new sellers sign up with it). Links can be shared anywhere because they are useless to anyone else. |
+| D59 | Invite expiry and delivery | 14 days. Sent by email and copyable for WhatsApp; resending issues a new link and voids the old one; invites can be revoked. |
+| D60 | Seller terms before attorney review | Draft v0 seller terms with the POPIA operator agreement for buyer data (PR01), versioned like D55 and accepted when a seller invite is accepted. |
+| D61 | Staff invites in B06 | Included: owners invite members by email and role, change roles and remove members. Owners may invite or promote other owners; the last owner can't be removed or demoted. |
+| D62 | Seller invite details | Operator enters the email and business name; the owner confirms or edits the name on acceptance. Legal name, VAT and contacts come with the business profile (BR01). |
+| D63 | Sell area before stock | A Sell nav item for members only, with a Sell home page and a Members page. |

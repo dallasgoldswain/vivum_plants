@@ -21,7 +21,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Done (entitlements stubbed until B07; audit via B04) |
 | B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Done |
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
-| B06 | Seller invites and onboarding (invite-only) | SO03, D17 | B02, B04 | Next |
+| B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Next (discussed) |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Planned |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Planned |
 | B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
@@ -181,3 +181,36 @@ existing users to re-accept; withdrawing marketing or AI consent takes effect at
 recorded as a new record; consent history shows who, what version, when and where; withdrawing
 is as easy as granting (one action on the Privacy page).
 
+### B06 Seller and staff invites — discussed 2026-11-10
+
+**Scope**
+- **One invite model** for both kinds: email, seller (or business name for a new seller),
+  role, inviter, token, expiry (14 days), accepted/revoked timestamps. Accepting needs an
+  account whose email matches the invite (D58); a mismatched account is told to sign in with
+  the invited address.
+- **Seller invites (SO03, D17):** operators create them in Madmin with email and business
+  name, and can resend (new link, old one void) or revoke. Accepting asks the owner to confirm
+  the business name and accept the **seller terms** (draft v0 with the operator agreement,
+  `/legal/seller-terms`, a versioned `seller_terms` consent, D60), then creates the seller and
+  the owner membership. Owners already must use two-step sign-in, so acceptance leads to
+  enrolment if it isn't on.
+- **Staff invites (SO02, D61):** owners invite by email and role from **Sell → Members**,
+  change roles, remove members, and resend or revoke pending invites. Owners may invite or
+  promote owners; the last owner can't be removed or demoted. Removal takes effect on the
+  member's next request (memberships are looked up per request).
+- **Delivery (D59):** invite email through Resend, plus a copy-link button for WhatsApp.
+- **Sell area (D63):** a Sell nav item shown only to members, a Sell home page (business
+  name, your role, what's coming) and the Members page. Gated by `seller.workspace`,
+  `seller.invites` and `seller.members`, all marked implemented.
+- **Audit:** invite created, resent, revoked and accepted; role changed; member removed.
+  Emails are not stored in audit details (D53).
+- **Policies:** `InvitePolicy` and `MembershipPolicy` — only owners manage members.
+
+**Deferred:** business profile with legal name, VAT and contacts (BR01, B19+), self-serve
+seller sign-up (roadmap), billing mode on new sellers (B07 sets Pilot on Pro).
+
+**Acceptance (AT32):** an uninvited account can't open Sell; an expired, revoked or
+already-used invite can't be accepted; an invite can't be accepted by a different email; a
+seller invite creates exactly one seller and owner membership and records seller terms
+acceptance; a manager or host/packer can't manage members; the last owner can't be removed or
+demoted; a removed member loses access on their next request.
