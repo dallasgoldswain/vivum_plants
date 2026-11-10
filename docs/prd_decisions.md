@@ -118,3 +118,12 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D46 | Flag implementation | Flipper (Active Record adapter) wrapped by a code-owned registry and one capability service implementing FF01's evaluation order. |
 | D47 | Flag console | flipper-ui at `/madmin/flags`, operators with two-step sign-in only; changes audited (B04). |
 | D48 | Flag registry and targeting | All PRD §28 keys registered now with state and `implemented: false` until built. Targeting by global, seller business and user account; no percentage rollouts. |
+
+## Round 12 — Audit log (2026-11-10)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D49 | Audit scope | Record operator changes and record views in Madmin, flag changes, and account security events (sign-in, failures, password resets, two-step changes, backup codes). |
+| D50 | Audit implementation | Custom append-only `audit_events` table and `Audit.record` API; PostgreSQL blocks updates and early deletes. paper_trail and audited not used. |
+| D51 | Flag change reasons | Optional for now; required once VIVUM has its own flag screens. |
+| D52 | Audit retention | 2 years, then purged by a daily job; confirm with the attorney (O13). |

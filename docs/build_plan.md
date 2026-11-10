@@ -19,7 +19,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B01 | Accounts, sign-up, email verification, two-step sign-in | §3, D33–D34 | — | Done |
 | B02 | Sellers, memberships, roles, Action Policy | SO01, SO02, D35 | B01 | Done (no member management UI) |
 | B03 | Feature flag registry and capability service | §28 FF01–FF04 | B01 | Done (entitlements stubbed until B07; audit via B04) |
-| B04 | Operator audit log (Madmin and flag changes) | PR08, FF04, O14 | B03 | Planned |
+| B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Next (discussed) |
 | B05 | Consent records and onboarding consent | PR03, ST06, D15 | B01 | Planned |
 | B06 | Seller invites and onboarding (invite-only) | SO03, D17 | B02, B04 | Planned |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Planned |
@@ -115,4 +115,37 @@ what is deferred, and the acceptance tests it must pass.
 **Acceptance:** AT30 (server-side gating, reconciliation after writes disabled), plus: an
 unknown key denies; an unimplemented key denies even if enabled in Flipper; a hidden button's
 URL is refused when its flag is off; a seller-targeted flag is on for that seller only.
+
+### B04 Audit log — discussed 2026-11-10
+
+**Scope**
+- One append-only `audit_events` table: actor (user, or none for system/anonymous), action
+  (e.g. `madmin.update`, `flag.enable_actor`, `session.failed`), target (polymorphic type and
+  id, or a flag key), changes (before/after JSON, secrets filtered), optional reason, IP
+  address, user agent, request id, time. Written synchronously through one `Audit.record` API.
+- Events recorded:
+  - **Operator changes in Madmin:** create, update and delete of every resource, with
+    filtered before/after values.
+  - **Operator record views:** an operator opening a Madmin index or record (PR08 access).
+  - **Flag changes:** every enable, disable, actor add/remove in `/madmin/flags`, captured
+    from Flipper's instrumentation with the operator from the session.
+  - **Account security:** sign-in, failed sign-in (attempted email, IP), sign-out, password
+    reset requested and completed, two-step on and off, backup codes replaced and used,
+    email verified.
+- Operators read the log in Madmin (read-only, filter by actor, action and target).
+- Tamper resistance: PostgreSQL triggers reject UPDATE, and DELETE of rows younger than
+  2 years.
+- Retention: 2 years, purged by a daily Solid Queue recurring job. To confirm with the
+  attorney (O13).
+
+**Decisions:** custom table rather than paper_trail or audited; flag-change reasons optional
+until we build our own flag screens (Flipper's console has no reason field).
+
+**Deferred:** required reasons for flag changes; export of audit events; seller-facing
+activity history (stock movements and order changes keep their own records, SE02).
+
+**Acceptance:** an operator edit, view and flag change each create one event naming the
+operator; a failed sign-in records the attempted email and IP; audit rows can't be updated
+or deleted early; secrets (password digests, TOTP secrets, codes) never appear in changes;
+non-operators can't read the log.
 
