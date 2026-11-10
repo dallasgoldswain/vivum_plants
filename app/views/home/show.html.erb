@@ -1,48 +1,81 @@
-<h1>VIVUM</h1>
+<div>
+  <p class="vv-kicker mb-2">Today</p>
+  <h1 class="vv-h2">Welcome to VIVUM Plants</h1>
+  <p class="vv-caption mt-1">Signed in as <%= Current.user.email_address %>.</p>
+</div>
 
-<%= render "shared/flash" %>
+<hr class="vv-rule-organic my-0">
 
-<p>Signed in as <%= Current.user.email_address %>.</p>
+<div class="grid gap-6 lg:grid-cols-2">
+  <% if @memberships.any? %>
+    <div class="card">
+      <header>
+        <p class="vv-kicker">Selling</p>
+        <h2>Seller businesses</h2>
+      </header>
 
-<% if @memberships.any? %>
-  <h2>Seller businesses</h2>
+      <section>
+        <ul class="grid gap-2">
+          <% @memberships.each do |membership| %>
+            <li
+              class="
+                flex min-h-11 items-center justify-between gap-3
+                rounded-[4px] border border-line bg-linen px-3 py-2
+              "
+            >
+              <span>
+                <span class="font-medium"><%= membership.seller.name %></span>
+                <span class="badge-outline ml-2"><%= membership.role.humanize %></span>
+              </span>
 
-  <ul>
-    <% @memberships.each do |membership| %>
-      <li>
-        <%= membership.seller.name %> (<%= membership.role.humanize %>)
-        <% if membership == Current.membership %>
-          <strong>current</strong>
-        <% else %>
-          <%= button_to "Work as #{membership.seller.name}", current_seller_path, method: :patch, params: { seller_id: membership.seller_id } %>
+              <% if membership == Current.membership %>
+                <span class="badge-secondary">Current</span>
+              <% else %>
+                <%= button_to "Work as this business", current_seller_path, method: :patch, params: { seller_id: membership.seller_id }, class: "btn-sm-outline" %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <header>
+      <p class="vv-kicker">Account security</p>
+      <h2>Two-step sign-in</h2>
+
+      <p>
+        <%= Current.user.two_factor_enabled? ? "On. You'll be asked for a code from your authenticator app when you sign in." : "Off. Add a second step to protect your account." %>
+      </p>
+    </header>
+
+    <% if Current.user.two_factor_enabled? %>
+      <section class="grid gap-6">
+        <%= form_with url: two_factor_backup_codes_path, class: "form grid gap-2" do |form| %>
+          <%= form.label :code, "Current code", for: "backup_code_regenerate" %>
+
+          <div class="flex gap-2">
+            <%= form.text_field :code, id: "backup_code_regenerate", required: true, autocomplete: "one-time-code", class: "font-mono" %>
+            <%= form.submit "Replace backup codes", class: "btn-outline" %>
+          </div>
         <% end %>
-      </li>
+
+        <% unless Current.user.two_factor_required? %>
+          <%= form_with url: two_factor_enrolment_path, method: :delete, class: "form grid gap-2" do |form| %>
+            <%= form.label :code, "Current code", for: "two_factor_disable" %>
+
+            <div class="flex gap-2">
+              <%= form.text_field :code, id: "two_factor_disable", required: true, autocomplete: "one-time-code", class: "font-mono" %>
+              <%= form.submit "Turn off", class: "btn-destructive" %>
+            </div>
+          <% end %>
+        <% end %>
+      </section>
+    <% else %>
+      <footer>
+        <%= link_to "Set up two-step sign-in", new_two_factor_enrolment_path, class: "btn" %>
+      </footer>
     <% end %>
-  </ul>
-<% end %>
-
-<h2>Two-step sign-in</h2>
-
-<% if Current.user.two_factor_enabled? %>
-  <p>On.</p>
-
-  <%= form_with url: two_factor_backup_codes_path do |form| %>
-    <%= form.label :code, "Current code", for: "backup_code_regenerate" %>
-    <%= form.text_field :code, id: "backup_code_regenerate", required: true, autocomplete: "one-time-code" %>
-    <%= form.submit "Replace backup codes" %>
-  <% end %>
-
-  <% unless Current.user.two_factor_required? %>
-    <%= form_with url: two_factor_enrolment_path, method: :delete do |form| %>
-      <%= form.label :code, "Current code", for: "two_factor_disable" %>
-      <%= form.text_field :code, id: "two_factor_disable", required: true, autocomplete: "one-time-code" %>
-      <%= form.submit "Turn off" %>
-    <% end %>
-  <% end %>
-<% else %>
-  <p>
-    Off. <%= link_to "Set up two-step sign-in", new_two_factor_enrolment_path %>
-  </p>
-<% end %>
-
-<%= button_to "Sign out", session_path, method: :delete %>
+  </div>
+</div>

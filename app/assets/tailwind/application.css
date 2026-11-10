@@ -1,0 +1,220 @@
+/*
+ * VIVUM Plants styles: Tailwind v4 + BasecoatUI 0.3.11, re-themed with the
+ * VIVUM Labs Design System (https://claude.ai/artifact/MhirAvmvZEph7unauXUNjM).
+ *
+ * Use Basecoat's classes for components (btn, btn-outline, card, alert, badge,
+ * form/field, input, label) and the vv- classes below for brand type and
+ * surfaces. Colours come from the tokens in :root, never raw hex in views.
+ */
+@import "tailwindcss";
+@import "../../../vendor/stylesheets/basecoat.css";
+
+/* ---------- Fonts (variable TTFs from the design system) ---------- */
+@font-face { font-family: "Cormorant Garamond"; src: url("/CormorantGaramond-VariableFont_wght.ttf") format("truetype"); font-weight: 300 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Cormorant Garamond"; src: url("/CormorantGaramond-Italic-VariableFont_wght.ttf") format("truetype"); font-weight: 300 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("/DMSans-VariableFont_opsz_wght.ttf") format("truetype"); font-weight: 100 1000; font-style: normal; font-display: swap; }
+@font-face { font-family: "DM Sans"; src: url("/DMSans-Italic-VariableFont_opsz_wght.ttf") format("truetype"); font-weight: 100 1000; font-style: italic; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/JetBrainsMono-VariableFont_wght.ttf") format("truetype"); font-weight: 100 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/JetBrainsMono-Italic-VariableFont_wght.ttf") format("truetype"); font-weight: 100 800; font-style: italic; font-display: swap; }
+
+/* ---------- Tokens ---------- */
+:root {
+  /* Palette */
+  --forest: #2E5339;
+  --deep: #1A3324;
+  --moss: #8BAF8F;
+  --linen: #F5F3EE;
+  --charcoal: #2A2A28;
+  --cork: #C4A97D;
+  --white: #FFFFFF;
+  --surface: #EFEDE8;
+  --surface-dark: #243D2D;
+  --line: #D8D4CB;
+  --line-dark: #2E4A38;
+  --fg1: var(--charcoal);
+  --fg2: #6A6A68;
+  --fg3: #9A9A98; /* 2.5:1 on linen: non-essential meta only */
+
+  /* Status (muted) */
+  --confirm: #4A7A5A;
+  --warn: #9A7B4B;
+  --error: #7A3A2E;
+
+  /* Flashes */
+  --notice-bg: #F4F8F0;
+  --notice-border: rgba(139, 175, 143, 0.55);
+  --notice-fg: var(--deep);
+  --alert-bg: #FFF4EE;
+  --alert-border: #E7B9A0;
+  --alert-fg: #7A2E18;
+
+  /* Basecoat remap */
+  --radius: 0.375rem;
+  --background: var(--linen);
+  --foreground: var(--charcoal);
+  --card: var(--surface);
+  --card-foreground: var(--charcoal);
+  --popover: var(--white);
+  --popover-foreground: var(--charcoal);
+  --primary: var(--forest);
+  --primary-foreground: var(--linen);
+  --secondary: var(--moss);
+  --secondary-foreground: var(--deep);
+  --muted: var(--surface);
+  --muted-foreground: var(--fg2);
+  --accent: var(--cork);
+  --accent-foreground: var(--charcoal);
+  --destructive: var(--error);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--moss);
+  --sidebar: var(--deep);
+  --sidebar-foreground: var(--linen);
+  --sidebar-border: var(--line-dark);
+
+  /* Radius, shadow, layout */
+  --radius-control: 4px;
+  --radius-card: 6px;
+  --shadow-xs: 0 1px 2px rgba(26, 51, 36, 0.06);
+  --shadow-card: 0 2px 10px rgba(26, 51, 36, 0.07);
+  --shadow-flash: 0 1.25rem 2.5rem rgba(26, 51, 36, 0.12);
+  --shadow-sidebar: 12px 0 32px rgba(26, 51, 36, 0.10);
+  --shadow-bottom-nav: 0 -1rem 2rem rgba(26, 51, 36, 0.08);
+  --shadow-focus: 0 0 0 3px rgba(139, 175, 143, 0.28);
+  --sidebar-width: 14rem;
+  --app-max-width: 72rem;
+  --tap-min: 44px;
+
+  /* Motion */
+  --ease-emerge: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-settle: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms var(--ease-settle);
+}
+
+/* Tailwind utilities for the palette and fonts: bg-forest, text-moss, font-display… */
+@theme {
+  --color-forest: #2E5339;
+  --color-deep: #1A3324;
+  --color-moss: #8BAF8F;
+  --color-linen: #F5F3EE;
+  --color-charcoal: #2A2A28;
+  --color-cork: #C4A97D;
+  --color-surface: #EFEDE8;
+  --color-line: #D8D4CB;
+  --color-fg2: #6A6A68;
+  --color-confirm: #4A7A5A;
+  --color-warn: #9A7B4B;
+  --color-error: #7A3A2E;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-mono: "JetBrains Mono", "Courier New", monospace;
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--charcoal);
+    background: var(--linen);
+  }
+  a { color: inherit; }
+}
+
+/* ---------- Brand type and surfaces (vv-) ---------- */
+@layer components {
+  .vv-h1 { font-family: var(--font-display); font-weight: 300; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; letter-spacing: -0.02em; color: var(--forest); }
+  .vv-h2 { font-family: var(--font-display); font-weight: 400; font-size: 2rem; line-height: 1.3; color: var(--forest); }
+  .vv-h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.3; color: var(--charcoal); }
+  .vv-h4 { font-family: var(--font-display); font-weight: 500; font-size: 1.25rem; color: var(--charcoal); }
+  .vv-h1 em, .vv-h2 em { font-style: italic; color: var(--forest); } /* moss italic on linen is 2.2:1; forest keeps it readable */
+  .vv-lead { font-weight: 300; font-size: 1.125rem; line-height: 1.65; color: var(--fg2); }
+  .vv-body { font-weight: 300; font-size: 1rem; line-height: 1.65; color: var(--fg1); }
+  .vv-caption { font-size: 0.875rem; line-height: 1.5; color: var(--fg2); }
+  /* Kickers: moss on deep; on linen use forest (moss on linen is 2.2:1). */
+  .vv-kicker { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--forest); }
+  .vv-on-dark .vv-kicker, .vv-kicker-on-dark { color: var(--moss); }
+  .vv-mono { font-family: var(--font-mono); font-size: 0.875rem; color: var(--forest); }
+  .vv-rule-organic { border: none; height: 1px; margin: 2rem 0; background: linear-gradient(90deg, transparent 0%, var(--line) 20%, var(--moss) 50%, var(--line) 80%, transparent 100%); }
+  .vv-bg-app { background: linear-gradient(135deg, rgba(46, 83, 57, 0.08), transparent 28rem), var(--linen); }
+  .vv-bg-sidebar { background: radial-gradient(circle at top left, rgba(139, 175, 143, 0.16), transparent 18rem), var(--deep); }
+  .vv-bg-auth {
+    background:
+      radial-gradient(circle at top left, rgba(139, 175, 143, 0.14), transparent 22rem),
+      radial-gradient(circle at 88% 8%, rgba(196, 169, 125, 0.12), transparent 20rem),
+      radial-gradient(rgba(46, 83, 57, 0.055) 1px, transparent 1px) 0 0 / 24px 24px,
+      var(--linen);
+  }
+
+  /* Wordmark: mark + "VIVUM Plants" */
+  .vv-wordmark { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; letter-spacing: 0.025em; font-size: 1.25rem; color: var(--forest); text-decoration: none; white-space: nowrap; }
+  .vv-wordmark > span > span { opacity: 0.6; }
+  .vv-wordmark svg { width: 1.75rem; height: 1.75rem; stroke: var(--moss); }
+  .vv-on-dark .vv-wordmark { color: var(--white); }
+
+  /* Flash messages */
+  .vv-flash { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-radius: var(--radius-card); box-shadow: var(--shadow-flash); font-size: 0.875rem; font-weight: 600; line-height: 1.5; }
+  .vv-flash-notice { background: var(--notice-bg); border: 1px solid var(--notice-border); color: var(--notice-fg); }
+  .vv-flash-alert { background: var(--alert-bg); border: 1px solid var(--alert-border); color: var(--alert-fg); }
+}
+
+/* ---------- Basecoat adjustments to the VIVUM look ---------- */
+@layer components {
+  /* Sharp corners: controls 4px, cards 6px. */
+  .btn, .btn-primary, .btn-secondary, .btn-outline, .btn-ghost, .btn-link, .btn-destructive { border-radius: var(--radius-control); min-height: var(--tap-min); }
+  .btn-outline, .btn-ghost { transition: background var(--transition-base), color var(--transition-base); }
+  .btn-outline:hover, .btn-ghost:hover { background: var(--cork); color: var(--charcoal); }
+  .card { border-radius: var(--radius-card); box-shadow: var(--shadow-card); border-color: rgba(216, 212, 203, 0.95); }
+  .card > header h2, .card > header h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; line-height: 1.3; }
+  .card-raised { background: var(--white); }
+  .badge, .badge-primary, .badge-secondary, .badge-destructive, .badge-outline { border-radius: var(--radius-control); }
+
+  /* Focus: moss border + soft halo. */
+  :is(.form, .field) input:focus-visible, .input:focus-visible, .btn:focus-visible, .btn-primary:focus-visible, .btn-outline:focus-visible {
+    border-color: var(--moss);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+/* ---------- App shell ---------- */
+@layer components {
+  .vv-sidebar {
+    position: fixed; inset: 0 auto 0 0; width: var(--sidebar-width);
+    display: none; flex-direction: column; padding: 1.5rem 1rem; overflow-y: auto;
+    color: var(--linen); border-right: 1px solid rgba(255, 255, 255, 0.1); box-shadow: var(--shadow-sidebar);
+  }
+  .vv-nav-link {
+    display: flex; align-items: center; min-height: var(--tap-min); padding: 0.5rem 0.75rem; border-radius: var(--radius-card);
+    font-size: 0.875rem; font-weight: 500; text-decoration: none; color: rgba(245, 243, 238, 0.75);
+    transition: background 150ms var(--ease-settle), color 150ms var(--ease-settle);
+  }
+  .vv-nav-link:hover { background: rgba(255, 255, 255, 0.05); color: var(--linen); }
+  .vv-nav-link[aria-current="page"] { background: rgba(255, 255, 255, 0.10); color: var(--linen); }
+  .vv-nav-group { margin: 1rem 0 0.25rem; padding: 0 0.75rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em; color: rgba(245, 243, 238, 0.6); }
+  .vv-sidebar-signout {
+    width: 100%; min-height: var(--tap-min); border-radius: var(--radius-card); background: transparent; cursor: pointer;
+    border: 1px solid rgba(139, 175, 143, 0.45); color: var(--linen); font-size: 0.875rem; font-weight: 600;
+    transition: border-color 150ms var(--ease-settle), color 150ms var(--ease-settle);
+  }
+  .vv-sidebar-signout:hover { border-color: var(--cork); color: var(--cork); }
+
+  .vv-bottom-nav {
+    position: fixed; inset: auto 0 0 0; z-index: 30; display: flex;
+    border-top: 1px solid rgba(0, 0, 0, 0.1); background: rgba(245, 243, 238, 0.95);
+    box-shadow: var(--shadow-bottom-nav); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .vv-bottom-nav a, .vv-bottom-nav button {
+    flex: 1; min-height: var(--tap-min); display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--fg2); text-decoration: none; background: none; border: 0; cursor: pointer;
+  }
+  .vv-bottom-nav a[aria-current="page"] { color: var(--forest); font-weight: 600; }
+
+  .vv-main { padding: 1.5rem 1rem 5rem; }
+  .vv-main > .vv-content { max-width: var(--app-max-width); margin: 0 auto; }
+
+  @media (min-width: 768px) {
+    .vv-sidebar { display: flex; }
+    .vv-bottom-nav { display: none; }
+    .vv-main { margin-left: var(--sidebar-width); padding: 2.5rem 2rem; }
+  }
+}

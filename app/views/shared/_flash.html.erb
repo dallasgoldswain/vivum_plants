@@ -1,2 +1,9 @@
-<%= tag.div(flash[:alert], role: "alert", style: "color:red") if flash[:alert] %>
-<%= tag.div(flash[:notice], role: "status", style: "color:green") if flash[:notice] %>
+<% if flash[:alert] %>
+  <div class="vv-flash vv-flash-alert" role="alert"><%= flash[:alert] %></div>
+<% end %>
+
+<% if flash[:notice] %>
+  <div class="vv-flash vv-flash-notice" role="status">
+    <%= flash[:notice] %>
+  </div>
+<% end %>

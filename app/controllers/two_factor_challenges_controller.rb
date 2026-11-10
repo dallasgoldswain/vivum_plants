@@ -1,5 +1,6 @@
 # Second sign-in step, after a correct password for an account with two-step sign-in on.
 class TwoFactorChallengesController < ApplicationController
+  layout "auth"
   allow_unauthenticated_access
   skip_verify_authorized
   before_action :require_pending_user

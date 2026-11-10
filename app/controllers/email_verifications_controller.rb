@@ -1,4 +1,5 @@
 class EmailVerificationsController < ApplicationController
+  layout "auth"
   allow_unauthenticated_access only: :show
   allow_unverified_email_access only: %i[ new create ]
   skip_verify_authorized

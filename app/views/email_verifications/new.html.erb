@@ -1,12 +1,20 @@
-<h1>Check your email</h1>
+<% content_for :title, "Check your email · VIVUM Plants" %>
 
-<%= render "shared/flash" %>
+<div>
+  <p class="vv-kicker mb-2">One more step</p>
+  <h2 class="vv-h2">Check your email</h2>
+</div>
 
-<p>
-  We sent a verification link to
-  <strong><%= Current.user.email_address %></strong>. Open it to finish setting
-  up your account.
-</p>
+<div class="card card-raised">
+  <section class="grid gap-6">
+    <p class="vv-body">
+      We sent a verification link to
+      <strong class="font-semibold"><%= Current.user.email_address %></strong>.
+      Open it to finish setting up your account.
+    </p>
 
-<%= button_to "Send a new link", email_verification_path %>
-<%= button_to "Sign out", session_path, method: :delete %>
+    <%= button_to "Send a new link", email_verification_path, class: "btn-outline w-full", form_class: "grid" %>
+  </section>
+</div>
+
+<%= button_to "Sign out", session_path, method: :delete, class: "btn-ghost w-full", form_class: "grid" %>

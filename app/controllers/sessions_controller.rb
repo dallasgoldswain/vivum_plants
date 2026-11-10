@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  layout "auth"
   allow_unauthenticated_access only: %i[ new create ]
   allow_unverified_email_access only: :destroy
   skip_verify_authorized

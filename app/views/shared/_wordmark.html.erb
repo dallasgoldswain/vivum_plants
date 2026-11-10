@@ -1,0 +1,26 @@
+<%# VIVUM mark (moss globe/leaf) + product name. Pass link: false inside other links. %>
+<% content = capture do %>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path
+      d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+    />
+
+    <path d="M12 22a10 10 0 0 0 5-8.5H7a10 10 0 0 0 5 8.5z" />
+    <path d="M12 2a10 10 0 0 1 5 8.5H7A10 10 0 0 1 12 2z" />
+  </svg>
+
+  <span>VIVUM <span>Plants</span></span>
+<% end %>
+
+<% if local_assigns.fetch(:link, true) %>
+  <%= link_to content, root_path, class: "vv-wordmark", aria: { label: "VIVUM Plants home" } %>
+<% else %>
+  <span class="vv-wordmark"><%= content %></span>
+<% end %>

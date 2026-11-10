@@ -1,23 +1,35 @@
-<h1>Set up two-step sign-in</h1>
+<% content_for :title, "Set up two-step sign-in · VIVUM Plants" %>
 
-<%= render "shared/flash" %>
+<div>
+  <p class="vv-kicker mb-2">Account security</p>
+  <h2 class="vv-h2">Set up two-step sign-in</h2>
 
-<p>
-  Scan this QR code with an authenticator app, then enter the 6-digit code it
-  shows.
-</p>
+  <p class="vv-caption mt-2">
+    Scan this QR code with an authenticator app, then enter the 6-digit code it
+    shows.
+  </p>
+</div>
 
-<%= image_tag @qr_data_uri, alt: "QR code for your authenticator app", width: 200, height: 200 %>
+<div class="card card-raised">
+  <section class="grid gap-6">
+    <div class="flex justify-center">
+      <%= image_tag @qr_data_uri, alt: "QR code for your authenticator app", width: 200, height: 200, class: "rounded-md border border-line bg-white p-2" %>
+    </div>
 
-<p>Can't scan it? Enter this key instead: <code><%= @secret %></code></p>
+    <div class="grid gap-1">
+      <p class="vv-caption">Can't scan it? Enter this key instead:</p>
+      <code class="vv-mono break-all"><%= @secret %></code>
+    </div>
 
-<%= form_with url: two_factor_enrolment_path do |form| %>
-  <div>
-    <%= form.label :code, "6-digit code" %>
-    <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric" %>
-  </div>
+    <%= form_with url: two_factor_enrolment_path, class: "form grid gap-6" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :code, "6-digit code" %>
+        <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", inputmode: "numeric", class: "font-mono tracking-widest" %>
+      </div>
 
-  <%= form.submit "Turn on" %>
-<% end %>
+      <%= form.submit "Turn on", class: "btn w-full" %>
+    <% end %>
+  </section>
+</div>
 
-<%= button_to "Sign out", session_path, method: :delete %>
+<%= button_to "Sign out", session_path, method: :delete, class: "btn-ghost w-full", form_class: "grid" %>

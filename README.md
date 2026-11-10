@@ -10,6 +10,7 @@ A South African plant collection and seller operations platform. Collectors reco
 - Ruby 4.0.7 (`.ruby-version`), Rails 8.1
 - PostgreSQL 18
 - Hotwire (Turbo, Stimulus) with importmap; PWA and Hotwire Native clients planned
+- Tailwind CSS v4 (`tailwindcss-rails`, standalone CLI, no Node) with BasecoatUI 0.3.11 components, themed to the [VIVUM Labs Design System](https://claude.ai/artifact/MhirAvmvZEph7unauXUNjM)
 - Solid Queue (jobs), Solid Cache, Solid Cable in development and production, each in its own database (`*_cache`, `*_queue`, `*_cable`). Jobs run inside Puma in development; in production when `SOLID_QUEUE_IN_PUMA` is set, or via `bin/jobs`. Tests use the in-process test adapters.
 - Kamal for deployment
 - Installed for upcoming features (not used yet): RubyLLM with the `anthropic` and `openai` gems (keys from `ai.*` credentials, `config/initializers/ruby_llm.rb`), caxlsx and roo (Excel/CSV import and export), Lexxy (rich text on Action Text), Redcarpet (Markdown), Prawn and prawn-table (PDFs), pdf-reader and docx (text from uploaded documents)
@@ -23,7 +24,7 @@ Make sure PostgreSQL is running locally, then:
 bin/setup
 ```
 
-This installs gems, prepares the database and starts the server at http://localhost:3001 (set `PORT` to change it). Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later.
+This installs gems, prepares the database and starts the server at http://localhost:3001 (set `PORT` to change it). Use `bin/setup --skip-server` to set up without starting it, and `bin/dev` to start it later. `bin/dev` runs the web server (with the job worker inside Puma) and the Tailwind watcher via `Procfile.dev`.
 
 Emails (verification, password reset) are not sent in development; preview them at http://localhost:3000/rails/mailers. Production sends through [Resend](https://resend.com).
 
@@ -42,6 +43,14 @@ Edit with `bin/rails credentials:edit`.
 | `db.password` | Production database password (`VIVUM_PLANTS_DATABASE_PASSWORD` overrides it) |
 | `ai.anthropic_api_key`, `ai.openai_api_key` | RubyLLM (AI features not built yet) |
 | `support_email` | Not used yet |
+
+## Styling
+
+- Stylesheet: `app/assets/tailwind/application.css` imports Tailwind and Basecoat (`vendor/stylesheets/basecoat.css`, vendored unchanged), then sets the VIVUM tokens, fonts and overrides. Tailwind builds it to `app/assets/builds/tailwind.css` (git-ignored).
+- Components: use Basecoat classes (`btn`, `btn-outline`, `card`, `alert`, `badge`, `form`) and the `vv-` brand classes (`vv-h1`–`vv-h4`, `vv-kicker`, `vv-lead`, `vv-caption`, `vv-bg-*`, `vv-rule-organic`). Utilities like `bg-forest`, `text-moss`, `font-display` come from the palette.
+- Layouts: `application` (sidebar on desktop, bottom nav on mobile, once signed in) and `auth` (brand panel plus form) for sign-in, sign-up, password, verification and two-step pages. Navigation items live in `app/views/shared/_nav_items.html.erb`.
+- Brand assets: fonts in `app/assets/fonts`, icon in `public/icon.svg` and `public/icon.png`.
+- Contrast: moss and cork fail 4.5:1 as text on linen, so kickers and italic heading words use forest on light backgrounds and moss only on deep.
 
 ## Authentication and authorisation
 

@@ -1,4 +1,5 @@
 class RegistrationsController < ApplicationController
+  layout "auth"
   allow_unauthenticated_access
   skip_verify_authorized
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_path, alert: "Try again later." }

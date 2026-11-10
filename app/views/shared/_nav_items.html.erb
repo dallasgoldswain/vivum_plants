@@ -1,0 +1,6 @@
+<%# Primary navigation, shared by the sidebar and the mobile bottom nav. %>
+<%= nav_link_to "Home", root_path, class: link_class %>
+
+<% if Current.user.platform_operator? %>
+  <%= nav_link_to "Management", madmin_root_path, class: link_class %>
+<% end %>

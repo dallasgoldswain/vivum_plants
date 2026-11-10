@@ -1,14 +1,27 @@
-<h1>Two-step sign-in</h1>
+<% content_for :title, "Two-step sign-in · VIVUM Plants" %>
 
-<%= render "shared/flash" %>
+<div>
+  <p class="vv-kicker mb-2">Two-step sign-in</p>
+  <h2 class="vv-h2">Enter your code</h2>
+</div>
 
-<%= form_with url: two_factor_challenge_path do |form| %>
-  <div>
-    <%= form.label :code, "Code from your authenticator app, or a backup code" %>
-    <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code" %>
-  </div>
+<div class="card card-raised">
+  <section>
+    <%= form_with url: two_factor_challenge_path, class: "form grid gap-6" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :code, "Code from your authenticator app" %>
+        <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code", class: "font-mono tracking-widest", aria: { describedby: "code-hint" } %>
 
-  <%= form.submit "Verify" %>
-<% end %>
+        <p id="code-hint" class="vv-caption">
+          Lost your phone? Enter one of your backup codes instead.
+        </p>
+      </div>
 
-<p><%= link_to "Start again", new_session_path %></p>
+      <%= form.submit "Verify", class: "btn w-full" %>
+    <% end %>
+  </section>
+</div>
+
+<p class="text-center text-sm">
+  <%= link_to "Start again", new_session_path, class: "text-forest underline-offset-4 hover:underline" %>
+</p>

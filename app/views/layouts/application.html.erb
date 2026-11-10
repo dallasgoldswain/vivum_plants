@@ -1,32 +1,27 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en-ZA">
   <head>
-    <title><%= content_for(:title) || "Vivum Plants" %></title>
-
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Vivum Plants">
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
+    <%= render "layouts/head" %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="vv-bg-app min-h-screen">
+    <% if app_shell? %>
+      <%= render "shared/sidebar" %>
+      <main class="vv-main">
+        <div class="vv-content grid gap-6">
+          <div class="md:hidden"><%= render "shared/wordmark" %></div>
+          <%= render "shared/flash" %>
+          <%= yield %>
+        </div>
+      </main>
+      <%= render "shared/bottom_nav" %>
+    <% else %>
+      <main class="mx-auto grid max-w-xl gap-6 px-4 py-10">
+        <%= render "shared/wordmark" %>
+        <%= render "shared/flash" %>
+        <%= yield %>
+      </main>
+    <% end %>
   </body>
 </html>

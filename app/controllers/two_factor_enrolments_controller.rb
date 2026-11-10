@@ -1,5 +1,6 @@
 # Sets up, or turns off, two-step sign-in for the signed-in user's own account.
 class TwoFactorEnrolmentsController < ApplicationController
+  layout "auth"
   allow_without_two_factor_enrolment
   skip_verify_authorized # acts only on Current.user
   rate_limit to: 10, within: 3.minutes, only: %i[ create destroy ], with: -> { redirect_to new_two_factor_enrolment_path, alert: "Try again later." }

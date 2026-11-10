@@ -1,0 +1,4 @@
+<nav class="vv-bottom-nav" aria-label="Primary navigation">
+  <%= render "shared/nav_items", link_class: nil %>
+  <%= button_to "Sign out", session_path, method: :delete, form_class: "flex flex-1" %>
+</nav>
