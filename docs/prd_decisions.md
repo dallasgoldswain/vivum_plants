@@ -198,3 +198,16 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D86 | Permanent deletion | Archive is the routine path. Permanent delete is allowed after a warning that lists what goes (photos, observations, and later reminders and links) and a confirmation. |
 | D87 | Ownership | Plants belong to a user's personal collection only. Seller stock (B19) has its own records and links to a plant where needed; a seller's team never edits a member's personal plants. |
 
+
+## Round 20 — Environments, occupants and measurements (2026-11-11)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D88 | Environment types | A fixed list, one level deep (no environments inside environments): room or shelf, grow cabinet, terrarium, paludarium, aquarium, acclimatisation container, outdoor bed. Only the name and type are required; notes, dimensions (cm), volume (litres) and photos are optional (EN01). A shelf in a room is its own environment. |
+| D89 | Plant setup in B11 | Dated environment assignments and dated setups (container, size with unit, watering method), one current of each with history kept (PL05). Recipe version joins the setup with substrates (B12). |
+| D90 | Measurements | Fixed metrics per environment type in metric units (air or water temperature °C, humidity %, light hours per day, optional light as lux or PPFD, pH, GH and KH in °dH, CO2 note), plus collector-defined custom metrics with their own name and unit (e.g. TDS in ppm). Every value has a unit, a measured-at date and a source (manual, or the meter's name); a blank stays unknown, never zero (EN02). Imperial display waits for unit settings (B17). |
+| D91 | Environment type and growing context | Moving a plant into an environment whose type implies a different growing context offers to update the context; the collector confirms or keeps it. Context stays the plant's own field (D80). |
+| D92 | Moves and setup on the timeline | A move or setup change writes a dated `movement` or `setup` care event as well as the assignment, so the timeline shows it and older events still show the setup at the time (PL05). |
+| D93 | Moving plants | From the plant page (one plant) or the environment page (several plants, one date). A plant has one current environment or none; unassigning is allowed, and the move history keeps both environments (EN03). |
+| D94 | Photos, offline and filters | Environment photos count toward the same 500-photo collector cap (D83). Environment pages are readable offline and measurements queue offline with an idempotency key and sync once, like observations (D84). The collection gets an environment filter. |
+| D95 | Deleting environments | Archive is the routine path and keeps history. Permanent delete is offered only for an environment that has never had a plant in it, after a warning listing its measurements and photos. |

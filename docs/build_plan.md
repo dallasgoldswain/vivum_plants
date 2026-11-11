@@ -51,7 +51,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
-| B11 | Environments, occupants, measurements | EN01–EN03, PL05 | B10 | Planned |
+| B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Next |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05 | B10 | Planned |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
@@ -377,5 +377,51 @@ browser-pane preview can't register service workers, so offline behaviour is tes
 headless Chrome (in CI). Chrome's offline emulation doesn't reach service-worker fetches,
 so the test checks the saved cache rather than reading a page offline. The app time zone is
 now Africa/Johannesburg until accounts get their own. Help topics: `collection`,
-`adding-a-plant`, `observations-and-photos`, `working-offline`, all unreviewed.
+`adding-a-plant`, `observations-and-photos`, `working-offline`, reviewed 2026-11-11.
+
+### B11 Environments, occupants and measurements — discussed 2026-11-11
+
+**Scope**
+- **Environments (EN01, D88):** `environments` owned by a user: name and type required (room or
+  shelf, grow cabinet, terrarium, paludarium, aquarium, acclimatisation container, outdoor
+  bed), notes, dimensions in cm, volume in litres, status active or archived. One level; no
+  nesting. Index and detail pages with current occupants, latest measurements and photos.
+- **Occupants and moves (EN03, D91, D93):** `environment_assignments` (plant, environment,
+  started on, ended on) with at most one open assignment per plant. Move one plant from its
+  page or several from the environment page with one date; unassign allowed. When the
+  environment type implies a different growing context (room, shelf, cabinet → indoor;
+  terrarium; paludarium; aquarium → aquatic; outdoor bed → outdoor; acclimatisation container
+  → no suggestion), the form offers to update the plant's context.
+- **Plant setup (PL05, D89):** `plant_setups` (plant, started on, container, size with unit,
+  watering method) with one current setup and history; recipe version added in B12. Plant
+  page shows the current environment and setup.
+- **Timeline (D92):** moves and setup changes write `movement` and `setup` care events on the
+  plant timeline; each event shows the environment and setup current on its date.
+- **Measurements (EN02, D90):** `measurements` (environment, metric, value, unit, measured at,
+  source, idempotency key). Fixed metrics offered by type — land: air temperature °C,
+  humidity %, light hours, light (lux or PPFD); aquarium: water temperature °C, pH, GH °dH,
+  KH °dH, light hours, CO2 note; paludarium: both — plus `custom_metrics` per user (name,
+  unit). A reading saves several values at one time; blanks are not stored. Latest value per
+  metric with its date on the environment page, and a dated history list.
+- **Photos, offline and filters (D94):** environment photos through the existing `photos`
+  table, counted in the 500-photo cap; service worker caches `/environments` pages; offline
+  measurements queue in IndexedDB and sync once; collection filter by environment.
+- **Deletion (D95):** archive keeps history and hides the environment from pickers;
+  permanent delete only when it has never had a plant, after a warning with counts.
+- **Account data:** export sections for environments, assignments, setups, measurements and
+  custom metrics; `purge!` removes them.
+- **Help and flags:** topics for environments and moving plants, and for measurements;
+  `collection.environments` and `collection.measurements` marked implemented.
+
+**Deferred:** recipe version on setups (B12); environment maintenance tasks and events
+(B15, EN04); measurements in AI guidance (B37, EN05); imperial units (B17); charts of
+measurements over time; nested environments.
+
+**Acceptance:** a tank saves with only name and type; a moved plant shows only in the new
+environment's current occupants and both appear in its history; moving three plants from the
+environment page records one date for all; an indoor plant moved into an aquarium is offered
+the aquatic context and keeps indoor if declined; repotting changes the current setup while
+earlier events still show the earlier setup; a blank humidity stays unknown, never zero; every
+stored value shows its unit, date and source; a measurement saved offline and synced twice
+creates one reading; an environment that has held a plant can be archived but not deleted.
 
