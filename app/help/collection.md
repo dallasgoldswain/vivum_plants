@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.plants, collection.search]
 prerequisites: []
 keywords: [collection, plants, search, find, filter, tag, record number, archive, inactive, sold, gifted, lost, quarantine, delete]
+reviewed: 2026-11-11
+reviewed_digest: bf771dc189abc6f76898544df00b03c54de87b609ad83d7203335e1e0e94d182
 ---
 
 **Collection** lists every plant you've added. Open it from the menu.

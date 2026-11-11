@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.plants, collection.acquisition]
 prerequisites: []
 keywords: [add plant, new plant, name, botanical, cultivar, unknown, context, indoor, terrarium, paludarium, aquatic, outdoor, tc, tissue culture, bought, price, cost, gift, source, acquisition]
+reviewed: 2026-11-11
+reviewed_digest: 38b0fa536d43e46501645ec1c32ed76413e64d1a8acdf2223c255920ce3f5117
 ---
 
 Choose **Add a plant** in your collection. Only a name and where it grows are
