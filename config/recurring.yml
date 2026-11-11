@@ -10,11 +10,17 @@
 #     schedule: at 5am every day
 
 development:
+  privacy_housekeeping:
+    class: PrivacyHousekeepingJob
+    schedule: every day at 3:30am
   purge_audit_events:
     class: PurgeAuditEventsJob
     schedule: every day at 3am
 
 production:
+  privacy_housekeeping:
+    class: PrivacyHousekeepingJob
+    schedule: every day at 3:30am
   purge_audit_events:
     class: PurgeAuditEventsJob
     schedule: every day at 3am

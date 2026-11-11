@@ -53,7 +53,8 @@
 
           <% if purpose.required %>
             <p class="vv-caption sm:max-w-48">
-              Required to use VIVUM. To withdraw, close your account.
+              Required to use VIVUM. To withdraw,
+              <%= link_to "delete your account", settings_account_path, class: "text-forest underline-offset-4 hover:underline" %>.
             </p>
           <% else %>
             <%= button_to on ? "Turn off" : "Turn on", settings_consent_path(purpose.key), method: :patch, params: { granted: on ? "0" : "1" }, class: on ? "btn-outline" : "btn" %>
@@ -109,6 +110,71 @@
       </table>
     <% else %>
       <p class="vv-caption">Nothing recorded yet.</p>
+    <% end %>
+  </section>
+</div>
+
+<div class="card" id="requests">
+  <header>
+    <h2>Privacy requests</h2>
+
+    <p>
+      Ask what we hold about you, correct something, or object to how we use it.
+      We reply within 30 days. To export or delete your data, use
+      <%= link_to "Account", settings_account_path, class: "text-forest underline-offset-4 hover:underline" %>.
+    </p>
+  </header>
+
+  <section class="grid gap-6">
+    <%= form_with model: @data_request, url: settings_privacy_requests_path, class: "form grid gap-4" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :kind, "What do you need?" %>
+        <%= form.select :kind, [ [ "See what you hold about me", "access" ], [ "Correct something", "correction" ], [ "Object to how my data is used", "objection" ], [ "Something else", "other" ] ], {}, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :message, "Details" %>
+        <%= form.text_area :message, required: true, rows: 4, maxlength: 5000, class: "textarea" %>
+      </div>
+
+      <div><%= form.submit "Send request", class: "btn-outline" %></div>
+    <% end %>
+
+    <% if @requests.any? %>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Asked</th>
+              <th>Request</th>
+              <th>Status</th>
+              <th>Outcome</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% @requests.each do |request| %>
+              <tr>
+                <td class="whitespace-nowrap">
+                  <%= l request.created_at, format: :short %>
+                </td>
+
+                <td><%= request.kind.humanize %></td>
+
+                <td>
+                  <%= request.status.humanize %>
+
+                  <% if request.open? %>
+                    <span class="vv-caption">· reply by <%= l request.due_on, format: :short %></span>
+                  <% end %>
+                </td>
+
+                <td><%= request.outcome %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     <% end %>
   </section>
 </div>

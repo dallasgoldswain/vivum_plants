@@ -15,4 +15,8 @@ class LegalController < ApplicationController
   def seller_terms
     @purpose = ConsentRecord.purpose(:seller_terms)
   end
+
+  # Public steps for deleting an account, for app stores (OF01, D73).
+  def account_deletion
+  end
 end

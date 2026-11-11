@@ -6,6 +6,7 @@ module Authentication
   included do
     before_action { Current.request = request }
     before_action :require_authentication
+    before_action :require_active_account
     before_action :require_verified_email
     before_action :require_two_factor_enrolment
     before_action :require_current_consents
@@ -15,6 +16,7 @@ module Authentication
   class_methods do
     def allow_unauthenticated_access(**options)
       skip_before_action :require_authentication, **options
+      skip_before_action :require_active_account, **options
       skip_before_action :require_verified_email, **options
       skip_before_action :require_two_factor_enrolment, **options
       skip_before_action :require_current_consents, **options
@@ -34,6 +36,12 @@ module Authentication
     def allow_without_current_consents(**options)
       skip_before_action :require_current_consents, **options
     end
+
+    # For the few actions an account waiting to be deleted may use: cancelling and signing out.
+    def allow_pending_deletion(**options)
+      skip_before_action :require_active_account, **options
+      allow_without_two_factor_enrolment(**options)
+    end
   end
 
   private
@@ -47,6 +55,11 @@ module Authentication
 
     def require_authentication
       resume_session || request_authentication
+    end
+
+    # An account waiting to be deleted can only cancel the deletion (D69).
+    def require_active_account
+      redirect_to new_deletion_cancellation_path if Current.user&.deletion_pending?
     end
 
     def require_verified_email

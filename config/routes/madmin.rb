@@ -9,7 +9,8 @@ namespace :madmin do
       post :revoke
     end
   end
-  resources :users
+  resources :users, except: :destroy # accounts are deleted by their holder, never hard-deleted (D70)
+  resources :data_requests, except: :destroy
   resources :sessions
   resources :audit_events, only: %i[ index show ]
   namespace :noticed do

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   resource :two_factor_backup_codes, only: :create
   resource :current_seller, only: :update
   resource :consent_acceptance, only: %i[ new create ]
+  resource :deletion_cancellation, only: %i[ new create ]
 
   resources :invitations, only: :show, param: :token do
     resource :acceptance, only: :create, module: :invitations
@@ -26,6 +27,10 @@ Rails.application.routes.draw do
   namespace :settings do
     resource :privacy, only: :show, controller: "privacy"
     resources :consents, only: :update, param: :purpose
+    resources :privacy_requests, only: :create
+    resource :account, only: :show, controller: "account"
+    resources :exports, only: %i[ create show ], param: :token
+    resource :account_deletion, only: %i[ new create ]
   end
 
   scope :legal, controller: :legal, as: :legal do
@@ -33,6 +38,7 @@ Rails.application.routes.draw do
     get :privacy
     get "seller-terms", action: :seller_terms, as: :seller_terms
   end
+  get "account-deletion", to: "legal#account_deletion", as: :account_deletion_help
 
   root "home#show"
 

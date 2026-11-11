@@ -39,10 +39,11 @@
 
     <p>
       <% if seller.free_period_ended? %>
-        Your free period ended on <%= l seller.free_until, format: :long %>.
-        You won't be charged.
+        Your free period ended on <%= l seller.free_until, format: :long %>. You
+        won't be charged.
       <% elsif seller.free? %>
-        Free during the pilot<%= ", until #{l seller.free_until, format: :long}" if seller.free_until %>.
+        Free during the
+        pilot<%= ", until #{l seller.free_until, format: :long}" if seller.free_until %>.
         You won't be charged.
       <% else %>
         <%= number_to_currency plan.monthly_price, unit: "R", precision: 0 %> a

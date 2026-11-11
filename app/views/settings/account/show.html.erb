@@ -1,0 +1,66 @@
+<% content_for :title, "Account · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Settings</p>
+  <h1 class="vv-h2">Account</h1>
+  <p class="vv-caption mt-1">Signed in as <%= Current.user.email_address %>.</p>
+</div>
+
+<div class="card">
+  <header>
+    <h2>Export your data</h2>
+
+    <p>
+      A zip of everything we hold about your account, in JSON. We'll email you a
+      download link that works for 7 days.
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if @export_in_progress %>
+      <p>
+        <span class="badge-secondary">Preparing</span> Asked for on
+        <%= l @export_in_progress.created_at, format: :short %>. We'll email you
+        when it's ready.
+      </p>
+    <% else %>
+      <% if @latest_export&.downloadable? %>
+        <p class="vv-caption">
+          Your export from <%= l @latest_export.completed_at, format: :short %>
+          is ready: use the link in your email.
+        </p>
+      <% end %>
+
+      <div>
+        <%= button_to "Export my data", settings_exports_path, class: "btn-outline" %>
+      </div>
+    <% end %>
+  </section>
+</div>
+
+<div class="card">
+  <header>
+    <h2>Delete your account</h2>
+
+    <p>
+      Your account is switched off straight away and everything is deleted after
+      30 days. Sign in before then to keep it.
+      <%= link_to "What gets deleted", account_deletion_help_path, class: "text-forest underline-offset-4 hover:underline" %>
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if @sole_owned_sellers.any? %>
+      <p>
+        You're the only owner of
+        <strong><%= @sole_owned_sellers.map(&:name).to_sentence %></strong>.
+        Make another member an owner in Sell → Members first, or ask us to close
+        the business.
+      </p>
+    <% else %>
+      <div>
+        <%= link_to "Delete my account", new_settings_account_deletion_path, class: "btn-destructive" %>
+      </div>
+    <% end %>
+  </section>
+</div>

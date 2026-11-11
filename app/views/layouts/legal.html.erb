@@ -9,15 +9,17 @@
     <main class="mx-auto grid max-w-3xl gap-8 px-4 py-10 sm:px-6">
       <div><%= render "shared/wordmark" %></div>
 
-      <div class="alert" role="note">
-        <h2>Draft for the pilot, pending legal review</h2>
+      <% unless content_for?(:help_page) %>
+        <div class="alert" role="note">
+          <h2>Draft for the pilot, pending legal review</h2>
 
-        <section>
-          This is a plain-language first version for pilot users. It will be
-          replaced by a reviewed version, and you'll be asked to accept that
-          one.
-        </section>
-      </div>
+          <section>
+            This is a plain-language first version for pilot users. It will be
+            replaced by a reviewed version, and you'll be asked to accept that
+            one.
+          </section>
+        </div>
+      <% end %>
 
       <article class="vv-legal card card-raised">
         <section class="grid gap-4">

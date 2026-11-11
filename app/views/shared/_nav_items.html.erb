@@ -6,6 +6,7 @@
 <% end %>
 
 <%= nav_link_to "Privacy", settings_privacy_path, class: link_class %>
+<%= nav_link_to "Account", settings_account_path, class: link_class %>
 
 <% if Current.user.platform_operator? %>
   <%= nav_link_to "Management", madmin_root_path, class: link_class %>

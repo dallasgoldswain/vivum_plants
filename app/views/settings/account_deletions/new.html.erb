@@ -1,0 +1,75 @@
+<% content_for :title, "Delete your account · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Settings · Account</p>
+  <h1 class="vv-h2">Delete your account</h1>
+</div>
+
+<div class="card">
+  <% if @sole_owned_sellers.any? %>
+    <section class="grid gap-3">
+      <p>
+        You're the only owner of
+        <strong><%= @sole_owned_sellers.map(&:name).to_sentence %></strong>, so
+        your account can't be deleted yet. Make another member an owner in Sell
+        → Members, or ask us to close the business.
+      </p>
+
+      <div>
+        <%= link_to "Back to account", settings_account_path, class: "btn-outline" %>
+      </div>
+    </section>
+  <% else %>
+    <header>
+      <h2>What happens next</h2>
+    </header>
+
+    <section class="grid gap-6">
+      <ul class="grid list-disc gap-2 pl-5">
+        <li>
+          You're signed out everywhere and your account is switched off now.
+        </li>
+
+        <li>
+          On <%= l User::DELETION_GRACE.from_now.to_date, format: :long %> your
+          plants, settings, notifications and sign-in details are deleted for
+          good.
+        </li>
+
+        <li>
+          Changed your mind? Sign in before then and choose "Keep my account".
+        </li>
+
+        <li>
+          We keep a record of the terms you agreed to and our security log for
+          up to two years, without your email address.
+        </li>
+      </ul>
+
+      <p class="vv-caption">
+        Want a copy first?
+        <%= link_to "Export your data", settings_account_path, class: "text-forest underline-offset-4 hover:underline" %>
+        before you go.
+      </p>
+
+      <%= form_with url: settings_account_deletion_path, class: "form grid gap-4" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :password, "Your password" %>
+          <%= form.password_field :password, required: true, autocomplete: "current-password", class: "input" %>
+        </div>
+
+        <% if Current.user.two_factor_enabled? %>
+          <div class="grid gap-2">
+            <%= form.label :code, "Two-step code (or a backup code)" %>
+            <%= form.text_field :code, required: true, autocomplete: "one-time-code", inputmode: "numeric", class: "input" %>
+          </div>
+        <% end %>
+
+        <div class="flex flex-wrap gap-3">
+          <%= form.submit "Delete my account", class: "btn-destructive" %>
+          <%= link_to "Keep my account", settings_account_path, class: "btn-ghost" %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+</div>

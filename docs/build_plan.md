@@ -23,8 +23,8 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Done (Paystack later) |
-| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Discussed |
-| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
+| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Done |
+| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Next |
 
 ## Phase 2 — Seller domain (built before the collector domain)
 
@@ -245,7 +245,7 @@ inviting beyond the member limit fails; an ended free period shows the prompt wi
 removing access; Paid can't be selected yet.
 
 
-### B08 Account export and deletion — discussed 2026-11-11
+### B08 Account export and deletion — discussed and built 2026-11-11
 
 **Scope**
 - **Data requests log (PR05, D72):** one `data_requests` table (user, kind: export, deletion,

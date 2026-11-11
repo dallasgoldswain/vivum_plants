@@ -16,15 +16,15 @@
 # --- Account and access ---
 account.profile: { domain: account, state: core, description: "Account profile and email address" }
 account.preferences: { domain: account, state: core, description: "Timezone, units and notification preferences" }
-account.export: { domain: account, state: core, description: "Machine-readable export of a user's data" }
-account.deletion: { domain: account, state: core, description: "Self-service account deletion" }
+account.export: { domain: account, state: core, implemented: true, description: "Machine-readable export of a user's data (§26). A legal right, never gated by this flag" }
+account.deletion: { domain: account, state: core, implemented: true, description: "Self-service account deletion (PR07). A legal right, never gated by this flag" }
 account.onboarding: { domain: account, state: core, description: "Onboarding: guidance sources and AI consent (ST06)" }
 help.manual: { domain: help, state: core, description: "Searchable product manual (HM01)" }
 help.contextual: { domain: help, state: core, depends_on: [help.manual], description: "Contextual help links from screens" }
 
 # --- Privacy ---
 privacy.consents: { domain: privacy, state: core, implemented: true, description: "Versioned consent records (PR03). Terms acceptance and Settings → Privacy are never gated by this flag" }
-privacy.dsr: { domain: privacy, state: core, description: "Data subject requests for account holders (PR05)" }
+privacy.dsr: { domain: privacy, state: core, implemented: true, description: "Data subject requests for account holders (PR05). A legal right, never gated by this flag" }
 privacy.buyer_dsr: { domain: privacy, state: core, depends_on: [seller.buyers], description: "Seller tools to export and delete a buyer's data" }
 
 # --- Clients ---

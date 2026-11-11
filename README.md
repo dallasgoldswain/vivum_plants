@@ -108,6 +108,16 @@ Seller billing (SB01–SB03, D64–D67). Paystack isn't built yet, so nobody is 
 - **Member limit:** members plus pending staff invites can't exceed `plan.member_limit`.
 - **Ended free periods** show owners a notice on Sell and appear under the "Free period ended" scope in Madmin → Sellers. Access isn't reduced.
 
+## Export, deletion and privacy requests
+
+Data subject rights for account holders (§26, PR05, PR07, D68–D73). Never behind a feature flag.
+
+- **Requests log:** every request is a `DataRequest` (kinds: export, deletion, access, correction, objection, other) with a 30-day `due_on` and an outcome. Operators work them in `/madmin` → Data requests (Open and Overdue scopes); closing one needs an outcome and records who handled it. Log requests that arrive by email with New.
+- **Export:** Settings → Account → Export my data runs `ExportAccountJob`, which builds a zip from `AccountExport::SECTIONS` and emails a link valid for 7 days. **When a new domain ships, add its section there**: this user's data only, never other people's personal data.
+- **Deletion:** `user.request_deletion!` switches the account off and ends its sessions; the `require_active_account` gate sends a signed-in pending account to "Keep my account" (`cancel_deletion!`). After 30 days `PrivacyHousekeepingJob` (daily, `config/recurring.yml`) calls `purge!`, which leaves an anonymised tombstone row. **When a new domain ships, wipe its personal data in `User::Deletable#purge!`.** The last owner of a seller can't delete their account.
+- **Never hard-delete users:** audit events, consent records and requests point at the id. Madmin has no user destroy.
+- Public help for app stores: `/account-deletion`.
+
 ## Consents
 
 Consents live in `consent_records`, one row per grant or withdrawal; the latest row per purpose is the current choice (PR03, D54–D57).
@@ -116,7 +126,7 @@ Consents live in `consent_records`, one row per grant or withdrawal; the latest 
 - **API:** `user.consented_to?(:ai_processing)`, `user.record_consent!(:marketing_email, granted: false, source: "settings")`. Check `consented_to?` before any AI request or WhatsApp send.
 - **Gate:** `Authentication#require_current_consents` runs after email verification and two-step enrolment; skip it with `allow_without_current_consents` only for pages a user needs before accepting.
 - **Pages:** `/legal/terms` and `/legal/privacy` (draft v0, pending legal review; text in `app/views/legal`), and Settings → Privacy at `/settings/privacy`. These are privacy controls and are never behind a feature flag.
-- Records are deleted with the account; they are not in the audit log.
+- Records outlive a deleted account as proof of consent, for the audit retention period (2 years, D70); they are not in the audit log.
 
 ## Notifications
 

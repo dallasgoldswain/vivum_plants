@@ -7,5 +7,7 @@ class Settings::PrivacyController < ApplicationController
     required = Current.user.required_consent_purposes
     @purposes = ConsentRecord::PURPOSES.values.select { !it.required || required.include?(it.key) || @current.key?(it.key) }
     @history = Current.user.consent_records.chronological.reverse
+    @requests = Current.user.data_requests.newest_first
+    @data_request = DataRequest.new(kind: "access")
   end
 end

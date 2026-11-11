@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080000) do
     t.string "user_agent"
     t.datetime "created_at", null: false
     t.index ["user_id", "purpose", "created_at"], name: "index_consent_records_on_user_id_and_purpose_and_created_at"
+  end
+
+  create_table "data_requests", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "kind", null: false
+    t.string "status", default: "open", null: false
+    t.text "message"
+    t.text "outcome"
+    t.date "due_on", null: false
+    t.bigint "handled_by_id"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["handled_by_id"], name: "index_data_requests_on_handled_by_id"
+    t.index ["status", "due_on"], name: "index_data_requests_on_status_and_due_on"
+    t.index ["user_id"], name: "index_data_requests_on_user_id"
   end
 
   create_table "flipper_features", force: :cascade do |t|
@@ -237,7 +253,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080000) do
 
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
-    t.string "password_digest", null: false
+    t.string "password_digest"
     t.datetime "email_verified_at"
     t.boolean "platform_operator", default: false, null: false
     t.string "otp_secret"
@@ -245,12 +261,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_080000) do
     t.datetime "otp_last_used_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deletion_requested_at"
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_users_on_deleted_at"
+    t.index ["deletion_requested_at"], name: "index_users_on_deletion_requested_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "consent_records", "users", on_delete: :cascade
+  add_foreign_key "data_requests", "users"
+  add_foreign_key "data_requests", "users", column: "handled_by_id"
   add_foreign_key "invitations", "sellers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id", on_delete: :nullify

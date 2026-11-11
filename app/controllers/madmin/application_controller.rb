@@ -26,7 +26,8 @@ module Madmin
         "Membership" => %w[ role seller_id user_id ],
         "Seller" => Seller::BILLING_FIELDS,
         "Plan" => %w[ key name monthly_price_cents member_limit photo_limit ai_extractions_per_month paid_branding active ],
-        "Invitation" => %w[ kind role seller_id expires_at accepted_at revoked_at ]
+        "Invitation" => %w[ kind role seller_id expires_at accepted_at revoked_at ],
+        "DataRequest" => %w[ kind status due_on completed_at handled_by_id ]
       }.freeze
 
       def audit_operator_action

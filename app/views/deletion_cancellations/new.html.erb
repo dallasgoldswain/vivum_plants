@@ -1,0 +1,15 @@
+<% content_for :title, "Your account is being deleted · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Account switched off</p>
+  <h2 class="vv-h2">Your account is being deleted</h2>
+
+  <p class="vv-caption mt-2">
+    Everything will be deleted on
+    <%= l Current.user.deletion_due_on, format: :long %>. Keep your account to
+    carry on where you left off.
+  </p>
+</div>
+
+<%= button_to "Keep my account", deletion_cancellation_path, class: "btn w-full" %>
+<%= button_to "Sign out", session_path, method: :delete, class: "btn-ghost w-full" %>

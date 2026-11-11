@@ -1,0 +1,6 @@
+<p>
+  We've received your <%= @data_request.kind.humanize(capitalize: false) %>
+  request and will reply by <%= l @data_request.due_on, format: :long %>.
+</p>
+
+<p>You can see its progress in Settings → Privacy.</p>

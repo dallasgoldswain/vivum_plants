@@ -3,6 +3,7 @@ class User < ApplicationRecord
   BACKUP_CODE_COUNT = 10
 
   include Consentable
+  include Deletable
 
   has_secure_password
   has_referrals

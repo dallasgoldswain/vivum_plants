@@ -2,6 +2,7 @@ class SessionsController < ApplicationController
   layout "auth"
   allow_unauthenticated_access only: %i[ new create ]
   allow_unverified_email_access only: :destroy
+  allow_pending_deletion only: :destroy
   skip_verify_authorized
   rate_limit to: 10, within: 3.minutes, only: :create, with: -> { redirect_to new_session_path, alert: "Try again later." }
 

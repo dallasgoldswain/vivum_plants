@@ -1,0 +1,9 @@
+<p>Your VIVUM Plants data export is ready.</p>
+
+<p>
+  <%= link_to "Download your data", @url %>. You'll need to be signed in. The
+  link works until <%= l @expires_on, format: :long %>; after that, ask for a
+  new export in Settings → Account.
+</p>
+
+<p>If you didn't ask for this, change your password straight away.</p>

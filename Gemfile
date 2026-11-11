@@ -92,6 +92,7 @@ gem "docx"
 # PDF generation in pure Ruby: care packs, receipts/tax invoices, packing slips, QR labels
 gem "prawn"
 gem "prawn-table"
+gem "rubyzip", require: "zip" # account export archives (B08)
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"

@@ -74,6 +74,19 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   the plan's member limit (members plus pending invites); Sell home shows the plan, owners
   see limits and an end-of-free-period notice; Madmin scope for ended free periods
   (D64–D67).
+- Account export and deletion (B08): `data_requests` log for every data subject request
+  (export, deletion, access, correction, objection, other) with a 30-day due date, outcome
+  and handler, worked in Madmin with open and overdue scopes (PR05, D72). Settings → Account
+  queues `ExportAccountJob`, which zips one JSON file per `AccountExport::SECTIONS` entry
+  into private Active Storage and emails a 7-day signed download link (§26, D68). Deletion
+  re-checks the password and two-step code, is refused for the last owner of a seller, ends
+  every session and starts 30 days' grace; signing in offers "Keep my account"
+  (`require_active_account` gate). `PrivacyHousekeepingJob` (daily) purges due accounts to
+  an anonymised tombstone (`users.deleted_at`, no email, password or two-step secrets;
+  "Deleted user #id" in Madmin), expires exports after 7 days and drops tombstones' consent
+  records after the audit retention (PR07, D69–D71). Privacy request form on Settings →
+  Privacy, public `/account-deletion` help page, `PrivacyMailer` emails, Madmin can no
+  longer destroy users (D73). `rubyzip` added to the Gemfile.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

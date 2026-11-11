@@ -31,3 +31,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   someone leaves.
 - See your plan and what it includes on the Sell page. Pilot sellers use VIVUM free, and
   we'll be in touch before any paid plan applies.
+- Download a copy of everything we hold about your account from Account. We'll email you a
+  link that works for 7 days.
+- Delete your account yourself from Account. It's switched off straight away and deleted
+  after 30 days; sign in before then if you change your mind.
+- Ask us what we hold about you, correct something, or object to how we use your data,
+  from Privacy. We reply within 30 days and you can follow progress there.
