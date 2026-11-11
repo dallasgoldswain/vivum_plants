@@ -98,6 +98,16 @@ Sellers join by invitation (SO03, D58–D63).
 - **Owners** must accept the seller terms (`seller_terms` consent) and use two-step sign-in; both are enforced on their next request.
 - **Flags:** `seller.workspace` (Sell area), `seller.members` (Members page and staff invites) and `seller.invites` (invite links). In development `bin/rails db:seed` turns them on; in production switch them on in `/madmin/flags`.
 
+## Plans and billing
+
+Seller billing (SB01–SB03, D64–D67). Paystack isn't built yet, so nobody is charged.
+
+- **Plans** live in the `plans` table (Starter, Pro; `bin/rails db:seed` creates them). Operators edit prices (in cents) and limits in `/madmin` → Plans.
+- **Seller billing** is `billing_mode` (pilot, comp; paid is blocked until Paystack), `plan` and an optional `free_until`. New sellers start in Pilot on Pro. Changing any of these in Madmin needs an audit reason, which is stored on the audit event.
+- **Entitlements:** a capability's `entitlement:` in `config/features.yml` must be a boolean column on `plans`; `Capabilities.enabled?` checks it against the seller's plan.
+- **Member limit:** members plus pending staff invites can't exceed `plan.member_limit`.
+- **Ended free periods** show owners a notice on Sell and appear under the "Free period ended" scope in Madmin → Sellers. Access isn't reduced.
+
 ## Consents
 
 Consents live in `consent_records`, one row per grant or withdrawal; the latest row per purpose is the current choice (PR03, D54–D57).

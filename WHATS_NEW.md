@@ -29,3 +29,5 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Sellers join by invitation during the pilot. Accept your invite to set up your business,
   then invite your team from Sell, choose what each person can do, and remove access when
   someone leaves.
+- See your plan and what it includes on the Sell page. Pilot sellers use VIVUM free, and
+  we'll be in touch before any paid plan applies.

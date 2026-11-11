@@ -24,7 +24,7 @@ class Invitation < ApplicationRecord
   validates :seller, presence: true, if: :staff?
   validates :invited_by, presence: true, on: :create
   validate :seller_invites_are_for_owners
-  validate :not_already_a_member, :no_other_pending_invite, on: :create
+  validate :not_already_a_member, :no_other_pending_invite, :within_member_limit, on: :create
 
   before_validation -> { self.expires_at ||= TTL.from_now }, on: :create
   after_create -> { audit("invitation.created") }
@@ -117,6 +117,12 @@ class Invitation < ApplicationRecord
       return unless staff? && seller
 
       errors.add(:email_address, "already belongs to this business") if seller.users.exists?(email_address: email_address)
+    end
+
+    def within_member_limit
+      return unless staff? && seller && !seller.seats_available?
+
+      errors.add(:base, "#{seller.name} has used all #{seller.plan.member_limit} member places on the #{seller.plan.name} plan")
     end
 
     def no_other_pending_invite

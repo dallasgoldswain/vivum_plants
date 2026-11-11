@@ -16,6 +16,12 @@
 <div class="card">
   <header>
     <h2>Team</h2>
+
+    <p>
+      <%= Current.seller.seats_used %> of
+      <%= Current.seller.plan.member_limit %> places used on the
+      <%= Current.seller.plan.name %> plan, including pending invites.
+    </p>
   </header>
 
   <section>
@@ -69,6 +75,13 @@
     </header>
 
     <section class="grid gap-6">
+      <% unless Current.seller.seats_available? %>
+        <p class="vv-caption">
+          Every member place is in use. Remove someone or cancel an invite to
+          invite someone new.
+        </p>
+      <% end %>
+
       <%= form_with model: @invitation, url: sell_invitations_path, class: "form grid gap-4 sm:grid-cols-[1fr_auto_auto] sm:items-end" do |form| %>
         <div class="grid gap-2">
           <%= form.label :email_address, "Email" %>
@@ -80,7 +93,7 @@
           <%= form.select :role, Membership.roles.keys.map { [ it.humanize, it ] }, {}, class: "select" %>
         </div>
 
-        <%= form.submit "Send invite", class: "btn" %>
+        <%= form.submit "Send invite", class: "btn", disabled: !Current.seller.seats_available? %>
       <% end %>
 
       <% if @invitations.any? %>

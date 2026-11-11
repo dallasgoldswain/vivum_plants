@@ -66,6 +66,14 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   last-owner guard on `Membership`; `InvitationPolicy`; draft v0 seller terms with the POPIA
   operator agreement at `/legal/seller-terms`; `seller.workspace`, `seller.members` and
   `seller.invites` marked implemented; invitation and membership changes audited (D58–D63).
+- Seller billing modes (B07): `plans` table seeded with Starter and Pro (prices, member,
+  photo and AI limits, `paid_branding` entitlement column), editable in Madmin; sellers get
+  `billing_mode` (pilot, comp, paid — paid blocked until Paystack), `plan` (Pro by default)
+  and `free_until`; operator billing changes need `audit_reason`, stored as the audit
+  event's reason; `Capabilities.entitled?` checks the seller's plan; staff invites respect
+  the plan's member limit (members plus pending invites); Sell home shows the plan, owners
+  see limits and an end-of-free-period notice; Madmin scope for ended free periods
+  (D64–D67).
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

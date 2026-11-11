@@ -1,0 +1,17 @@
+starter:
+  key: starter
+  name: Starter
+  monthly_price_cents: 19900
+  member_limit: 2
+  photo_limit: 2000
+  ai_extractions_per_month: 1000
+  paid_branding: false
+
+pro:
+  key: pro
+  name: Pro
+  monthly_price_cents: 44900
+  member_limit: 5
+  photo_limit: 10000
+  ai_extractions_per_month: 5000
+  paid_branding: true

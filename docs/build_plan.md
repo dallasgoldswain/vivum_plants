@@ -22,8 +22,8 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Done |
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
-| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Next (discussed) |
-| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Planned |
+| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Done (Paystack later) |
+| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Next |
 | B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
 
 ## Phase 2 — Seller domain (built before the collector domain)
@@ -215,7 +215,7 @@ seller invite creates exactly one seller and owner membership and records seller
 acceptance; a manager or host/packer can't manage members; the last owner can't be removed or
 demoted; a removed member loses access on their next request.
 
-### B07 Seller billing modes — discussed 2026-11-11
+### B07 Seller billing modes — discussed and built 2026-11-11
 
 **Scope**
 - **Plans (D65):** `plans` table (key, name, monthly price in cents ZAR, member limit, photo

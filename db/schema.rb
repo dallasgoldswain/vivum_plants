@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -163,6 +163,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
     t.index ["user_id"], name: "index_otp_backup_codes_on_user_id"
   end
 
+  create_table "plans", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "name", null: false
+    t.integer "monthly_price_cents", null: false
+    t.integer "member_limit", null: false
+    t.integer "photo_limit", null: false
+    t.integer "ai_extractions_per_month", null: false
+    t.boolean "paid_branding", default: false, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_plans_on_key", unique: true
+  end
+
   create_table "refer_referral_codes", force: :cascade do |t|
     t.string "referrer_type", null: false
     t.bigint "referrer_id", null: false
@@ -204,6 +218,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "billing_mode", default: "pilot", null: false
+    t.bigint "plan_id", null: false
+    t.date "free_until"
+    t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -240,6 +258,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_190000) do
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
+  add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify
   add_foreign_key "sessions", "users"
 

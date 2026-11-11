@@ -24,3 +24,69 @@
     </p>
   </header>
 </div>
+
+<% seller = Current.seller %>
+<% plan = seller.plan %>
+
+<div class="card">
+  <header>
+    <p class="vv-kicker">Plan</p>
+
+    <h2>
+      <%= plan.name %>
+      <span class="badge-secondary ml-2"><%= seller.billing_mode.humanize %></span>
+    </h2>
+
+    <p>
+      <% if seller.free_period_ended? %>
+        Your free period ended on <%= l seller.free_until, format: :long %>.
+        You won't be charged.
+      <% elsif seller.free? %>
+        Free during the pilot<%= ", until #{l seller.free_until, format: :long}" if seller.free_until %>.
+        You won't be charged.
+      <% else %>
+        <%= number_to_currency plan.monthly_price, unit: "R", precision: 0 %> a
+        month.
+      <% end %>
+    </p>
+  </header>
+
+  <% if Current.membership.owner? %>
+    <section>
+      <dl class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4">
+        <div>
+          <dt class="vv-caption">Members</dt>
+
+          <dd class="font-medium">
+            <%= seller.seats_used %> of <%= plan.member_limit %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="vv-caption">Photos</dt>
+
+          <dd class="font-medium">
+            <%= number_with_delimiter plan.photo_limit, delimiter: " " %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="vv-caption">AI extractions</dt>
+
+          <dd class="font-medium">
+            <%= number_with_delimiter plan.ai_extractions_per_month, delimiter: " " %>
+            a month
+          </dd>
+        </div>
+
+        <div>
+          <dt class="vv-caption">Branding</dt>
+
+          <dd class="font-medium">
+            <%= plan.paid_branding? ? "Your own palettes" : "Standard" %>
+          </dd>
+        </div>
+      </dl>
+    </section>
+  <% end %>
+</div>

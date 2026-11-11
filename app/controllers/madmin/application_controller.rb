@@ -24,6 +24,8 @@ module Madmin
       AUDITED_VALUES = {
         "User" => %w[ platform_operator email_verified_at ],
         "Membership" => %w[ role seller_id user_id ],
+        "Seller" => Seller::BILLING_FIELDS,
+        "Plan" => %w[ key name monthly_price_cents member_limit photo_limit ai_extractions_per_month paid_branding active ],
         "Invitation" => %w[ kind role seller_id expires_at accepted_at revoked_at ]
       }.freeze
 
@@ -37,7 +39,7 @@ module Madmin
         when "create", "update"
           return unless response.redirect? && @record&.persisted?
 
-          Audit.record("madmin.#{action_name}", target: @record, details: change_details(@record))
+          Audit.record("madmin.#{action_name}", target: @record, details: change_details(@record), reason: @record.try(:audit_reason).presence)
         when "destroy"
           Audit.record("madmin.destroy", target: @record) if @record&.destroyed?
         end

@@ -1,5 +1,13 @@
 # Records required in every environment. Safe to run repeatedly (bin/rails db:seed).
 
+# Seller plans (SB01, D21, D65). Created once; operators edit prices and limits in /madmin.
+{
+  "starter" => { name: "Starter", monthly_price_cents: 19_900, member_limit: 2, photo_limit: 2_000, ai_extractions_per_month: 1_000, paid_branding: false },
+  "pro" => { name: "Pro", monthly_price_cents: 44_900, member_limit: 5, photo_limit: 10_000, ai_extractions_per_month: 5_000, paid_branding: true }
+}.each do |key, attrs|
+  Plan.find_or_create_by!(key: key) { it.assign_attributes(attrs) }
+end
+
 # Platform operator account, from credentials:
 #
 #   user:

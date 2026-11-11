@@ -1,6 +1,7 @@
 # Platform operator management area. Access: Madmin::ApplicationController.
 namespace :madmin do
   resources :sellers
+  resources :plans
   resources :memberships
   resources :invitations, except: %i[ edit update destroy ] do
     member do

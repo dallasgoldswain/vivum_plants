@@ -7,7 +7,7 @@
 #   2. turned on in Flipper globally, for the seller or for the user
 #      (disabling a flag in the console clears every target: the emergency stop)
 #   3. every dependency is enabled for the same user and seller
-#   4. the seller holds the capability's entitlement (billing, B07)
+#   4. the seller's plan holds the capability's entitlement (billing, B07)
 # Authorisation (Action Policy) and user preferences are checked by the caller after this.
 module Capabilities
   class << self
@@ -45,9 +45,9 @@ module Capabilities
     end
 
     private
-      # Paid entitlements come with billing (B07); until then nothing is entitled.
-      def entitled?(definition, _seller)
-        definition.entitlement.nil?
+      # The seller's plan must include the entitlement (SB02, D66). A flag never grants one.
+      def entitled?(definition, seller)
+        definition.entitlement.nil? || seller&.entitled_to?(definition.entitlement) || false
       end
   end
 end
