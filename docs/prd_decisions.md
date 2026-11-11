@@ -184,3 +184,17 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D77 | Marking a topic reviewed | Front matter `reviewed` (date) and `reviewed_digest` (hash of the topic text), written by `bin/rails "help:review[topic-id]"` at the founder's request. A later text change no longer matches the digest, so the topic counts as unreviewed until reviewed again. |
 | D78 | Contextual help and screenshots | A Help link beside page headings opens the topic (or a section of it). Screenshots ship with topics from B09 on: headless Chrome system tests sign in with fixture data and save phone and desktop PNGs, run with `bin/rails help:screenshots` rather than on every CI run. |
 | D79 | What's new page | `/whats-new` renders WHATS_NEW.md with the same renderer, linked from Help and the sidebar, with a dot until the user has seen the latest entry. |
+
+## Round 19 — Plant records (2026-11-11)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D80 | Growing contexts | Five fixed contexts: indoor, terrarium, paludarium, aquatic, outdoor. TC origin is a separate field (stages with B16), so a TC-origin plant can be aquatic (AT01). |
+| D81 | Record ID | A short number per collection (P-0001, P-0002, …) shown on the plant, searchable and later printed on labels. Never reused, never changed by renaming; the database ID stays internal. |
+| D82 | Observations and the timeline | The plant timeline is a `care_events` table from B10; observations are its first kind (note, photos, event date separate from entry time). B13 adds watering, feeding, repotting and other kinds to the same table. |
+| D83 | Photo storage | Active Storage on the app server's disk (a Kamal volume) for the pilot, included in server backups; move to an S3-compatible bucket later. Originals resized to 2560 px long edge with location data stripped, plus thumbnails; caps from OF03 (500 photos for collectors). |
+| D84 | Offline (OF02) | Built in B10: a service worker caches the collection list and plant pages for reading offline, and observations with photos queue offline with a client-generated idempotency key, showing their queued state and syncing once (AT12). |
+| D85 | Tags | Free-text tags per plant, suggested from the collector's own earlier tags; searchable and filterable. |
+| D86 | Permanent deletion | Archive is the routine path. Permanent delete is allowed after a warning that lists what goes (photos, observations, and later reminders and links) and a confirmation. |
+| D87 | Ownership | Plants belong to a user's personal collection only. Seller stock (B19) has its own records and links to a plant where needed; a seller's team never edits a member's personal plants. |
+

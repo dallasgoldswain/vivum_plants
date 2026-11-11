@@ -50,7 +50,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
-| B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF03 | B03 | Planned |
+| B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Discussed |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05 | B10 | Planned |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05 | B10 | Planned |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
@@ -322,3 +322,50 @@ console's error message. `using-help` covers both help flags. All eight first to
 unreviewed: review them with `bin/rails "help:review[id]"` before enabling their flags
 globally in production. The dot uses dated `## YYYY-MM-DD` headings in WHATS_NEW.md, so until
 the first dated release it shows only for users who have never opened the page.
+
+### B10 Plant records — discussed 2026-11-11
+
+**Scope**
+- **Plants (PL01, D80, D81, D87):** `plants` owned by a user: record number (P-0001 per
+  collection, never reused), display name (required), botanical name, cultivar, common name,
+  nickname, growing context (indoor, terrarium, paludarium, aquatic, outdoor; required),
+  TC origin (yes/no), origin note, quantity (default 1, non-negative), notes. Unknown
+  identity and duplicate names allowed; renaming keeps the record number and history. The
+  library profile link waits for B18.
+- **Acquisition (PL02):** `acquisitions` (date, source, cost in cents with ISO currency,
+  default ZAR, order reference, quantity, arrival notes), one per plant for now and shaped to
+  cover several plants for purchase groups (B16). Cost optional; no market value.
+- **Status (PL03):** active, quarantined, lost, sold, gifted, archived, with a dated
+  `plant_status_changes` history (effective date, reason) shown on the timeline. Inactive
+  plants leave the active collection; "stop reminders" hooks in with B14.
+- **Timeline and observations (PL04, D82):** `care_events` (plant, kind `observation`, note,
+  event date and time, entered at, idempotency key unique per user). Photos attach to a plant
+  or an event with caption and taken-on date; one cover photo per plant.
+- **Photos (OF03, D83):** Active Storage on local disk (Kamal volume in production), resized
+  to 2560 px with EXIF location stripped, thumbnail variants; 500-photo cap per collector with
+  warnings at 80% and 100%; at the cap new uploads are refused and the typed note is kept;
+  deleting photos frees quota.
+- **Collection and search (UX01, D85):** grid and list, search over names, nickname, record
+  number and tags (PostgreSQL, trigram); filters for context, status and TC origin
+  (environment and care due arrive with B11 and B14); empty state with "Add a plant".
+- **Tags (D85):** free text, suggested from the collector's own tags.
+- **Deletion (D86):** archive first; permanent delete after a warning with counts.
+- **Offline (OF02, D84):** service worker caching the collection list and plant pages for
+  offline reading; observations and photos queued offline (IndexedDB) with a client-generated
+  idempotency key, shown as queued, synced once.
+- **Account data:** export sections and `purge!` wiping for plants, events and photos (B08).
+- **Help and flags:** topics for the collection, adding a plant, observations and photos,
+  and offline use; flags `collection.plants`, `collection.acquisition`, `collection.media`
+  and `collection.search` marked implemented.
+
+**Deferred:** library profile link (B18); environments, setups and location filter (B11);
+other care event kinds (B13); reminders and the "stop reminders" offer (B14); purchase groups
+and splits (B16); a photo bucket (after the pilot); native camera bridge (with the native apps).
+
+**Acceptance:** an unknown plant saves with only a name and context; renaming keeps the
+record number, photos and history; a gift saves without a price and a price keeps its
+currency; archiving hides a plant from the active collection but keeps its timeline;
+yesterday's observation sorts before today's; two Monstera records of the same cultivar are
+found separately; an upload at the cap is refused with the note kept; an observation saved
+offline and synced twice creates one event; a deleted account's plants and photos are gone.
+

@@ -6,6 +6,8 @@ audience: everyone
 capabilities: [privacy.consents, privacy.dsr]
 prerequisites: []
 keywords: [consent, marketing, news emails, ai, whatsapp, popia, personal information, data request, correction, objection, access]
+reviewed: 2026-11-11
+reviewed_digest: eb83641289a7236d5e7b9eb1310fa0bd8a4d5b47991b5e653601fa43586965eb
 ---
 
 **Privacy** shows what you've agreed to and every change you've made. Open it
