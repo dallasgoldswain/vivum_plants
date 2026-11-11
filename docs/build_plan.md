@@ -22,7 +22,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B04 | Audit log: operator changes and views, flag changes, account security events | PR08, FF04, O14 | B03 | Done |
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
-| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21 | B06 | Next |
+| B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Next (discussed) |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Planned |
 | B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
 
@@ -214,3 +214,33 @@ already-used invite can't be accepted; an invite can't be accepted by a differen
 seller invite creates exactly one seller and owner membership and records seller terms
 acceptance; a manager or host/packer can't manage members; the last owner can't be removed or
 demoted; a removed member loses access on their next request.
+
+### B07 Seller billing modes — discussed 2026-11-11
+
+**Scope**
+- **Plans (D65):** `plans` table (key, name, monthly price in cents ZAR, member limit, photo
+  limit, AI extractions per month, entitlements such as `paid_branding`, active). Seeded with
+  Starter and Pro; editable in Madmin.
+- **Billing on the seller (SB03, D64):** mode (`pilot`, `comp`, `paid`), plan, optional end
+  date. New sellers from invites start in Pilot on Pro (D25). Operators change mode, plan and
+  end date in Madmin with a **required reason**; each change is audited with operator, old
+  and new values and reason. `paid` can't be chosen until Paystack exists.
+- **Entitlements (SB02, D66):** `Capabilities.entitled?` checks the seller's plan, so
+  `seller.paid_branding` needs Pro. Enabling a flag never grants an entitlement.
+- **Member limit (D66):** members plus pending staff invites can't exceed the plan's limit;
+  the Members page shows "3 of 5" and blocks new invites at the limit. Existing members are
+  never removed if a plan shrinks.
+- **Plan status:** Sell home shows mode, plan and end date to all members; owners see the
+  limits.
+- **End date (D67):** once passed, owners see a banner asking them to choose a paid plan
+  (with "coming soon" until Paystack) and Madmin flags the seller as ended. No access is lost.
+
+**Deferred:** Paystack checkout, subscriptions, webhooks, grace periods and read-only mode
+(SB01, SB02, own item); photo and AI limit enforcement (with B19+ and B37); collector billing
+(never charged).
+
+**Acceptance:** a comp seller on Pro can use paid branding with no Paystack record; a Starter
+seller can't; only operators change billing mode and every change is audited with a reason;
+inviting beyond the member limit fails; an ended free period shows the prompt without
+removing access; Paid can't be selected yet.
+

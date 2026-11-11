@@ -153,3 +153,12 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D61 | Staff invites in B06 | Included: owners invite members by email and role, change roles and remove members. Owners may invite or promote other owners; the last owner can't be removed or demoted. |
 | D62 | Seller invite details | Operator enters the email and business name; the owner confirms or edits the name on acceptance. Legal name, VAT and contacts come with the business profile (BR01). |
 | D63 | Sell area before stock | A Sell nav item for members only, with a Sell home page and a Members page. |
+
+## Round 16 — Seller billing modes (2026-11-11)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D64 | Billing scope in B07 | Free modes only: Pilot and Comp/test, each on a chosen plan. Paid mode exists but can't be selected until Paystack subscriptions are built (later item); no charges, webhooks or grace periods yet. |
+| D65 | Where plans live | A `plans` table seeded with Starter (R199, 2 members, 2,000 photos, standard identity, 1,000 AI extractions) and Pro (R449, 5 members, 10,000 photos, paid branding, 5,000 AI extractions); operators edit them in Madmin, so prices change without a release (SB01). |
+| D66 | Limits enforced now | Member limit (members plus pending staff invites) and the paid branding entitlement through `Capabilities.entitled?`. Photo and AI limits are stored and enforced when those features ship. |
+| D67 | End of a free period | Owners see a prompt to choose a paid plan and operators see the seller flagged; access is not reduced until Paystack and the SB02 grace rules exist. |
