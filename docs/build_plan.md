@@ -50,7 +50,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
-| B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Discussed |
+| B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05 | B10 | Planned |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05 | B10 | Planned |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
@@ -323,7 +323,7 @@ unreviewed: review them with `bin/rails "help:review[id]"` before enabling their
 globally in production. The dot uses dated `## YYYY-MM-DD` headings in WHATS_NEW.md, so until
 the first dated release it shows only for users who have never opened the page.
 
-### B10 Plant records — discussed 2026-11-11
+### B10 Plant records — discussed and built 2026-11-11
 
 **Scope**
 - **Plants (PL01, D80, D81, D87):** `plants` owned by a user: record number (P-0001 per
@@ -368,4 +368,14 @@ currency; archiving hides a plant from the active collection but keeps its timel
 yesterday's observation sorts before today's; two Monstera records of the same cultivar are
 found separately; an upload at the cap is refused with the note kept; an observation saved
 offline and synced twice creates one event; a deleted account's plants and photos are gone.
+
+**Built notes:** search is a plain ILIKE scan rather than a trigram index; personal
+collections are small, so an index can wait until it's needed. Photos are converted to JPEG
+(HEIC isn't accepted; phone browsers usually send JPEG). Offline reading is a network-first
+service worker limited to `/plants` and `/plants/:id`, plus assets and thumbnails; the
+browser-pane preview can't register service workers, so offline behaviour is tested in
+headless Chrome (in CI). Chrome's offline emulation doesn't reach service-worker fetches,
+so the test checks the saved cache rather than reading a page offline. The app time zone is
+now Africa/Johannesburg until accounts get their own. Help topics: `collection`,
+`adding-a-plant`, `observations-and-photos`, `working-offline`, all unreviewed.
 

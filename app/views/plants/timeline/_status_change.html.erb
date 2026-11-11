@@ -1,0 +1,9 @@
+<li>
+  <p class="vv-caption">
+    <%= l(record.effective_on, format: :long) %> · Status
+  </p>
+
+  <p>
+    <%= plant_status_label(record.status) %><%= " · #{record.reason}" if record.reason.present? %>
+  </p>
+</li>

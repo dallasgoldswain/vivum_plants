@@ -1,0 +1,47 @@
+# Two of the same cultivar stay separate records (UX01).
+monstera_one:
+  user: collector
+  number: 1
+  display_name: Monstera
+  botanical_name: Monstera deliciosa
+  cultivar: Thai Constellation
+  growing_context: indoor
+  tags: [aroid, rare]
+  status: active
+
+monstera_two:
+  user: collector
+  number: 2
+  display_name: Monstera
+  botanical_name: Monstera deliciosa
+  cultivar: Thai Constellation
+  growing_context: indoor
+  nickname: Bathroom Monstera
+  status: active
+
+anubias:
+  user: collector
+  number: 3
+  display_name: Anubias
+  botanical_name: Anubias barteri
+  cultivar: Petite
+  growing_context: aquatic
+  tc_origin: true
+  status: active
+
+old_fern:
+  user: collector
+  number: 4
+  display_name: Bird's nest fern
+  growing_context: terrarium
+  status: archived
+  status_on: <%= 1.month.ago.to_date %>
+
+owner_philodendron:
+  user: owner
+  number: 1
+  display_name: Philodendron
+  botanical_name: Philodendron gloriosum
+  growing_context: indoor
+  tags: [aroid]
+  status: active

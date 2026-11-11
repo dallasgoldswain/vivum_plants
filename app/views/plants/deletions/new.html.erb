@@ -1,0 +1,32 @@
+<% content_for :title, "Delete #{@plant.display_name} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2"><%= @plant.record_id %></p>
+  <h1 class="vv-h2">Delete <%= @plant.display_name %>?</h1>
+</div>
+
+<div class="card">
+  <section class="grid gap-3">
+    <p>This can't be undone. It permanently removes:</p>
+
+    <ul class="list-disc pl-5">
+      <li><%= pluralize(@effects[:photos], "photo") %></li>
+      <li><%= pluralize(@effects[:observations], "observation") %></li>
+
+      <li>
+        <%= pluralize(@effects[:status_changes], "status change") %> and its
+        acquisition details
+      </li>
+    </ul>
+
+    <p>
+      To keep its history instead, set its status to archived. It leaves your
+      active collection but stays searchable.
+    </p>
+  </section>
+
+  <footer class="flex flex-wrap gap-2">
+    <%= button_to "Delete permanently", plant_deletion_path(@plant), class: "btn-destructive" %>
+    <%= link_to "Keep it", plant_path(@plant), class: "btn-outline" %>
+  </footer>
+</div>

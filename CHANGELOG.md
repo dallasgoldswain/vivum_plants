@@ -99,6 +99,23 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   global and percentage enables until the topic is reviewed, shown in the flag console.
   `/whats-new` renders WHATS_NEW.md, with `users.whats_new_seen_at` driving a dot on the link
   (D79). `help.manual` and `help.contextual` marked implemented.
+- Plant records (B10): `plants` in a personal collection (D87) with a per-collection record
+  number (`P-0001`, from `users.last_plant_number`, never reused, D81), five growing contexts
+  (D80), TC origin, quantity, free-text tags (D85) and notes; `acquisitions` with cost in cents
+  and its original currency (PL02); `plant_status_changes` history with effective date and
+  reason (PL03); the `care_events` timeline with observations first and a unique per-user
+  idempotency key (D82); `photos` processed on upload with libvips (upright, 2560 px long
+  edge, all metadata including location stripped, JPEG), thumb and large variants, first photo
+  as cover, 500-photo collector cap with warnings from 80% (OF03, D83). Collection grid and
+  list with search over names, nickname, tags and record number and filters for context,
+  status, TC origin and tag (UX01); permanent delete behind a warning with counts (D86).
+  Offline (OF02, D84): service worker at `/service-worker.js` caches collection and plant
+  pages network-first plus assets and thumbnails; observations queue in IndexedDB when
+  offline and sync once via the idempotency key; the sign-in page clears cached pages.
+  Plants, observations and photo files added to the account export; `purge!` removes them.
+  Four help topics with screenshots; `collection.plants`, `collection.search`,
+  `collection.media` and `collection.acquisition` marked implemented. App time zone set to
+  Africa/Johannesburg. CI runs the offline system test in headless Chrome.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

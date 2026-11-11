@@ -1,0 +1,27 @@
+<% content_for :title, "Edit #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <p class="vv-kicker mb-2"><%= @plant.record_id %></p>
+    <h1 class="vv-h2">Edit <%= @plant.display_name %></h1>
+  </div>
+
+  <%= help_link "adding-a-plant" %>
+</div>
+
+<%= render "form", plant: @plant %>
+
+<div class="card">
+  <header>
+    <h2>Remove this plant</h2>
+
+    <p>
+      Set its status to archived, sold, gifted or lost to keep its history.
+      Deleting it permanently removes its photos and timeline.
+    </p>
+  </header>
+
+  <footer>
+    <%= link_to "Delete permanently", new_plant_deletion_path(@plant), class: "btn-destructive" %>
+  </footer>
+</div>

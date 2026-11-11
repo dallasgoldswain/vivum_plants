@@ -10,9 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "acquisitions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "acquired_on"
+    t.string "source"
+    t.integer "cost_cents"
+    t.string "currency", limit: 3, default: "ZAR", null: false
+    t.string "order_reference"
+    t.integer "quantity"
+    t.text "arrival_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_acquisitions_on_user_id"
+    t.check_constraint "cost_cents IS NULL OR cost_cents >= 0", name: "acquisitions_cost_not_negative"
+    t.check_constraint "quantity IS NULL OR quantity >= 0", name: "acquisitions_quantity_not_negative"
+  end
 
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
@@ -69,6 +85,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.index ["created_at"], name: "index_audit_events_on_created_at"
     t.index ["target_key"], name: "index_audit_events_on_target_key"
     t.index ["target_type", "target_id"], name: "index_audit_events_on_target_type_and_target_id"
+  end
+
+  create_table "care_events", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.string "kind", default: "observation", null: false
+    t.text "note"
+    t.datetime "occurred_at", null: false
+    t.string "idempotency_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plant_id", "occurred_at"], name: "index_care_events_on_plant_id_and_occurred_at"
+    t.index ["plant_id"], name: "index_care_events_on_plant_id"
+    t.index ["user_id", "idempotency_key"], name: "index_care_events_on_user_id_and_idempotency_key", unique: true
+    t.index ["user_id"], name: "index_care_events_on_user_id"
   end
 
   create_table "consent_records", force: :cascade do |t|
@@ -179,6 +210,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.index ["user_id"], name: "index_otp_backup_codes_on_user_id"
   end
 
+  create_table "photos", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.bigint "care_event_id"
+    t.string "caption"
+    t.date "taken_on", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["care_event_id"], name: "index_photos_on_care_event_id"
+    t.index ["plant_id", "taken_on"], name: "index_photos_on_plant_id_and_taken_on"
+    t.index ["plant_id"], name: "index_photos_on_plant_id"
+    t.index ["user_id"], name: "index_photos_on_user_id"
+  end
+
   create_table "plans", force: :cascade do |t|
     t.string "key", null: false
     t.string "name", null: false
@@ -191,6 +236,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_plans_on_key", unique: true
+  end
+
+  create_table "plant_status_changes", force: :cascade do |t|
+    t.bigint "plant_id", null: false
+    t.string "status", null: false
+    t.date "effective_on", null: false
+    t.string "reason"
+    t.datetime "created_at", null: false
+    t.index ["plant_id"], name: "index_plant_status_changes_on_plant_id"
+  end
+
+  create_table "plants", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "acquisition_id"
+    t.integer "number", null: false
+    t.string "display_name", null: false
+    t.string "botanical_name"
+    t.string "cultivar"
+    t.string "common_name"
+    t.string "nickname"
+    t.string "growing_context", null: false
+    t.boolean "tc_origin", default: false, null: false
+    t.string "origin_note"
+    t.integer "quantity", default: 1, null: false
+    t.text "notes"
+    t.string "tags", default: [], null: false, array: true
+    t.string "status", default: "active", null: false
+    t.date "status_on"
+    t.bigint "cover_photo_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["acquisition_id"], name: "index_plants_on_acquisition_id"
+    t.index ["tags"], name: "index_plants_on_tags", using: :gin
+    t.index ["user_id", "number"], name: "index_plants_on_user_id_and_number", unique: true
+    t.index ["user_id", "status"], name: "index_plants_on_user_id_and_status"
+    t.index ["user_id"], name: "index_plants_on_user_id"
+    t.check_constraint "quantity >= 0", name: "plants_quantity_not_negative"
   end
 
   create_table "refer_referral_codes", force: :cascade do |t|
@@ -264,13 +346,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
     t.datetime "deletion_requested_at"
     t.datetime "deleted_at"
     t.datetime "whats_new_seen_at"
+    t.integer "last_plant_number", default: 0, null: false
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["deletion_requested_at"], name: "index_users_on_deletion_requested_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "acquisitions", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "care_events", "plants", on_delete: :cascade
+  add_foreign_key "care_events", "users"
   add_foreign_key "consent_records", "users", on_delete: :cascade
   add_foreign_key "data_requests", "users"
   add_foreign_key "data_requests", "users", column: "handled_by_id"
@@ -280,6 +366,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
+  add_foreign_key "photos", "care_events", on_delete: :cascade
+  add_foreign_key "photos", "plants", on_delete: :cascade
+  add_foreign_key "photos", "users"
+  add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
+  add_foreign_key "plants", "acquisitions", on_delete: :nullify
+  add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify
+  add_foreign_key "plants", "users"
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify

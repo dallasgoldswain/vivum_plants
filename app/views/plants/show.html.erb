@@ -1,0 +1,235 @@
+<% content_for :title, "#{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Collection", plants_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">
+        <%= @plant.record_id %> ·
+        <%= growing_context_label(@plant.growing_context) %>
+      </p>
+
+      <h1 class="vv-h2">
+        <%= @plant.display_name %> <%= plant_status_badge(@plant) %>
+      </h1>
+
+      <% if (identity = plant_identity(@plant)) %>
+        <p class="vv-caption mt-1"><%= identity %></p>
+      <% end %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "observations-and-photos" %>
+      <%= link_to "Edit", edit_plant_path(@plant), class: "btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[2fr_3fr]">
+  <div class="order-2 grid content-start gap-6 lg:order-1">
+    <% if @plant.cover_photo&.image&.attached? %>
+      <%= image_tag @plant.cover_photo.image.variant(:large), alt: @plant.cover_photo.caption.presence || "Cover photo of #{@plant.display_name}", class: "vv-plant-cover" %>
+    <% end %>
+
+    <div class="card">
+      <header>
+        <h2>Details</h2>
+      </header>
+
+      <section>
+        <dl class="vv-details">
+          <% { "Common name" => @plant.common_name, "Nickname" => @plant.nickname, "Quantity" => @plant.quantity, "TC origin" => (@plant.tc_origin? ? "Yes" : nil), "Origin" => @plant.origin_note }.compact_blank.each do |label, value| %>
+            <dt><%= label %></dt>
+            <dd><%= value %></dd>
+          <% end %>
+
+          <% if @plant.tags.any? %>
+            <dt>Tags</dt>
+
+            <dd class="flex flex-wrap gap-1">
+              <% @plant.tags.each do |tag| %>
+                <%= link_to tag, plants_path(tag: tag, status: "all"), class: "badge-outline" %>
+              <% end %>
+            </dd>
+          <% end %>
+
+          <% if (acquisition = @plant.acquisition) && capability?("collection.acquisition") %>
+            <% { "Acquired" => acquisition.acquired_on && l(acquisition.acquired_on, format: :long), "From" => acquisition.source, "Cost" => acquisition_cost(acquisition), "Order" => acquisition.order_reference, "Quantity bought" => acquisition.quantity, "On arrival" => acquisition.arrival_notes }.compact_blank.each do |label, value| %>
+              <dt><%= label %></dt>
+              <dd><%= value %></dd>
+            <% end %>
+          <% end %>
+        </dl>
+
+        <% if @plant.notes.present? %>
+          <p class="mt-4 whitespace-pre-line"><%= @plant.notes %></p>
+        <% end %>
+      </section>
+    </div>
+
+    <div class="card">
+      <header>
+        <h2>Status</h2>
+
+        <p>
+          <%= plant_status_label(@plant.status) %><%= " since #{l(@plant.status_on, format: :long)}" if @plant.status_on %>.
+        </p>
+      </header>
+
+      <section>
+        <%= form_with model: PlantStatusChange.new(status: @plant.status, effective_on: Date.current), url: plant_status_changes_path(@plant), class: "form grid gap-3 sm:grid-cols-2" do |form| %>
+          <div class="grid gap-2">
+            <%= form.label :status, "New status" %>
+            <%= form.select :status, plant_status_options, {}, class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :effective_on, "From" %>
+            <%= form.date_field :effective_on, max: Date.current %>
+          </div>
+
+          <div class="grid gap-2 sm:col-span-2">
+            <%= form.label :reason, "Reason (optional)" %>
+            <%= form.text_field :reason, maxlength: 200, placeholder: "e.g. thrips found" %>
+          </div>
+
+          <div><%= form.submit "Change status", class: "btn-outline" %></div>
+        <% end %>
+      </section>
+    </div>
+  </div>
+
+  <div class="order-1 grid content-start gap-6 lg:order-2">
+    <div class="card" id="observe">
+      <header>
+        <h2>Add an observation</h2>
+
+        <p>
+          A note, photos or both. Works offline: it's sent when you're back
+          online.
+        </p>
+      </header>
+
+      <section>
+        <%= form_with model: CareEvent.new, url: plant_care_events_path(@plant), class: "form grid gap-3", data: { controller: "observation-form", observation_form_plant_id_value: @plant.id, action: "submit->observation-form#submit" } do |form| %>
+          <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, data: { observation_form_target: "key" } %>
+
+          <div class="grid gap-2">
+            <%= form.label :note %>
+            <%= form.text_area :note, rows: 3, placeholder: "New leaf unfurling; roots reaching the pot edge" %>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="grid gap-2">
+              <%= form.label :occurred_at, "When" %>
+              <%= form.datetime_local_field :occurred_at, value: Time.current.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+            </div>
+
+            <% if capability?("collection.media") %>
+              <div class="grid gap-2">
+                <%= form.label :photos %>
+                <%= form.file_field :photos, multiple: true, include_hidden: false, accept: Photo::ACCEPTED_TYPES.join(","), disabled: @quota.full? %>
+              </div>
+            <% end %>
+          </div>
+
+          <p
+            class="vv-caption"
+            data-observation-form-target="status"
+            role="status"
+          ></p>
+
+          <div>
+            <%= form.submit "Save observation", class: "btn", data: { observation_form_target: "submit" } %>
+          </div>
+        <% end %>
+      </section>
+
+      <section
+        class="grid gap-2"
+        data-controller="offline-queue-list"
+        data-offline-queue-list-plant-id-value="<%= @plant.id %>"
+        hidden
+      >
+        <h3 class="vv-h4">Waiting to send</h3>
+        <ul class="grid gap-2" data-offline-queue-list-target="list"></ul>
+      </section>
+    </div>
+
+    <% if capability?("collection.media") %>
+      <div class="card" id="photos">
+        <header>
+          <h2>Photos</h2>
+
+          <p class="<%= 'text-destructive' if @quota.warning? %>">
+            <%= @quota.used %> of <%= @quota.limit %> photos used in your
+            collection. <%= "Delete some to add more." if @quota.full? %>
+          </p>
+        </header>
+
+        <section class="grid gap-4">
+          <% if @photos.any? %>
+            <ul class="vv-photo-grid">
+              <% @photos.each do |photo| %>
+                <li class="grid gap-1">
+                  <%= link_to url_for(photo.image), target: "_blank", rel: "noopener" do %>
+                    <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo from #{l(photo.taken_on, format: :long)}", loading: "lazy", class: "vv-photo-thumb" %>
+                  <% end %>
+
+                  <p class="vv-caption">
+                    <%= l(photo.taken_on, format: :short) %><%= " · #{photo.caption}" if photo.caption.present? %>
+                    <%= " · cover" if photo.cover? %>
+                  </p>
+
+                  <div class="flex gap-1">
+                    <% unless photo.cover? %>
+                      <%= button_to "Make cover", cover_plant_photo_path(@plant, photo), class: "btn-sm-ghost" %>
+                    <% end %>
+
+                    <%= button_to "Delete", plant_photo_path(@plant, photo), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this photo?" } %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+
+          <% unless @quota.full? %>
+            <%= form_with url: plant_photos_path(@plant), scope: :photo, class: "form grid gap-3 sm:grid-cols-2" do |form| %>
+              <div class="grid gap-2 sm:col-span-2">
+                <%= form.label :images, "Add photos" %>
+                <%= form.file_field :images, multiple: true, include_hidden: false, required: true, accept: Photo::ACCEPTED_TYPES.join(",") %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= form.label :caption %>
+                <%= form.text_field :caption, maxlength: 200 %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= form.label :taken_on, "Taken on" %>
+                <%= form.date_field :taken_on, value: Date.current, max: Date.current %>
+              </div>
+
+              <div><%= form.submit "Upload", class: "btn-outline" %></div>
+            <% end %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <div class="card">
+      <header>
+        <h2>Timeline</h2>
+      </header>
+
+      <section>
+        <ol class="vv-timeline">
+          <% @timeline.each do |entry| %>
+            <%= render "plants/timeline/#{entry.kind}", plant: @plant, record: entry.record %>
+          <% end %>
+        </ol>
+      </section>
+    </div>
+  </div>
+</div>

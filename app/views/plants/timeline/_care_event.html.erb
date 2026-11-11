@@ -1,0 +1,19 @@
+<li>
+  <p class="vv-caption">
+    <%= l(record.occurred_at, format: :long) %> · Observation
+  </p>
+
+  <% if record.note.present? %>
+    <p class="whitespace-pre-line"><%= record.note %></p>
+  <% end %>
+
+  <% if record.photos.any? %>
+    <div class="flex flex-wrap gap-2">
+      <% record.photos.each do |photo| %>
+        <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo with this observation", loading: "lazy", class: "vv-timeline-thumb" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= button_to "Delete", plant_care_event_path(plant, record), method: :delete, class: "btn-sm-ghost w-fit", data: { turbo_confirm: "Delete this observation and its photos?" } %>
+</li>

@@ -16,6 +16,17 @@ Rails.application.routes.draw do
     resource :acceptance, only: :create, module: :invitations
   end
 
+  resources :plants do
+    scope module: :plants do
+      resources :status_changes, only: :create
+      resources :care_events, only: %i[ create destroy ]
+      resources :photos, only: %i[ create update destroy ] do
+        post :cover, on: :member
+      end
+      resource :deletion, only: %i[ new create ]
+    end
+  end
+
   namespace :sell do
     root "home#show"
     resources :members, only: %i[ index update destroy ], controller: "memberships"
@@ -52,7 +63,7 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
+  # Offline reading and queued observations (OF02, D84). The manifest waits for the PWA (client.pwa).
+  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 end

@@ -5,6 +5,7 @@ collector:
   email_address: collector@example.com
   password_digest: <%= password_digest %>
   email_verified_at: <%= 1.day.ago.to_fs(:db) %>
+  last_plant_number: 4
 
 # Signed up but has not verified their email.
 unverified:
@@ -18,6 +19,7 @@ owner:
   email_verified_at: <%= 1.day.ago.to_fs(:db) %>
   otp_secret: JBSWY3DPEHPK3PXP
   otp_enabled_at: <%= 1.day.ago.to_fs(:db) %>
+  last_plant_number: 1
 
 # Owner of Aroid Attic who has not set up two-step sign-in yet.
 unenrolled_owner:

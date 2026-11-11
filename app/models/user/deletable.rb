@@ -90,6 +90,8 @@ module User::Deletable
       referral_codes.destroy_all
       referrals.destroy_all
       referral&.destroy!
+      plants.destroy_all
+      acquisitions.destroy_all
       Invitation.for_email(address).update_all(email_address: tombstone_email_address)
       Invitation.pending.where(invited_by: self).update_all(revoked_at: Time.current)
       data_requests.each { it.export_file.purge }

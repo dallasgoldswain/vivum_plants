@@ -148,6 +148,15 @@ TOTP secrets use Active Record encryption.
   bin/rails credentials:edit
   ```
 
+## Collection
+
+Collectors' plant records (B10, PL01–PL04, UX01, OF02, OF03, D80–D87). Plants belong to one user only; controllers load them through `Current.user.plants`, so another user's plant is a 404.
+
+- **Records:** `Plant` (record number `P-0001` from `users.last_plant_number`, never reused), `Acquisition` (cost in cents, original currency), `PlantStatusChange` (history), `CareEvent` (the timeline; observations now, other kinds with B13), `Photo`.
+- **Photos:** `Photo.build_from_upload` processes with libvips before storing (upright, 2560 px, metadata and location stripped, JPEG); originals are never kept. Collectors can keep 500 (`Photo::COLLECTOR_LIMIT`). Stored with Active Storage on disk (`storage/`, the `vivum_plants_storage` Kamal volume in production). **Back up that volume**: photos aren't in the database.
+- **Offline:** `app/views/pwa/service-worker.js` caches collection and plant pages (network first), assets and photo thumbnails, nothing else. `observation_form` queues observations in IndexedDB when offline; `offline_sync` (on `<body>` when signed in) sends them with their idempotency key, so a resend never saves twice. The sign-in page clears cached pages. Bump `VERSION` in the worker to drop old caches. Tests: `bin/rails test test/system/offline_observation_test.rb`.
+- **New domain data:** add export sections in `AccountExport` and wiping in `User::Deletable#purge!` (done for plants, events and photos).
+
 ## Help manual and What's new
 
 The public manual at `/help` (HM01, HM02, D74–D79). Topics are Markdown files in `app/help`, written in the same change as their feature.
@@ -172,6 +181,7 @@ Or individually:
 |---|---|
 | Tests | `bin/rails test` |
 | Help screenshots | `bin/rails help:screenshots` (system tests, headless Chrome) |
+| Offline behaviour | `bin/rails test test/system/offline_observation_test.rb` (headless Chrome, in CI) |
 | Ruby style | `bin/rubocop` |
 | HTML+ERB lint | `bundle exec herb lint` |
 | HTML+ERB format | `bundle exec herb format --check` (fix with `bundle exec herb format`) |

@@ -4,3 +4,6 @@ import "controllers"
 
 import "trix"
 import "@rails/actiontext"
+
+// Offline reading and queued observations (OF02, D84).
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js", { scope: "/" })

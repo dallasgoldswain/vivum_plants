@@ -12,6 +12,10 @@ class User < ApplicationRecord
   has_many :sellers, through: :memberships
   has_many :otp_backup_codes, dependent: :delete_all
   has_many :notifications, as: :recipient, class_name: "Noticed::Notification", dependent: :destroy
+  has_many :plants, dependent: :destroy
+  has_many :acquisitions, dependent: :destroy
+  has_many :care_events, dependent: :destroy
+  has_many :photos, dependent: :destroy
 
   encrypts :otp_secret
 
@@ -42,6 +46,21 @@ class User < ApplicationRecord
 
   def verify_email!
     update!(email_verified_at: Time.current) unless email_verified?
+  end
+
+  # --- Collection ---------------------------------------------------------------
+
+  # The next plant record number (P-0001, …). Counts up atomically and never reuses a
+  # number, even after a plant is deleted (D81).
+  def next_plant_number!
+    self.class.connection.select_value(
+      self.class.sanitize_sql_array([ "UPDATE users SET last_plant_number = last_plant_number + 1 WHERE id = ? RETURNING last_plant_number", id ])
+    ).to_i
+  end
+
+  # Tags this collector has used, for suggestions (D85).
+  def plant_tags
+    plants.pluck(Arel.sql("DISTINCT unnest(tags)")).sort
   end
 
   # --- Two-step sign-in -------------------------------------------------------

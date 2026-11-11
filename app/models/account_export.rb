@@ -38,8 +38,26 @@ class AccountExport
     },
     "data_requests" => ->(user) {
       user.data_requests.order(:created_at).map { it.slice(:kind, :status, :message, :outcome, :due_on, :created_at, :completed_at) }
+    },
+    "plants" => ->(user) {
+      user.plants.includes(:acquisition, :status_changes).order(:number).map do |plant|
+        plant.slice(:number, :display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :origin_note, :quantity, :notes, :tags, :status, :status_on, :created_at, :updated_at).merge(
+          record_id: plant.record_id,
+          acquisition: plant.acquisition&.slice(:acquired_on, :source, :cost_cents, :currency, :order_reference, :quantity, :arrival_notes),
+          status_history: plant.status_changes.map { it.slice(:status, :effective_on, :reason, :created_at) }
+        )
+      end
+    },
+    "care_events" => ->(user) {
+      user.care_events.includes(:plant).order(:occurred_at).map { it.slice(:kind, :note, :occurred_at, :created_at).merge(plant: it.plant.record_id) }
+    },
+    "photos" => ->(user) {
+      user.photos.includes(:plant, image_attachment: :blob).order(:id).map { it.slice(:caption, :taken_on, :created_at).merge(plant: it.plant.record_id, file: AccountExport.photo_path(it)) }
     }
   }.freeze
+
+  # Photo files go in the zip beside photos.json (D68).
+  def self.photo_path(photo) = "photos/#{photo.plant.record_id}-#{photo.id}.jpg"
 
   def initialize(user)
     @user = user
@@ -53,6 +71,9 @@ class AccountExport
       write(zip, "README.txt", readme)
       write(zip, "manifest.json", JSON.pretty_generate(manifest))
       SECTIONS.each { |name, section| write(zip, "#{name}.json", JSON.pretty_generate(section.call(@user))) }
+      @user.photos.includes(:plant, image_attachment: :blob).find_each do |photo|
+        write(zip, self.class.photo_path(photo), photo.image.download) if photo.image.attached?
+      end
     end
     buffer.string
   end

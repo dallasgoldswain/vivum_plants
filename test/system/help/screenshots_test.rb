@@ -16,6 +16,17 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
     sign_in_as_owner
   end
 
+  test "collection" do
+    add_sample_plants
+    capture "collection", plants_path, wait_for: "Your plants"
+  end
+
+  test "plant" do
+    plant = add_sample_plants
+    plant.care_events.create!(user: users(:owner), note: "Third leaf hardening off, darker than the last.", occurred_at: 2.days.ago, idempotency_key: "shot")
+    capture "plant", plant_path(plant), wait_for: "Add an observation"
+  end
+
   test "privacy" do
     capture "privacy", settings_privacy_path, wait_for: "Your choices"
   end
@@ -33,6 +44,14 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
   end
 
   private
+    def add_sample_plants
+      owner = users(:owner)
+      owner.plants.create!(display_name: "Anthurium", botanical_name: "Anthurium warocqueanum", growing_context: "terrarium", tag_list: "aroid, velvet")
+      owner.plants.create!(display_name: "Java fern", botanical_name: "Microsorum pteropus", cultivar: "Windelov", growing_context: "aquatic", tc_origin: true)
+      owner.plants.create!(display_name: "Hoya", botanical_name: "Hoya carnosa", cultivar: "Krimson Queen", growing_context: "indoor",
+        acquisition_attributes: { acquired_on: 3.weeks.ago.to_date, source: "Fern & Frond", cost: "185", currency: "ZAR" })
+    end
+
     def sign_in_as_owner
       visit new_session_path
       fill_in "Email", with: users(:owner).email_address

@@ -38,5 +38,16 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   after 30 days; sign in before then if you change your mind.
 - Ask us what we hold about you, correct something, or object to how we use your data,
   from Privacy. We reply within 30 days and you can follow progress there.
+- Keep your plants in Collection: add a plant with just a name and where it grows, then
+  fill in its botanical name, cultivar, tags and where you got it whenever you like. Each
+  plant gets its own number, such as P-0042.
+- Find any plant by name, cultivar, nickname, tag or number, and filter by where it grows,
+  status or tissue culture origin.
+- Note what you see on a plant's timeline, with photos. Log yesterday's observation today and
+  it lands in the right place. Your collection holds 500 photos.
+- Mark plants as quarantined, sold, gifted, lost or archived, with the date and a reason.
+  Their history stays.
+- No signal? Plants you've opened stay readable, and new observations wait on your device
+  until you're back online.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

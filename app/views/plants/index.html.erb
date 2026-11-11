@@ -1,0 +1,116 @@
+<% content_for :title, "Collection · VIVUM Plants" %>
+
+<div class="grid gap-4">
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Collection</p>
+      <h1 class="vv-h2">Your plants</h1>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "collection" %>
+      <%= link_to "Add a plant", new_plant_path, class: "btn" %>
+    </div>
+  </div>
+
+  <% if capability?("collection.search") && @collection_size.positive? %>
+    <%= form_with url: plants_path, method: :get, class: "grid gap-2", role: "search" do |form| %>
+      <div class="flex gap-2">
+        <%= form.label :q, "Search your plants", class: "sr-only" %>
+        <%= form.search_field :q, value: params[:q], placeholder: "Name, cultivar, P-0042 or tag", class: "input flex-1" %>
+        <%= form.submit "Search", name: nil, class: "btn-outline" %>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.label :context, "Context", class: "sr-only" %>
+        <%= form.select :context, growing_context_options, { include_blank: "All contexts", selected: params[:context] }, class: "select w-auto" %>
+        <%= form.label :status, "Status", class: "sr-only" %>
+        <%= form.select :status, [ [ "Active collection", "active" ], [ "Inactive plants", "inactive" ], [ "All plants", "all" ] ] + plant_status_options.reject { it.last == "active" }, { selected: params[:status].presence || "active" }, class: "select w-auto" %>
+
+        <label class="flex min-h-11 items-center gap-2 text-sm">
+          <%= form.check_box :tc, { checked: params[:tc] == "1" }, "1", nil %>
+          TC origin
+        </label>
+
+        <% if params[:tag].present? %>
+          <%= form.hidden_field :tag, value: params[:tag] %>
+          <span class="badge-secondary self-center">Tag: <%= params[:tag] %></span>
+        <% end %>
+
+        <%= form.hidden_field :view, value: @view %>
+        <%= form.submit "Filter", name: nil, class: "btn-sm-outline self-center" %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<% if @collection_size.zero? %>
+  <div class="card">
+    <header>
+      <h2>Start your collection</h2>
+
+      <p>
+        Add your first plant. A name and where it grows are all you need; the
+        rest can wait.
+      </p>
+    </header>
+
+    <footer><%= link_to "Add a plant", new_plant_path, class: "btn" %></footer>
+  </div>
+<% elsif @plants.empty? %>
+  <div class="card">
+    <section>
+      <p>
+        No plants match.
+        <%= link_to "Show your active collection", plants_path, class: "underline underline-offset-4" %>.
+      </p>
+    </section>
+  </div>
+<% else %>
+  <div class="flex items-center justify-between gap-3">
+    <p class="vv-caption"><%= pluralize(@plants.size, "plant") %></p>
+
+    <nav class="flex gap-1" aria-label="Layout">
+      <%= link_to "Grid", request.query_parameters.merge(view: "grid"), class: "btn-sm-ghost", aria: { current: (@view == "grid" ? "true" : nil) } %>
+      <%= link_to "List", request.query_parameters.merge(view: "list"), class: "btn-sm-ghost", aria: { current: (@view == "list" ? "true" : nil) } %>
+    </nav>
+  </div>
+
+  <% if @view == "grid" %>
+    <ul class="vv-plant-grid">
+      <% @plants.each do |plant| %>
+        <li>
+          <%= link_to plant_path(plant), class: "vv-plant-card" do %>
+            <%= plant_thumb plant, class: "vv-plant-card-image" %>
+
+            <span class="grid gap-0.5 p-3">
+              <span class="font-medium"><%= plant.display_name %></span>
+              <span class="vv-caption"><%= plant_identity(plant) || growing_context_label(plant.growing_context) %></span>
+              <span class="vv-caption"><%= plant.record_id %> <%= plant_status_badge(plant) %></span>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <ul class="grid gap-2">
+      <% @plants.each do |plant| %>
+        <li>
+          <%= link_to plant_path(plant), class: "vv-plant-row" do %>
+            <%= plant_thumb plant, class: "vv-plant-row-image" %>
+
+            <span class="grid min-w-0 flex-1 gap-0.5">
+              <span class="truncate font-medium"><%= plant.display_name %></span>
+
+              <span class="vv-caption truncate">
+                <%= [ plant.record_id, plant_identity(plant), growing_context_label(plant.growing_context) ].compact.join(" · ") %>
+              </span>
+            </span>
+
+            <%= plant_status_badge(plant) %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>

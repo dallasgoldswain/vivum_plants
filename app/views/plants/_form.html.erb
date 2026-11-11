@@ -1,0 +1,152 @@
+<%= form_with model: plant, class: "form grid gap-6" do |form| %>
+  <% if plant.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h2>Please check the details</h2>
+      <section><%= plant.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <header>
+      <h2>The plant</h2>
+    </header>
+
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :display_name, "Name" %>
+        <%= form.text_field :display_name, required: true, maxlength: 120, autofocus: plant.new_record? %>
+
+        <p class="vv-caption">What you call it. It can repeat across plants.</p>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :growing_context, "Where it grows" %>
+        <%= form.select :growing_context, growing_context_options, { include_blank: "Choose…" }, required: true, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :quantity %>
+        <%= form.number_field :quantity, min: 0, step: 1, required: true %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :botanical_name, "Botanical name" %>
+        <%= form.text_field :botanical_name, maxlength: 120, placeholder: "Leave blank if unsure" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :cultivar %>
+        <%= form.text_field :cultivar, maxlength: 120 %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :common_name, "Common name" %>
+        <%= form.text_field :common_name, maxlength: 120 %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :nickname %>
+        <%= form.text_field :nickname, maxlength: 120 %>
+      </div>
+
+      <div class="flex items-start gap-3 sm:col-span-2">
+        <%= form.check_box :tc_origin, class: "mt-1" %>
+
+        <div>
+          <%= form.label :tc_origin, "From tissue culture", class: "font-normal" %>
+
+          <p class="vv-caption">
+            Bought as a TC plantlet. It can still grow in any context.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :origin_note, "Origin" %>
+        <%= form.text_field :origin_note, maxlength: 200, placeholder: "e.g. cutting from a friend's plant" %>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2" data-controller="tag-suggestions">
+        <%= form.label :tag_list, "Tags" %>
+        <%= form.text_field :tag_list, placeholder: "aroid, wishlist trade", data: { tag_suggestions_target: "input" } %>
+
+        <p class="vv-caption">Separate tags with commas.</p>
+
+        <% if (tags = Current.user.plant_tags).any? %>
+          <div class="flex flex-wrap gap-1" aria-label="Your tags">
+            <% tags.first(30).each do |tag| %>
+              <button
+                type="button"
+                class="badge-outline cursor-pointer"
+                data-action="tag-suggestions#add"
+                data-tag-suggestions-tag-param="<%= tag %>"
+              >
+                <%= tag %>
+              </button>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :notes %>
+        <%= form.text_area :notes, rows: 3 %>
+      </div>
+    </section>
+  </div>
+
+  <% if capability?("collection.acquisition") %>
+    <div class="card">
+      <header>
+        <h2>Acquisition</h2>
+        <p>All optional. A gift needs no price.</p>
+      </header>
+
+      <%= form.fields_for :acquisition do |acquisition| %>
+        <section class="grid gap-4 sm:grid-cols-2">
+          <div class="grid gap-2">
+            <%= acquisition.label :acquired_on, "Date" %>
+            <%= acquisition.date_field :acquired_on, max: Date.current %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= acquisition.label :source, "From" %>
+            <%= acquisition.text_field :source, maxlength: 200, placeholder: "Seller, nursery or person" %>
+          </div>
+
+          <div class="grid grid-cols-[1fr_6rem] gap-2">
+            <div class="grid gap-2">
+              <%= acquisition.label :cost %>
+              <%= acquisition.text_field :cost, inputmode: "decimal" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= acquisition.label :currency %>
+              <%= acquisition.select :currency, Acquisition::CURRENCIES, {}, class: "select" %>
+            </div>
+          </div>
+
+          <div class="grid gap-2">
+            <%= acquisition.label :order_reference, "Order reference" %>
+            <%= acquisition.text_field :order_reference, maxlength: 200 %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= acquisition.label :quantity, "Quantity bought" %>
+            <%= acquisition.number_field :quantity, min: 0, step: 1 %>
+          </div>
+
+          <div class="grid gap-2 sm:col-span-2">
+            <%= acquisition.label :arrival_notes, "Arrival notes" %>
+            <%= acquisition.text_area :arrival_notes, rows: 2, placeholder: "Condition on arrival" %>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex gap-2">
+    <%= form.submit plant.new_record? ? "Add plant" : "Save", class: "btn" %>
+    <%= link_to "Cancel", plant.new_record? ? plants_path : plant_path(plant), class: "btn-ghost" %>
+  </div>
+<% end %>

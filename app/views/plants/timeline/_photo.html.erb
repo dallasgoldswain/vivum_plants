@@ -1,0 +1,8 @@
+<li>
+  <p class="vv-caption"><%= l(record.taken_on, format: :long) %> · Photo</p>
+  <%= image_tag record.image.variant(:thumb), alt: record.caption.presence || "Photo", loading: "lazy", class: "vv-timeline-thumb" %>
+
+  <% if record.caption.present? %>
+    <p><%= record.caption %></p>
+  <% end %>
+</li>
