@@ -1,5 +1,5 @@
 <!--
-  User-facing release notes. The in-app What's new page will render this file (not built yet).
+  User-facing release notes, shown on the in-app What's new page (/whats-new).
   Technical changes go in CHANGELOG.md instead.
 
   Writing rules (VIVUM voice):
@@ -8,6 +8,7 @@
   - No emoji, no hype, no internal IDs or gem names.
   - One "## <date>" heading per release, newest first, with an optional one-line summary,
     then short bullet points. Unreleased work stays under "## Coming soon" until it ships.
+  - Date headings as YYYY-MM-DD: a new dated entry shows a dot on the What's new link.
 -->
 
 # What's new
@@ -37,3 +38,5 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   after 30 days; sign in before then if you change your mind.
 - Ask us what we hold about you, correct something, or object to how we use your data,
   from Privacy. We reply within 30 days and you can follow progress there.
+- Find short guides under Help, search them, or use the Help link beside a page's heading.
+  What's new shows a dot when there's something you haven't seen.

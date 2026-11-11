@@ -51,3 +51,14 @@ ActiveSupport::Notifications.subscribe("feature_operation.flipper") do |*, paylo
     details: { gate: payload[:gate_name], value: thing.respond_to?(:value) ? thing.value : thing }.compact
   )
 end
+
+# Releasing a capability to everyone needs a reviewed help topic (HM02, D76). Development
+# and test skip the check so flags can be flipped freely while building.
+# Loaded once at boot (lib/, not autoloaded): Flipper keeps the class it is given.
+require_relative "../../lib/flag_release_guard"
+
+if Rails.env.production?
+  Flipper.configure do |config|
+    config.use FlagReleaseGuard
+  end
+end

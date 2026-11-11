@@ -1,7 +1,10 @@
 <% content_for :title, "Accept your invite · VIVUM Plants" %>
 
 <div>
-  <p class="vv-kicker mb-2">You're invited</p>
+  <div class="flex items-center justify-between gap-3">
+    <p class="vv-kicker">You're invited</p>
+    <%= help_link "accepting-an-invite" %>
+  </div>
 
   <h2 class="vv-h2">
     <%= @invitation.seller? ? "Start selling on VIVUM" : "Join #{@invitation.business_label}" %>

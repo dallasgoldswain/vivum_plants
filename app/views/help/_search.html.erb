@@ -1,0 +1,5 @@
+<%= form_with url: help_path, method: :get, class: "flex gap-2", role: "search" do |form| %>
+  <%= form.label :q, "Search help", class: "sr-only" %>
+  <%= form.search_field :q, value: query, placeholder: "Search help, e.g. two-step", class: "input flex-1" %>
+  <%= form.submit "Search", name: nil, class: "btn-outline" %>
+<% end %>

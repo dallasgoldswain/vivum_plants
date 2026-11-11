@@ -40,6 +40,10 @@ Rails.application.routes.draw do
   end
   get "account-deletion", to: "legal#account_deletion", as: :account_deletion_help
 
+  get "help", to: "help#index", as: :help
+  get "help/:id", to: "help#show", as: :help_topic
+  get "whats-new", to: "whats_new#show", as: :whats_new
+
   root "home#show"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

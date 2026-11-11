@@ -1,0 +1,52 @@
+<% content_for :title, "Help · VIVUM Plants" %>
+
+<div class="grid gap-4">
+  <div>
+    <p class="vv-kicker mb-2">Help</p>
+    <h1 class="vv-h2">How VIVUM Plants works</h1>
+
+    <p class="vv-caption mt-1">
+      Short guides for collectors and sellers. See
+      <%= link_to "what's new", whats_new_path, class: "underline underline-offset-4" %>
+      for recent changes.
+    </p>
+  </div>
+
+  <%= render "help/search", query: @query %>
+</div>
+
+<% if @query.present? %>
+  <section class="card" aria-labelledby="results-heading">
+    <header>
+      <h2 id="results-heading">
+        <%= pluralize(@results.size, "result") %> for
+        &ldquo;<%= @query %>&rdquo;
+      </h2>
+    </header>
+
+    <section>
+      <% if @results.any? %>
+        <%= render "help/topic_list", topics: @results %>
+      <% else %>
+        <p>
+          Nothing matched. Try a shorter word, or
+          <%= link_to "see every topic", help_path, class: "underline underline-offset-4" %>.
+        </p>
+      <% end %>
+    </section>
+  </section>
+<% else %>
+  <% { "everyone" => "Your account", "collector" => "Collecting", "seller" => "Selling" }.each do |audience, heading| %>
+    <% next unless @topics[audience] %>
+
+    <section class="card" aria-labelledby="<%= audience %>-heading">
+      <header>
+        <h2 id="<%= audience %>-heading"><%= heading %></h2>
+      </header>
+
+      <section>
+        <%= render "help/topic_list", topics: @topics[audience] %>
+      </section>
+    </section>
+  <% end %>
+<% end %>

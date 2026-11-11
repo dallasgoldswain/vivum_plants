@@ -11,6 +11,7 @@
 #   entitlement   subscription entitlement the seller must hold (checked from B07)
 #   off           what still works when the flag is off (default: new actions are blocked,
 #                 existing data stays readable, reconciliation and recovery keep running)
+#   internal      true for operator-only tools with no user-facing help topic (HM02, D76)
 #   description   one line, shown in the flag console
 
 # --- Account and access ---
@@ -19,8 +20,8 @@ account.preferences: { domain: account, state: core, description: "Timezone, uni
 account.export: { domain: account, state: core, implemented: true, description: "Machine-readable export of a user's data (§26). A legal right, never gated by this flag" }
 account.deletion: { domain: account, state: core, implemented: true, description: "Self-service account deletion (PR07). A legal right, never gated by this flag" }
 account.onboarding: { domain: account, state: core, description: "Onboarding: guidance sources and AI consent (ST06)" }
-help.manual: { domain: help, state: core, description: "Searchable product manual (HM01)" }
-help.contextual: { domain: help, state: core, depends_on: [help.manual], description: "Contextual help links from screens" }
+help.manual: { domain: help, state: core, implemented: true, description: "Searchable product manual (HM01)" }
+help.contextual: { domain: help, state: core, implemented: true, depends_on: [help.manual], description: "Contextual help links from screens" }
 
 # --- Privacy ---
 privacy.consents: { domain: privacy, state: core, implemented: true, description: "Versioned consent records (PR03). Terms acceptance and Settings → Privacy are never gated by this flag" }

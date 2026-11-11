@@ -1,0 +1,11 @@
+<%# Help and What's new, in the sidebar and the mobile header (D78, D79). %>
+<% if capability?("help.manual") %>
+  <%= nav_link_to "Help", help_path, class: link_class %>
+<% end %>
+
+<%= link_to whats_new_path, class: [ link_class, "gap-2" ], aria: { current: (current_page?(whats_new_path) ? "page" : nil) } do %>
+  What's new
+  <% if whats_new_unseen? %>
+    <span class="vv-dot"><span class="sr-only">(new)</span></span>
+  <% end %>
+<% end %>

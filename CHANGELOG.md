@@ -87,6 +87,18 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   records after the audit retention (PR07, D69–D71). Privacy request form on Settings →
   Privacy, public `/account-deletion` help page, `PrivacyMailer` emails, Madmin can no
   longer destroy users (D73). `rubyzip` added to the Gemfile.
+- Help manual and What's new (B09): Markdown topics in `app/help` with front matter
+  (audience, capabilities, prerequisites, keywords) loaded by `HelpTopic` and rendered by
+  Redcarpet with escaped HTML and heading anchors; public `/help` with in-memory search
+  (title, then keywords, then text) and `/help/:id`, listing only topics whose capabilities are
+  live for the viewer (HM01, D74, D75). Eight first topics with phone and desktop
+  screenshots from headless Chrome system tests (`bin/rails help:screenshots`, not in CI).
+  `help_link` beside page headings (D78). Release check (HM02, D76, D77): a test fails when an
+  implemented capability not marked `internal` has no topic; `bin/rails "help:review[id]"`
+  stamps `reviewed` and a digest of the text; `FlagReleaseGuard` (production only) refuses
+  global and percentage enables until the topic is reviewed, shown in the flag console.
+  `/whats-new` renders WHATS_NEW.md, with `users.whats_new_seen_at` driving a dot on the link
+  (D79). `help.manual` and `help.contextual` marked implemented.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

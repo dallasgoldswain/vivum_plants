@@ -1,0 +1,31 @@
+<% content_for :title, "#{@topic.title} · Help · VIVUM Plants" %>
+
+<div class="grid gap-4">
+  <nav aria-label="Breadcrumb">
+    <%= link_to "Help", help_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+  </nav>
+
+  <%= render "help/search", query: nil %>
+</div>
+
+<article class="vv-legal vv-help card">
+  <section class="grid gap-4">
+    <h1><%= @topic.title %></h1>
+
+    <% if @topic.prerequisites.any? %>
+      <div class="alert" role="note">
+        <h2>Before you start</h2>
+
+        <section>
+          <ul>
+            <% @topic.prerequisites.each do |prerequisite| %>
+              <li><%= prerequisite %></li>
+            <% end %>
+          </ul>
+        </section>
+      </div>
+    <% end %>
+
+    <%= @topic.html %>
+  </section>
+</article>

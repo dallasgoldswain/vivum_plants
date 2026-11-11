@@ -24,7 +24,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Done (Paystack later) |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Done |
-| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Discussed |
+| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Done |
 
 ## Phase 2 — Seller domain (built before the collector domain)
 
@@ -278,7 +278,7 @@ in within 30 days can cancel; after 30 days personal data is gone and audit even
 "Deleted user #id"; the last owner of a seller can't delete their account; every request has
 a logged outcome and a due date.
 
-### B09 Help manual and What's new — discussed 2026-11-11
+### B09 Help manual and What's new — discussed and built 2026-11-11
 
 **Scope**
 - **Topics (D74):** `app/help/<id>.md` with front matter (id, title, audience, capabilities,
@@ -315,3 +315,10 @@ search for a keyword finds its topic; CI fails when an implemented capability ha
 topic; a global enable of a capability with an unreviewed or edited topic is refused in
 production while an actor enable works; screenshots regenerate from the task; What's new
 shows a dot until opened.
+
+**Built notes:** the production guard is a Flipper adapter wrapper (`lib/flag_release_guard.rb`),
+so it also covers enables from a Rails console; `FlagConsoleContext` turns a refusal into the
+console's error message. `using-help` covers both help flags. All eight first topics start
+unreviewed: review them with `bin/rails "help:review[id]"` before enabling their flags
+globally in production. The dot uses dated `## YYYY-MM-DD` headings in WHATS_NEW.md, so until
+the first dated release it shows only for users who have never opened the page.

@@ -20,4 +20,19 @@ class FlagConsoleContextTest < ActionDispatch::IntegrationTest
     assert_equal users(:owner), event.actor
     assert_equal({ "gate" => "boolean", "value" => true }, event.details)
   end
+
+  test "a release refused by the guard goes back to the feature page with the reason" do
+    console = Rack::Builder.new do
+      use FlagConsoleContext
+      run ->(_env) { raise FlagReleaseGuard::Refused, "seller.stock has no help topic." }
+    end
+
+    with_routing do |set|
+      set.draw { mount console, at: "/madmin/flags" }
+      post "/madmin/flags/features/seller.stock/boolean", params: { action: "Enable" }
+
+      assert_response :see_other
+      assert_equal "/madmin/flags/features/seller.stock?error=seller.stock+has+no+help+topic.", response.location
+    end
+  end
 end

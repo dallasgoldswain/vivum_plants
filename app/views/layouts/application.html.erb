@@ -10,7 +10,14 @@
       <%= render "shared/sidebar" %>
       <main class="vv-main">
         <div class="vv-content grid gap-6">
-          <div class="md:hidden"><%= render "shared/wordmark" %></div>
+          <div class="flex items-center justify-between gap-3 md:hidden">
+            <%= render "shared/wordmark" %>
+
+            <nav class="vv-top-links" aria-label="Support">
+              <%= render "shared/help_links", link_class: nil %>
+            </nav>
+          </div>
+
           <%= render "shared/flash" %>
           <%= yield %>
         </div>

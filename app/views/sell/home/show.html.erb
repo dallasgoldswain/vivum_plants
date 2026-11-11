@@ -3,7 +3,11 @@
 <div class="grid gap-3">
   <div>
     <p class="vv-kicker mb-2">Sell</p>
-    <h1 class="vv-h2"><%= Current.seller.name %></h1>
+
+    <div class="flex items-start justify-between gap-3">
+      <h1 class="vv-h2"><%= Current.seller.name %></h1>
+      <%= help_link "selling" %>
+    </div>
 
     <p class="vv-caption mt-1">
       You're <%= Current.membership.role.humanize.downcase %> of this business.

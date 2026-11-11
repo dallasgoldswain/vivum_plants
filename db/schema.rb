@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -143,7 +143,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -263,6 +263,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_120000) do
     t.datetime "updated_at", null: false
     t.datetime "deletion_requested_at"
     t.datetime "deleted_at"
+    t.datetime "whats_new_seen_at"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["deletion_requested_at"], name: "index_users_on_deletion_requested_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true

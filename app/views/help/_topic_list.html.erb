@@ -1,0 +1,13 @@
+<ul class="grid gap-2">
+  <% topics.each do |topic| %>
+    <li>
+      <%= link_to help_topic_path(topic), class: "vv-help-item" do %>
+        <span class="font-medium"><%= topic.title %></span>
+
+        <% if topic.summary %>
+          <span class="vv-caption"><%= topic.summary %></span>
+        <% end %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

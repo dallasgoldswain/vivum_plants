@@ -148,6 +148,16 @@ TOTP secrets use Active Record encryption.
   bin/rails credentials:edit
   ```
 
+## Help manual and What's new
+
+The public manual at `/help` (HM01, HM02, D74–D79). Topics are Markdown files in `app/help`, written in the same change as their feature.
+
+- **A topic:** `app/help/<id>.md` with front matter: `id`, `title`, `summary`, `audience` (everyone, collector, seller), `capabilities` (keys from `config/features.yml`), `prerequisites`, `keywords` (search terms readers use, e.g. "MINE"). A topic shows only when all its capabilities are on for the reader; topics with none always show.
+- **Shipping a feature:** CI fails while an implemented capability has no topic (mark operator-only tools `internal: true` in `config/features.yml`). Add a `help_link "topic-id"` (optionally `anchor: "heading-id"`) beside the page heading; a test checks each link's topic and heading exist.
+- **Screenshots:** write `![Caption](name)` in a topic and add a capture to `test/system/help/screenshots_test.rb`, then run `bin/rails help:screenshots` (headless Chrome, not part of CI). It saves `app/assets/images/help/<name>-phone.png` and `-desktop.png`; check and commit them.
+- **Review before release:** `bin/rails help:status` lists review state; after reading a topic, `bin/rails "help:review[topic-id]"` stamps `reviewed` and a digest of its text. Any later edit voids the review. In production, enabling a capability for everyone or a percentage in `/madmin/flags` is refused until its topics are reviewed (`FlagReleaseGuard`); enabling it for a user or seller, and turning anything off, always work.
+- **What's new:** `/whats-new` renders `WHATS_NEW.md`. Signed-in users see a dot on the link until they open it after the newest `## YYYY-MM-DD` entry.
+
 ## Tests and checks
 
 Run the full local CI (setup, style, security, architecture, tests):
@@ -161,6 +171,7 @@ Or individually:
 | Check | Command |
 |---|---|
 | Tests | `bin/rails test` |
+| Help screenshots | `bin/rails help:screenshots` (system tests, headless Chrome) |
 | Ruby style | `bin/rubocop` |
 | HTML+ERB lint | `bundle exec herb lint` |
 | HTML+ERB format | `bundle exec herb format --check` (fix with `bundle exec herb format`) |

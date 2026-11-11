@@ -24,7 +24,8 @@ class Capability::Registry
         depends_on: Array(attrs["depends_on"]).map(&:to_s),
         entitlement: attrs["entitlement"],
         description: attrs.fetch("description"),
-        off: attrs["off"]
+        off: attrs["off"],
+        internal: attrs.fetch("internal", false)
       ) ]
     end.freeze
     validate!
