@@ -24,7 +24,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Done (Paystack later) |
 | B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Done |
-| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Next |
+| B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Discussed |
 
 ## Phase 2 — Seller domain (built before the collector domain)
 
@@ -277,3 +277,41 @@ expires after 7 days; a deleted account can't be used, its sessions end at once,
 in within 30 days can cancel; after 30 days personal data is gone and audit events show
 "Deleted user #id"; the last owner of a seller can't delete their account; every request has
 a logged outcome and a due date.
+
+### B09 Help manual and What's new — discussed 2026-11-11
+
+**Scope**
+- **Topics (D74):** `app/help/<id>.md` with front matter (id, title, audience, capabilities,
+  prerequisites, keywords, reviewed, reviewed_digest). A `HelpTopic` loader parses and
+  caches them; Redcarpet renders the body (safe HTML, heading anchors).
+- **Manual (HM01, D75):** public `/help` (search plus topics grouped by audience) and
+  `/help/:id`, mobile-friendly, in a help layout that shows the app shell when signed in.
+  Only topics whose capabilities are live for the viewer are listed or reachable. Search
+  ranks title, then keywords, then text.
+- **First topics:** cover what exists: signing up and verifying, two-step sign-in, privacy
+  and consents, exporting and deleting your account, accepting an invite, Sell home,
+  members and invites, plans. The PRD search terms for later features (MINE, backup
+  bidder, closeout and so on) arrive with those features.
+- **Contextual links (D78):** a `help_link("topic-id", anchor:)` helper rendering a small
+  Help link beside page headings, added to the existing pages.
+- **Screenshots (D78):** headless Chrome system tests under `test/system/help`, one per
+  topic that needs images, saving phone and desktop PNGs to `app/assets/images/help`;
+  `bin/rails help:screenshots` runs them. Topics embed them with captions.
+- **Release check (HM02, D76, D77):** a test that every implemented capability not marked
+  internal has a topic; `bin/rails "help:review[id]"` stamps the date and digest; in
+  production, Flipper global or percentage enables are refused for a capability whose
+  topic isn't reviewed, with the reason shown in the flag console (actor enables and
+  disables pass).
+- **What's new (D79):** `/whats-new` renders WHATS_NEW.md; `users.whats_new_seen_at` drives a
+  dot on the sidebar link until the user opens it.
+- Flags `help.manual` and `help.contextual` marked implemented.
+
+**Deferred:** topics for features not built yet (each feature adds its own); translations;
+a help side sheet (links open the page for now).
+
+**Acceptance:** a signed-out visitor can search and read live topics; a topic for a
+capability that's off is neither listed nor reachable, but is for a user it's enabled for;
+search for a keyword finds its topic; CI fails when an implemented capability has no
+topic; a global enable of a capability with an unreviewed or edited topic is refused in
+production while an actor enable works; screenshots regenerate from the task; What's new
+shows a dot until opened.

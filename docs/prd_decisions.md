@@ -173,3 +173,14 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D71 | Last owner of a seller | Deletion is refused until another member is made owner, or VIVUM closes the business. Seller data belongs to the seller and is never deleted as a side effect of a person's deletion. |
 | D72 | Other data subject requests | Settings → Privacy has a "Make a privacy request" form (access, correction, objection, other). All requests, including exports and deletions, are logged in one table with a 30-day due date (O13) and an outcome; operators work the queue in Madmin. Buyer requests come with buyers (B21). |
 | D73 | App-store deletion rule | The web flow (Settings → Account → Delete account) is the one path; native shells open the same page. A public `/account-deletion` page explains the steps (Google Play). Emails go out on request, on cancel and on purge. |
+
+## Round 18 — Help manual (2026-11-11)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D74 | Where help topics live | Markdown files in the repo (`app/help`), one per topic, with front matter: id, title, audience (collector, seller, everyone), capability keys, prerequisites (integration, subscription, rollout) and search keywords. Rendered with Redcarpet; written in the same change as the feature (D30). |
+| D75 | Who can read the manual | `/help` is public. A topic is listed only when its capabilities are live for the viewer (enabled globally, or for the signed-in user or their business); topics with no capability (account basics) always show. Search runs over title, keywords and text in memory, so it finds "MINE" and similar terms by keyword. |
+| D76 | Release check (HM02) | A test fails when an implemented, user-facing capability has no topic. Enabling a capability globally or by percentage in production is refused until its topic is reviewed; enabling it for one user or business (founder testing, pilot sellers) and turning anything off are never blocked. Development and test skip the block. |
+| D77 | Marking a topic reviewed | Front matter `reviewed` (date) and `reviewed_digest` (hash of the topic text), written by `bin/rails "help:review[topic-id]"` at the founder's request. A later text change no longer matches the digest, so the topic counts as unreviewed until reviewed again. |
+| D78 | Contextual help and screenshots | A Help link beside page headings opens the topic (or a section of it). Screenshots ship with topics from B09 on: headless Chrome system tests sign in with fixture data and save phone and desktop PNGs, run with `bin/rails help:screenshots` rather than on every CI run. |
+| D79 | What's new page | `/whats-new` renders WHATS_NEW.md with the same renderer, linked from Help and the sidebar, with a dot until the user has seen the latest entry. |
