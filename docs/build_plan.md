@@ -23,7 +23,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B05 | Consent records, terms and privacy acceptance, Privacy settings | PR02, PR03, PR04, ST06, D15 | B01 | Done |
 | B06 | Seller and staff invites, onboarding (invite-only), Sell home and Members | SO02, SO03, D17, D58–D63 | B02, B04 | Done |
 | B07 | Seller billing modes: Pilot, Comp, Paid (Paystack later) | SB01–SB03, D21, D64–D67 | B06 | Done (Paystack later) |
-| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Next |
+| B08 | Account export and deletion | §26 export, PR05, PR07, OF01 store rules | B01 | Discussed |
 | B09 | Help manual skeleton and contextual links | HM01, HM02 | B03 | Planned |
 
 ## Phase 2 — Seller domain (built before the collector domain)
@@ -244,3 +244,36 @@ seller can't; only operators change billing mode and every change is audited wit
 inviting beyond the member limit fails; an ended free period shows the prompt without
 removing access; Paid can't be selected yet.
 
+
+### B08 Account export and deletion — discussed 2026-11-11
+
+**Scope**
+- **Data requests log (PR05, D72):** one `data_requests` table (user, kind: export, deletion,
+  access, correction, objection, other; message; status; due date 30 days after the request;
+  outcome; handled by; completed at). Operators work open requests in Madmin, with an overdue
+  scope; every status change is audited.
+- **Export (§26, D68):** Settings → Account → "Export my data" queues a job that writes a
+  JSON zip to private storage: profile, preferences, memberships, consents, invites sent and
+  received, referrals and notifications. Each domain adds a section through one exporter
+  registry as it ships (plants, photos, setups and so on). The email links to a signed
+  download that expires in 7 days; only one export runs at a time.
+- **Deletion (PR07, D69–D71, D73):** Settings → Account → "Delete account" asks for the
+  password and two-step code if on, explains the 30 days, and refuses if the user is the last
+  owner of any seller. Confirming deactivates the account, ends all sessions and sends an
+  email. Signing in within 30 days offers "Cancel deletion"; after that a daily job purges:
+  personal fields wiped, sessions, backup codes, notifications, referrals, memberships,
+  pending invites and attachments removed; the row stays as an anonymised tombstone.
+  Consent records are purged after 2 years with the audit log.
+- **Privacy requests form (D72):** Settings → Privacy, kind plus message; confirmation email.
+- **Public page (D73):** `/account-deletion` explains how to delete an account and what is
+  kept.
+- Flags `account.export`, `account.deletion` and `privacy.dsr` marked implemented.
+
+**Deferred:** buyer requests (`privacy.buyer_dsr`, with B21); backup expiry (90 days) is a
+hosting setting, not code; per-domain export sections arrive with each domain.
+
+**Acceptance:** an export zip contains the user's records and no one else's; the link
+expires after 7 days; a deleted account can't be used, its sessions end at once, and signing
+in within 30 days can cancel; after 30 days personal data is gone and audit events show
+"Deleted user #id"; the last owner of a seller can't delete their account; every request has
+a logged outcome and a due date.

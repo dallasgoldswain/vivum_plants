@@ -162,3 +162,14 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D65 | Where plans live | A `plans` table seeded with Starter (R199, 2 members, 2,000 photos, standard identity, 1,000 AI extractions) and Pro (R449, 5 members, 10,000 photos, paid branding, 5,000 AI extractions); operators edit them in Madmin, so prices change without a release (SB01). |
 | D66 | Limits enforced now | Member limit (members plus pending staff invites) and the paid branding entitlement through `Capabilities.entitled?`. Photo and AI limits are stored and enforced when those features ship. |
 | D67 | End of a free period | Owners see a prompt to choose a paid plan and operators see the seller flagged; access is not reduced until Paystack and the SB02 grace rules exist. |
+
+## Round 17 — Account export and deletion (2026-11-11)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D68 | How exports are delivered | A background job builds a JSON zip (photos added as later domains add them); the user gets an email with a signed link that expires after 7 days. One export in progress at a time. Each domain contributes its own section as it ships. |
+| D69 | What deletion does | After re-entering the password (and two-step code if on), the account is deactivated and signed out everywhere at once. Signing in within 30 days offers to cancel; after 30 days a daily job purges it (PR07). |
+| D70 | What a purged account leaves | An anonymised tombstone: the user row keeps only its id and deletion time; email, name, password, two-step secrets, sessions, notifications and referral details are wiped. Audit events show "Deleted user #id". Consent records are kept as proof for the audit retention period (2 years, D52), then purged. Confirm with the attorney (O13). |
+| D71 | Last owner of a seller | Deletion is refused until another member is made owner, or VIVUM closes the business. Seller data belongs to the seller and is never deleted as a side effect of a person's deletion. |
+| D72 | Other data subject requests | Settings → Privacy has a "Make a privacy request" form (access, correction, objection, other). All requests, including exports and deletions, are logged in one table with a 30-day due date (O13) and an outcome; operators work the queue in Madmin. Buyer requests come with buyers (B21). |
+| D73 | App-store deletion rule | The web flow (Settings → Account → Delete account) is the one path; native shells open the same page. A public `/account-deletion` page explains the steps (Google Play). Emails go out on request, on cancel and on purge. |
