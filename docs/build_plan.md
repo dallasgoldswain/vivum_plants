@@ -52,7 +52,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 |---|---|---|---|---|
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
-| B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05 | B10 | Planned |
+| B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Planned |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
@@ -432,5 +432,51 @@ Custom metrics are shared across all of a collector's environments. Archiving re
 environment with plants still in it rather than moving them out silently. The offline form
 controller is now generic (`offline-form`), and the IndexedDB store was renamed, which drops
 anything queued by the B10 build (development only). Help topics `environments` and
-`measurements` are new; `working-offline` and `observations-and-photos` changed, so all four
-need review.
+`measurements` are new; `working-offline` and `observations-and-photos` changed; all four
+reviewed 2026-11-12.
+
+### B12 Substrate ingredients and versioned recipes, scaling — discussed 2026-11-12
+
+**Scope**
+- **Ingredients (SU01, D96, D97):** `ingredients` that are either built-in (no user, seeded
+  from `db/seeds/ingredients.yml`, about 40 generic entries, not editable) or personal (owned
+  by a user, generic or branded with manufacturer and product name). Fields: name, category
+  (fixed list), water retention and aeration (low, medium, high), particle size min and max
+  in mm, intended use, preparation, source, notes; status active or archived. "Copy to
+  personal" turns a built-in into an editable personal ingredient. Qualitative properties
+  show a "guidance" label.
+- **Recipes and versions (SU02, SU04, D98, D99):** `recipes` (user, name, growing contexts,
+  source, private notes, status active or archived, share token) with `recipe_versions`
+  (number, basis parts or percent, state draft or ready, notes) and `recipe_components`
+  (version, ingredient, quantity). Parts show % equivalents; a % version must total 100%
+  before it's ready. A ready version that no setup uses is edited in place; changing a used
+  version saves the next version. Single-material substrates are one-ingredient recipes.
+- **Scaling (SU03, D98):** target volume in L or mL; each component rounded to the nearest
+  50 mL (25 mL under 1 L) with the rounded total shown. Done in a Stimulus controller (works
+  offline), with the same rule in a Ruby class that the tests check against AT09.
+- **Assigning (PL05, D100):** `plant_setups` gains `recipe_version_id`; the setup form offers
+  the latest ready version of each active recipe. Setup timeline events show recipe and
+  version. The recipe page lists plants on each version, current and past.
+- **Sharing (D102):** a recipe's public link (`/r/:token`) shows the current ready version
+  with the scaler, without notes or plants; the collector can turn the link off or make a new
+  one. No sign-in, no indexing.
+- **Search, offline and deletion (SU05, D101, D102):** recipe list search by name and
+  ingredient, filters for growing context and current or past use; service worker caches
+  recipe and ingredient pages. Used recipes and personal ingredients archive; unused ones
+  delete after a warning.
+- **Account data:** export sections for ingredients (personal), recipes, versions and
+  components; setups export their recipe version; `purge!` removes them.
+- **Help and flags:** topics for ingredients, and for recipes, versions and scaling;
+  `substrate.ingredients`, `substrate.recipes`, `substrate.scaling` and `substrate.share`
+  marked implemented.
+
+**Deferred:** built-in recipes (with the library, B18); repot as a care event with recipe
+choice (B13); bulk assignment from the recipe page; weight-based recipes and cups or scoops;
+ingredient stock and cost (excluded by the PRD); recipes in care packs (B31).
+
+**Acceptance:** 2 bark : 1 perlite : 1 coir shows 50/25/25%; a % recipe at 95% can't be
+marked ready; 2:1:1 scaled to 4 L gives 2 L / 1 L / 1 L; a plant on v1 stays on v1 after v2 is
+saved, and its earlier setup events still show v1; a branded ingredient keeps its
+manufacturer and is distinct from the generic one; built-ins can't be edited but can be
+copied; a used recipe can be archived but not deleted; a shared link opens signed out,
+shows no notes, and stops working once revoked.
