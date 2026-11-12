@@ -32,6 +32,7 @@ class CareEvent < ApplicationRecord
   belongs_to :environment, optional: true
   belongs_to :from_environment, class_name: "Environment", optional: true
   belongs_to :plant_setup, optional: true
+  belongs_to :care_task, optional: true
   has_many :photos, -> { order(:id) }, dependent: :destroy
 
   enum :kind, KINDS.index_by(&:itself), validate: true, default: "observation"
@@ -39,6 +40,8 @@ class CareEvent < ApplicationRecord
   normalizes :product, :target, :label, with: ->(value) { value.squish.presence }
 
   before_validation :drop_unused_details
+  after_create :complete_open_task, if: -> { care_task_id.nil? && kind.in?(LOGGED_KINDS) }
+  after_destroy -> { care_task.reopen! }, if: -> { care_task&.completed? && !destroyed_by_association }
 
   validates :occurred_at, :idempotency_key, presence: true
   validates :idempotency_key, length: { maximum: 64 }, uniqueness: { scope: :user_id }
@@ -88,6 +91,13 @@ class CareEvent < ApplicationRecord
   def date_editable? = deletable?
 
   private
+    # Logging care completes the plant's matching reminder that's due or nearly due (D114).
+    def complete_open_task
+      task = CareTask.completable_by(self) or return
+      self.care_task = task
+      task.resolve_with!(self)
+    end
+
     def drop_unused_details
       kept = DETAILS.fetch(kind, [])
       (DETAIL_COLUMNS - kept).each { self[it] = nil }

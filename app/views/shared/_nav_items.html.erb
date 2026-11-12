@@ -1,5 +1,5 @@
 <%# Primary navigation, shared by the sidebar and the mobile bottom nav. %>
-<%= nav_link_to "Home", root_path, class: link_class %>
+<%= nav_link_to (capability?("care.reminders") ? "Today" : "Home"), root_path, class: link_class %>
 
 <% if capability?("collection.plants") %>
   <%= nav_link_to "Collection", plants_path, class: link_class %>

@@ -20,6 +20,9 @@ Rails.application.routes.draw do
     scope module: :plants do
       resources :status_changes, only: :create
       resources :care_events, only: %i[ create edit update destroy ]
+      resources :care_schedules, only: %i[ new create edit update destroy ] do
+        resource :pause, only: %i[ create destroy ], module: :care_schedules
+      end
       resources :photos, only: %i[ create update destroy ] do
         post :cover, on: :member
       end
@@ -31,6 +34,15 @@ Rails.application.routes.draw do
   end
 
   resources :care_logs, only: %i[ new create ]
+  resources :care_schedules, only: %i[ new create ]
+  resources :task_completions, only: :create
+  resources :care_tasks, only: :update do
+    scope module: :care_tasks do
+      resource :completion, only: %i[ new create ]
+      resource :skip, only: :create
+      resource :snooze, only: :create
+    end
+  end
 
   resources :environments, except: :destroy do
     scope module: :environments do
@@ -77,6 +89,7 @@ Rails.application.routes.draw do
     resources :consents, only: :update, param: :purpose
     resources :privacy_requests, only: :create
     resource :account, only: :show, controller: "account"
+    resource :time_zone, only: :update
     resources :exports, only: %i[ create show ], param: :token
     resource :account_deletion, only: %i[ new create ]
   end

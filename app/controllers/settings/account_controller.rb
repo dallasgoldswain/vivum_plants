@@ -1,4 +1,4 @@
-# Settings → Account: export your data and delete your account (§26, PR05, PR07; D68–D73).
+# Settings → Account: timezone (D117), export your data and delete your account (§26, PR05, PR07; D68–D73).
 class Settings::AccountController < ApplicationController
   skip_verify_authorized # acts only on Current.user
 

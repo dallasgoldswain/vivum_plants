@@ -13,6 +13,24 @@
 
 <div class="card">
   <header>
+    <h2>Timezone</h2>
+    <p>Decides what "today" is for your reminders.</p>
+  </header>
+
+  <section>
+    <%= form_with url: settings_time_zone_path, method: :patch, class: "form flex flex-wrap items-end gap-2" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :time_zone, "Timezone" %>
+        <%= form.select :time_zone, time_zone_options(Current.user.time_zone_or_default.tzinfo.name), {}, class: "select w-auto" %>
+      </div>
+
+      <%= form.submit "Save", class: "btn-outline" %>
+    <% end %>
+  </section>
+</div>
+
+<div class="card">
+  <header>
     <h2>Export your data</h2>
 
     <p>

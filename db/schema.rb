@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -106,6 +106,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
     t.string "strength"
     t.string "target"
     t.string "label"
+    t.bigint "care_task_id"
+    t.index ["care_task_id"], name: "index_care_events_on_care_task_id", unique: true
     t.index ["environment_id"], name: "index_care_events_on_environment_id"
     t.index ["from_environment_id"], name: "index_care_events_on_from_environment_id"
     t.index ["plant_id", "kind", "occurred_at"], name: "index_care_events_on_plant_id_and_kind_and_occurred_at"
@@ -115,6 +117,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
     t.index ["user_id", "idempotency_key"], name: "index_care_events_on_user_id_and_idempotency_key", unique: true
     t.index ["user_id"], name: "index_care_events_on_user_id"
     t.check_constraint "amount IS NULL OR amount > 0::numeric", name: "care_events_amount_positive"
+  end
+
+  create_table "care_schedules", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.string "kind", null: false
+    t.string "label"
+    t.string "note"
+    t.integer "interval"
+    t.string "interval_unit"
+    t.string "mode", default: "after_completion", null: false
+    t.date "starts_on", null: false
+    t.string "status", default: "active", null: false
+    t.boolean "paused_by_status", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
+    t.index ["user_id"], name: "index_care_schedules_on_user_id"
+    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
+  end
+
+  create_table "care_tasks", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.bigint "care_schedule_id", null: false
+    t.date "due_on", null: false
+    t.boolean "due_on_changed_by_hand", default: false, null: false
+    t.date "snoozed_until"
+    t.string "state", default: "open", null: false
+    t.datetime "resolved_at"
+    t.date "resolved_on"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["care_schedule_id"], name: "index_care_tasks_on_care_schedule_id"
+    t.index ["care_schedule_id"], name: "index_care_tasks_one_open_per_schedule", unique: true, where: "((state)::text = 'open'::text)"
+    t.index ["plant_id"], name: "index_care_tasks_on_plant_id"
+    t.index ["user_id", "state", "due_on"], name: "index_care_tasks_on_user_id_and_state_and_due_on"
+    t.index ["user_id"], name: "index_care_tasks_on_user_id"
   end
 
   create_table "consent_records", force: :cascade do |t|
@@ -514,6 +554,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
     t.datetime "deleted_at"
     t.datetime "whats_new_seen_at"
     t.integer "last_plant_number", default: 0, null: false
+    t.string "time_zone"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["deletion_requested_at"], name: "index_users_on_deletion_requested_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
@@ -522,11 +563,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
   add_foreign_key "acquisitions", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "care_events", "care_tasks", on_delete: :nullify
   add_foreign_key "care_events", "environments", column: "from_environment_id", on_delete: :nullify
   add_foreign_key "care_events", "environments", on_delete: :nullify
   add_foreign_key "care_events", "plant_setups", on_delete: :cascade
   add_foreign_key "care_events", "plants", on_delete: :cascade
   add_foreign_key "care_events", "users"
+  add_foreign_key "care_schedules", "plants"
+  add_foreign_key "care_schedules", "users"
+  add_foreign_key "care_tasks", "care_schedules"
+  add_foreign_key "care_tasks", "plants"
+  add_foreign_key "care_tasks", "users"
   add_foreign_key "consent_records", "users", on_delete: :cascade
   add_foreign_key "custom_metrics", "users"
   add_foreign_key "data_requests", "users"

@@ -4,8 +4,13 @@ require "application_system_test_case"
 # waiting, and sent once when the connection returns. Run in headless Chrome (bin/ci).
 class OfflineTest < ApplicationSystemTestCase
   setup do
-    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling care.logs ].each { Flipper.enable(it) }
+    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling care.logs care.reminders ].each { Flipper.enable(it) }
     users(:collector).update!(whats_new_seen_at: Time.current)
+  end
+
+  # A failed test must not leave the browser offline for the next one.
+  teardown do
+    page.driver.browser.network_conditions = { offline: false, latency: 0, throughput: 0 }
   end
 
   test "an observation saved offline is sent once when back online" do
@@ -66,6 +71,45 @@ class OfflineTest < ApplicationSystemTestCase
     click_on "Undo"
     assert_text "Entry deleted."
     assert_equal 0, CareEvent.count
+  end
+
+  test "Done on Today saved offline is sent once, logging care for each ticked plant (D120)" do
+    user = users(:collector)
+    tasks = [ plants(:anubias), plants(:monstera_one) ].map do |plant|
+      user.care_schedules.create!(plant: plant, kind: "watering", interval: 7, interval_unit: "day", starts_on: Date.current).tap(&:start!).open_task
+    end
+    sign_in
+    visit root_path
+    assert_text "Water · 2 plants"
+
+    page.driver.browser.network_conditions = { offline: true, latency: 0, throughput: 0 }
+    uncheck "task_due_#{tasks.last.id}"
+    click_on "Done for ticked plants"
+    assert_text "Saved on this device"
+    assert_text "Water done"
+    assert_equal 0, CareEvent.count
+
+    page.driver.browser.network_conditions = { offline: false, latency: 0, throughput: 0 }
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    assert_no_text "Waiting to send", wait: 10
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    sleep 1
+    assert_equal [ plants(:anubias) ], CareEvent.watering.map(&:plant)
+    assert tasks.first.reload.completed?
+    assert tasks.last.reload.open?
+  end
+
+  test "the reminder form previews the next dates as you choose" do
+    sign_in
+    visit new_plant_care_schedule_path(plants(:anubias))
+    fill_in "First date", with: Date.new(2027, 1, 31)
+    find_field("care_schedule_interval").fill_in(with: "1")
+    find("select[name='care_schedule[interval_unit]']").select("months")
+    choose "Fixed dates (every Monday, or the 1st of the month)"
+    assert_text "Sun 31 Jan · Sun 28 Feb · Wed 31 Mar · Fri 30 Apr · Mon 31 May"
+    choose "Once"
+    assert_text "Sun 31 Jan"
+    assert_no_text "28 Feb"
   end
 
   test "a reading saved offline is sent once when back online" do
@@ -169,6 +213,6 @@ class OfflineTest < ApplicationSystemTestCase
       fill_in "Email", with: users(:collector).email_address
       fill_in "Password", with: "password-long-enough"
       click_on "Sign in"
-      assert_text "Welcome to VIVUM Plants"
+      assert_text "Signed in as"
     end
 end

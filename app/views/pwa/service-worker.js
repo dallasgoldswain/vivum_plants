@@ -1,10 +1,10 @@
-// Offline reading for the collection (OF02, D84, D94). Collection, plant and environment
-// pages are fetched from the network first and fall back to the last copy; assets and photo
+// Offline reading for the collection (OF02, D84, D94, D120). Today, collection, plant and
+// environment pages are fetched from the network first and fall back to the last copy; assets and photo
 // thumbnails are cached once. Nothing else is cached: no seller, payment, order or account pages.
 const VERSION = "v1"
 const PAGES = `vivum-pages-${VERSION}`
 const ASSETS = `vivum-assets-${VERSION}`
-const COLLECTION_PAGE = /^\/(plants|environments|recipes|ingredients)(\/\d+)?\/?$/
+const COLLECTION_PAGE = /^\/$|^\/(plants|environments|recipes|ingredients)(\/\d+)?\/?$/
 
 self.addEventListener("install", () => self.skipWaiting())
 

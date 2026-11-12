@@ -69,7 +69,15 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Water a whole shelf at once, or any plants you pick from your collection.
 - See when each plant was last watered, fed and repotted, and find the ones not watered for
   a week or more.
-- No signal? Plants, environments and recipes you've opened stay readable, and new
-  observations, care and readings wait on your device until you're back online.
+- Set reminders to water, feed, repot or check a plant, once or on repeat: every so many
+  days after you last did it, or on fixed dates. The form shows the next dates as you choose.
+- Today is your new home page: what's due, grouped so you can water a whole shelf with one
+  tap. Skip what isn't needed, or snooze it for later.
+- Logging care on a plant's page completes its reminder too.
+- Reminders pause when a plant is sold, gifted, lost or archived, and start again if it comes
+  back.
+- No signal? Today, plants, environments and recipes you've opened stay readable, and new
+  observations, care, readings and reminder updates wait on your device until you're back
+  online.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

@@ -109,6 +109,10 @@
       <%= render "plants/care", plant: @plant, latest: @last_care, logged_event: @logged_event, setup: @plant.current_setup, recipes: @recipes, quota: @quota, suggestions: @care_suggestions %>
     <% end %>
 
+    <% if capability?("care.reminders") %>
+      <%= render "plants/reminders", plant: @plant, schedules: @schedules %>
+    <% end %>
+
     <div class="card" id="observe">
       <header>
         <h2>Add an observation</h2>

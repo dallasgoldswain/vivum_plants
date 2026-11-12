@@ -32,6 +32,6 @@ export default class extends Controller {
     } finally {
       this.syncing = false
     }
-    if (sent && /^\/(plants|environments)/.test(window.location.pathname)) window.Turbo.visit(window.location.pathname, { action: "replace" })
+    if (sent && /^\/($|plants|environments)/.test(window.location.pathname)) window.Turbo.visit(window.location.pathname, { action: "replace" })
   }
 }

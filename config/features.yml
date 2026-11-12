@@ -46,7 +46,7 @@ collection.tissue_culture: { domain: collector, state: core, depends_on: [collec
 # --- Care and library ---
 care.logs: { domain: care, state: core, implemented: true, depends_on: [collection.plants], description: "Care events and quick care entry (CA01)" }
 care.shared_maintenance: { domain: care, state: core, depends_on: [collection.environments, care.reminders], description: "Environment maintenance tasks (EN04)" }
-care.reminders: { domain: care, state: core, depends_on: [care.logs], description: "Schedules, reminders and the Today inbox (CA02–CA05)" }
+care.reminders: { domain: care, state: core, implemented: true, depends_on: [care.logs], description: "Schedules, reminders and the Today inbox (CA02–CA05)" }
 care.library_guidance: { domain: care, state: core, depends_on: [library.profiles, care.reminders], description: "Suggestions from built-in profiles" }
 care.ai_guidance: { domain: care, state: pilot, depends_on: [ai.care_suggestions, care.reminders], description: "AI care suggestions in the care plan" }
 library.profiles: { domain: care, state: core, description: "Built-in species reference profiles (GU01)" }

@@ -23,7 +23,15 @@
             <span class="vv-caption"><%= details %></span>
           <% end %>
 
+          <% if logged_event.care_task %>
+            <span class="vv-caption basis-full">Also completed its <%= care_task_title(logged_event.care_task).downcase %> reminder.</span>
+          <% end %>
+
           <%= link_to "Add details", edit_plant_care_event_path(plant, logged_event), class: "btn-sm-outline" %>
+
+          <% if capability?("care.reminders") && !logged_event.care_task %>
+            <%= link_to "Repeat every…", new_plant_care_schedule_path(plant, kind: logged_event.kind, label: logged_event.label, from: logged_event.occurred_at.to_date.iso8601), class: "btn-sm-outline" %>
+          <% end %>
 
           <% if logged_event.deletable? %>
             <%= button_to "Undo", plant_care_event_path(plant, logged_event), method: :delete, class: "btn-sm-ghost" %>

@@ -23,13 +23,20 @@ class User < ApplicationRecord
   has_many :custom_metrics, dependent: :destroy
   has_many :recipes, dependent: :destroy
   has_many :ingredients, dependent: :destroy
+  has_many :care_schedules, dependent: :destroy
+  has_many :care_tasks, dependent: :delete_all
+
+  # The collector's timezone, for due dates (D117); the app's when not set yet.
+  def time_zone_or_default = (time_zone.presence && ActiveSupport::TimeZone[time_zone]) || Time.zone_default
 
   encrypts :otp_secret
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+  normalizes :time_zone, with: ->(value) { value.strip.presence }
 
   validates :email_address, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 12 }, allow_nil: true
+  validate { errors.add(:time_zone, "isn't one we know") if time_zone && ActiveSupport::TimeZone[time_zone].nil? }
 
   # Token is invalidated once the address is verified or changed.
   generates_token_for :email_verification, expires_in: 2.days do

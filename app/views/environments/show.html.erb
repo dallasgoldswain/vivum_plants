@@ -85,6 +85,10 @@
           <%= link_to "Log care for plants here", new_care_log_path(environment_id: @environment.id), class: "btn-sm-outline w-fit" %>
         <% end %>
 
+        <% if @occupants.any? && capability?("care.reminders") %>
+          <%= link_to "Set reminders for plants here", new_care_schedule_path(environment_id: @environment.id), class: "btn-sm-outline w-fit" %>
+        <% end %>
+
         <% if @environment.active? && @movable_plants.any? %>
           <details>
             <summary class="btn-sm-outline w-fit">Move plants here</summary>

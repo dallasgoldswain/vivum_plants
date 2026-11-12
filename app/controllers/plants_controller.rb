@@ -25,6 +25,7 @@ class PlantsController < ApplicationController
     @timeline_kind = params[:kind].presence_in(@timeline_kinds)
     @timeline = @plant.timeline(kind: @timeline_kind)
     load_care if capability?("care.logs")
+    @schedules = @plant.care_schedules.where.not(status: "ended").includes(:open_task).order(:created_at) if capability?("care.reminders")
     @environments = Current.user.environments.active.by_name if capability?("collection.environments")
     @recipes = Current.user.recipes.active.includes(:versions).by_name if capability?("substrate.recipes")
     @photos = @plant.photos.with_attached_image.newest_first

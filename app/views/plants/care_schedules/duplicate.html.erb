@@ -1,0 +1,45 @@
+<% content_for :title, "Already set · #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@plant.display_name}", plant_path(@plant, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h1 class="vv-h2"><%= @plant.display_name %> already has this reminder</h1>
+</div>
+
+<div class="card max-w-2xl">
+  <section class="grid gap-4">
+    <ul class="grid gap-2">
+      <% @duplicates.each do |existing| %>
+        <li class="rounded-[4px] border border-line bg-linen px-3 py-2">
+          <span class="font-medium"><%= care_task_title(existing) %></span> ·
+          <%= schedule_cadence(existing) %>
+
+          <% if (task = existing.open_task) %>
+            <span class="vv-caption block"><%= task_due_label(task) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+
+    <p>
+      The new one: <strong><%= care_task_title(@schedule) %></strong> ·
+      <%= schedule_cadence(@schedule) %>, from
+      <%= l(@schedule.starts_on, format: :long) %>.
+    </p>
+
+    <div class="flex flex-wrap gap-2">
+      <% { "replace" => [ "Replace it", "btn" ], "keep" => [ "Keep both", "btn-outline" ] }.each do |choice, (label, style)| %>
+        <%= form_with url: plant_care_schedules_path(@plant) do |form| %>
+          <% params.fetch(:care_schedule, {}).permit(:kind, :label, :note, :repeats, :interval, :interval_unit, :mode, :starts_on).each do |name, value| %>
+            <%= hidden_field_tag "care_schedule[#{name}]", value, id: nil %>
+          <% end %>
+
+          <%= hidden_field_tag :duplicate, choice, id: nil %>
+          <%= form.submit label, class: style %>
+        <% end %>
+      <% end %>
+
+      <%= link_to "Cancel", plant_path(@plant, anchor: "reminders"), class: "btn-ghost" %>
+    </div>
+  </section>
+</div>

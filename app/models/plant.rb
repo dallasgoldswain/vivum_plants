@@ -14,6 +14,8 @@ class Plant < ApplicationRecord
   belongs_to :cover_photo, class_name: "Photo", optional: true
   has_many :status_changes, -> { order(:effective_on, :created_at) }, class_name: "PlantStatusChange", dependent: :delete_all
   has_many :care_events, dependent: :destroy
+  has_many :care_schedules, dependent: :destroy
+  has_many :care_tasks
   has_many :photos, dependent: :destroy
 
   accepts_nested_attributes_for :acquisition, reject_if: :acquisition_blank?
@@ -51,8 +53,10 @@ class Plant < ApplicationRecord
   # Status with an effective date and reason, kept as history (PL03).
   def change_status!(new_status, on: Date.current, reason: nil)
     transaction do
+      was_active = active?
       update!(status: new_status, status_on: on)
       status_changes.create!(status: new_status, effective_on: on, reason: reason.presence)
+      pause_or_resume_reminders(was_active)
     end
   end
 
@@ -82,6 +86,16 @@ class Plant < ApplicationRecord
   end
 
   private
+    # Inactive plants have no running reminders; restoring resumes the ones the status paused,
+    # from today, so no past tasks appear (PL03, D119).
+    def pause_or_resume_reminders(was_active)
+      if was_active && !active?
+        care_schedules.running.each { it.pause!(by_status: true) }
+      elsif !was_active && active?
+        care_schedules.paused.where(paused_by_status: true).each(&:resume!)
+      end
+    end
+
     def assign_number
       self.number ||= user.next_plant_number!
     end

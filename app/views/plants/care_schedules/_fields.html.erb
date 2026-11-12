@@ -1,0 +1,74 @@
+<%# What a reminder asks for and how often (CA02, D112, D117), with the next dates. %>
+<div class="grid gap-3" data-controller="schedule-preview">
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= form.label :kind, "What" %>
+
+      <% if schedule.persisted? %>
+        <p><%= care_task_title(schedule) %></p>
+      <% else %>
+        <%= form.select :kind, schedule_kind_options, {}, class: "select" %>
+      <% end %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :label, "Your own (for Your own)" %>
+      <%= form.text_field :label, maxlength: 80, placeholder: "e.g. check for pests", list: "care-label-suggestions", autocomplete: "off" %>
+    </div>
+  </div>
+
+  <fieldset class="grid gap-2">
+    <legend class="mb-1 text-sm font-medium">How often</legend>
+
+    <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+      <%= form.radio_button :repeats, "once", checked: schedule.once?, data: { schedule_preview_target: "once", action: "schedule-preview#update" } %>
+      Once
+    </label>
+
+    <label class="flex min-h-11 flex-wrap items-center gap-2 text-sm font-normal">
+      <%= form.radio_button :repeats, "repeat", checked: schedule.repeating?, data: { action: "schedule-preview#update" } %>
+      Every
+      <%= form.number_field :interval, value: schedule.interval || 7, min: 1, max: 365, class: "input w-20", aria: { label: "How many" }, data: { schedule_preview_target: "interval", action: "schedule-preview#update" } %>
+
+      <%= form.select :interval_unit, interval_unit_options, { selected: schedule.interval_unit || "day" }, class: "select w-auto", aria: { label: "Days, weeks or months" }, data: { schedule_preview_target: "unit", action: "schedule-preview#update" } %>
+    </label>
+  </fieldset>
+
+  <fieldset class="grid gap-2">
+    <legend class="mb-1 text-sm font-medium">Count from</legend>
+
+    <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+      <%= form.radio_button :mode, "after_completion", data: { action: "schedule-preview#update" } %>
+      When it's done (water 7 days after the last watering)
+    </label>
+
+    <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+      <%= form.radio_button :mode, "fixed", data: { schedule_preview_target: "fixed", action: "schedule-preview#update" } %>
+      Fixed dates (every Monday, or the 1st of the month)
+    </label>
+  </fieldset>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= form.label :starts_on, "First date" %>
+      <%= form.date_field :starts_on, data: { schedule_preview_target: "start", action: "schedule-preview#update" } %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :note, "Note (optional)" %>
+      <%= form.text_field :note, maxlength: 200, placeholder: "e.g. half-strength feed" %>
+    </div>
+  </div>
+
+  <div class="grid gap-1">
+    <p class="text-sm font-medium">Next dates</p>
+
+    <p
+      class="vv-caption"
+      data-schedule-preview-target="dates"
+      aria-live="polite"
+    >
+      <%= schedule.preview.map { l(it, format: "%a %-d %b") }.join(" · ") if schedule.starts_on %>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<% content_for :title, "New reminder · #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@plant.display_name}", plant_path(@plant, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <h1 class="vv-h2">New reminder</h1>
+    <%= help_link "reminders" %>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <section>
+    <%= form_with model: @schedule, url: plant_care_schedules_path(@plant), class: "form grid gap-4" do |form| %>
+      <%= render "shared/form_errors", record: @schedule %>
+      <%= render "plants/care_schedules/fields", form: form, schedule: @schedule %>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Set reminder", class: "btn" %>
+        <%= link_to "Cancel", plant_path(@plant, anchor: "reminders"), class: "btn-ghost" %>
+      </div>
+    <% end %>
+
+    <%= render "plants/care_events/suggestions", suggestions: CareEvent.suggestions_for(Current.user) %>
+  </section>
+</div>

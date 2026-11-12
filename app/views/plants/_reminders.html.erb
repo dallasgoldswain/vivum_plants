@@ -1,0 +1,73 @@
+<%# A plant's reminders (CA02, D112, D118–D120): next date, change it, pause, edit, end. %>
+<div class="card" id="reminders">
+  <header>
+    <h2>Reminders</h2>
+
+    <p>
+      <%= schedules.any? ? "What's next for #{plant.display_name}." : "None yet. Set one up and it shows on Today." %>
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if schedules.any? %>
+      <ul class="grid gap-2">
+        <% schedules.each do |schedule| %>
+          <% task = schedule.open_task %>
+
+          <li class="grid gap-2 rounded-[4px] border border-line bg-linen px-3 py-2">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <span>
+                <span class="font-medium"><%= care_task_title(schedule) %></span>
+                <span class="vv-caption">· <%= schedule_cadence(schedule) %></span>
+              </span>
+
+              <% if schedule.paused? %>
+                <span class="badge-outline">Paused</span>
+              <% elsif task %>
+                <span class="<%= task.overdue? ? "badge-destructive" : "badge-secondary" %>"><%= task_due_label(task) %></span>
+              <% end %>
+            </div>
+
+            <% if schedule.note %>
+              <p class="vv-caption"><%= schedule.note %></p>
+            <% end %>
+
+            <% if task&.snoozed_until && task.snoozed_until > Date.current %>
+              <p class="vv-caption">
+                Snoozed until <%= l(task.snoozed_until, format: :long) %>.
+              </p>
+            <% end %>
+
+            <div class="flex flex-wrap items-center gap-1">
+              <%= link_to "Edit", edit_plant_care_schedule_path(plant, schedule), class: "btn-sm-ghost" %>
+
+              <% if task %>
+                <details>
+                  <summary class="btn-sm-ghost">Change date</summary>
+
+                  <%= form_with model: task, url: care_task_path(task), class: "form mt-2 flex gap-2" do |form| %>
+                    <%= form.label :due_on, "Next date", class: "sr-only", for: "care_task_due_on_#{task.id}" %>
+                    <%= form.date_field :due_on, id: "care_task_due_on_#{task.id}", class: "w-auto" %>
+                    <%= form.submit "Move", class: "btn-sm-outline" %>
+                  <% end %>
+                </details>
+              <% end %>
+
+              <% if schedule.paused? %>
+                <%= button_to "Resume", plant_care_schedule_pause_path(plant, schedule), method: :delete, class: "btn-sm-ghost" %>
+              <% else %>
+                <%= button_to "Pause", plant_care_schedule_pause_path(plant, schedule), class: "btn-sm-ghost" %>
+              <% end %>
+
+              <%= button_to "End", plant_care_schedule_path(plant, schedule), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "End this reminder? Its history stays." } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <div>
+      <%= link_to "Add a reminder", new_plant_care_schedule_path(plant), class: "btn-sm-outline" %>
+    </div>
+  </section>
+</div>

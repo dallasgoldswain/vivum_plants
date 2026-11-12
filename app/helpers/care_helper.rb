@@ -67,4 +67,41 @@ module CareHelper
     name = entry.record.is_a?(CareEvent) && !entry.record.kind.in?(CareEvent::PLACEMENT_KINDS) ? "care" : entry.kind
     "plants/timeline/#{name}"
   end
+
+  # --- Reminders (CA02, CA03, D111–D120) ----------------------------------------
+
+  INTERVAL_UNIT_LABELS = { "day" => "days", "week" => "weeks", "month" => "months" }.freeze
+
+  # What a reminder asks you to do: "Water", "Feed", or your own label.
+  def care_task_title(task_or_schedule) = (task_or_schedule.kind == "custom" && task_or_schedule.label) || CARE_BUTTONS.fetch(task_or_schedule.kind)
+
+  # "Every 7 days after it's done", "Every 2 weeks on fixed dates", "Once"
+  def schedule_cadence(schedule)
+    return "Once" if schedule.once?
+
+    every = schedule.interval == 1 ? "Every #{schedule.interval_unit}" : "Every #{schedule.interval} #{INTERVAL_UNIT_LABELS[schedule.interval_unit]}"
+    "#{every} #{schedule.fixed? ? 'on fixed dates' : "after it's done"}"
+  end
+
+  # "3 days overdue", "Due today", "Due tomorrow", "Due Thu 19 Nov"
+  def task_due_label(task, today = Date.current)
+    days = (task.due_on - today).to_i
+    if days < -1 then "#{-days} days overdue"
+    elsif days == -1 then "1 day overdue"
+    elsif days.zero? then "Due today"
+    elsif days == 1 then "Due tomorrow"
+    else "Due #{l(task.due_on, format: '%a %-d %b')}"
+    end
+  end
+
+  def interval_unit_options = INTERVAL_UNIT_LABELS.map { |value, label| [ label, value ] }
+  def schedule_kind_options = CareSchedule::KINDS.map { [ (it == "custom" ? "Your own" : CARE_BUTTONS[it]), it ] }
+
+  # Timezones by their IANA name (what browsers report), with the current one kept even if
+  # it isn't among Rails' friendly names (D117).
+  def time_zone_options(current)
+    zones = ActiveSupport::TimeZone.all.map { [ it.to_s, it.tzinfo.name ] }.uniq(&:last)
+    zones.unshift([ current, current ]) unless zones.any? { it.last == current }
+    options_for_select(zones, current)
+  end
 end

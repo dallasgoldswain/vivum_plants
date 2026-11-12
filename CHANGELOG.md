@@ -170,6 +170,24 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   longer requires content unless `emptyMessage` is set and now takes `label` and `afterSave`
   values (D110). Export includes the new details. Help topic `logging-care`; `care.logs`
   marked implemented. Browser tests for watering and feeding offline and for Undo.
+- Reminders and Today (B14): `care_schedules` (kind or custom label, once or every N days,
+  weeks or months, `after_completion` or `fixed`, start date, active, paused or ended) and
+  `care_tasks` (due date, snooze, state, hand-moved flag), with a partial unique index for one
+  open task per schedule (CA02, CA03, D112, D118). `CareSchedule#next_due_after` keeps fixed
+  weekdays and clamps months from the start date; `schedule_preview_controller.js` shows the
+  same dates in the form. `care_events.care_task_id` links completed care: Done logs a linked
+  event idempotently, logging care completes a matching task due within 2 days, and deleting
+  that event reopens the task (D113, D114). Home is Today when `care.reminders` is on, with
+  tasks grouped by kind, Done for ticked plants (`TaskCompletionsController`), Done with
+  details, Skip and Snooze, and the nav item renamed (CA04, D111, D115, D116). Plant page
+  Reminders card with change date, pause, resume, edit and end; duplicate check with keep or
+  replace; "Repeat every…" after logging; several-plant reminders from an environment or the
+  collection (D112, D120). Inactive statuses pause schedules and restoring resumes from today
+  (PL03, D119). `users.time_zone`, saved from the browser's `time_zone` cookie the first time
+  and editable under Account; every request runs in it (D117). Today is cached offline and its
+  actions queue through `offline-form` (D120). Export section `care_schedules`. Help topics
+  `reminders` and `today`; `care.reminders` marked implemented. Browser tests for Today offline
+  and the date preview; the offline tests now reset the network after each test.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

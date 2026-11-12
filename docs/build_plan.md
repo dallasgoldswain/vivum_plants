@@ -54,7 +54,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
-| B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Planned |
+| B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
@@ -543,7 +543,7 @@ pages weren't clicked through, because the only development account has two-step
 headless Chrome tests cover watering and feeding offline and Undo, and the plant screenshot
 now shows the Log care card. Help topic `logging-care` needs review.
 
-### B14 Reminders, schedules and Today inbox — discussed 2026-11-12
+### B14 Reminders, schedules and Today inbox — discussed and built 2026-11-12
 
 **Scope**
 - **Schedules (CA02, D112, D117):** `care_schedules` (user, plant, kind or custom label,
@@ -587,3 +587,16 @@ retry creates no second (CA01); tapping Water on a plant with a watering task du
 completes it; Done on "Water · 5 plants" logs five events; marking a plant sold pauses its
 schedules and restoring it creates no past tasks; editing a schedule leaves a hand-changed due
 date alone; with notifications off, tasks still appear in Today (CA04).
+
+**Built notes:** Today replaces the home page only while `care.reminders` is on; otherwise
+home is unchanged. Done on Today ticks every plant in a group by default; untick to leave one
+out. A task's checkboxes sit outside its group's form (the `form` attribute), so Skip and
+Snooze can be forms of their own. Undo of the care that completed a task reopens it and
+removes the task made after it, unless that one was moved or snoozed since. A one-off
+reminder ends when done. Resuming a fixed reminder picks the first calendar date from today;
+an after-completion one is due today. Setting up and editing reminders needs a connection;
+Done, Skip and Snooze queue offline. The timezone is saved from the browser on the first
+signed-in request and changed under Account. Dev-server pages weren't clicked through,
+because the only development account has two-step sign-in; headless Chrome tests cover Today
+offline and the date preview, and there's a Today screenshot. Help topics `reminders` and
+`today` need review.

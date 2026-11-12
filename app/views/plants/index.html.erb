@@ -94,6 +94,11 @@
         ·
         <%= link_to "Log care for several", new_care_log_path(request.query_parameters.slice("q", "context", "status", "tc", "tag", "environment", "unwatered")), class: "underline underline-offset-4" %>
       <% end %>
+
+      <% if capability?("care.reminders") %>
+        ·
+        <%= link_to "Set reminders for several", new_care_schedule_path(request.query_parameters.slice("q", "context", "status", "tc", "tag", "environment", "unwatered")), class: "underline underline-offset-4" %>
+      <% end %>
     </p>
 
     <nav class="flex gap-1" aria-label="Layout">

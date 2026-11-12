@@ -29,6 +29,18 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
     capture "plant", plant_path(plant), wait_for: "Add an observation"
   end
 
+  test "today" do
+    owner = users(:owner)
+    add_sample_plants
+    anthurium, java_fern, hoya = %w[ Anthurium Java\ fern Hoya ].map { owner.plants.find_by!(display_name: it) }
+    [ [ anthurium, 3 ], [ hoya, 0 ] ].each do |plant, days_ago|
+      owner.care_schedules.create!(plant: plant, kind: "watering", interval: 7, interval_unit: "day", starts_on: days_ago.days.ago.to_date).start!
+    end
+    owner.care_schedules.create!(plant: hoya, kind: "feeding", interval: 2, interval_unit: "week", mode: "fixed", starts_on: Date.current, note: "Half-strength").start!
+    owner.care_schedules.create!(plant: java_fern, kind: "custom", label: "Trim old leaves", interval: 1, interval_unit: "month", starts_on: 4.days.from_now.to_date).start!
+    capture "today", root_path, wait_for: "Due now"
+  end
+
   test "environment" do
     owner = users(:owner)
     hoya = add_sample_plants
@@ -84,7 +96,7 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
       click_on "Sign in"
       fill_in "code", with: ROTP::TOTP.new(users(:owner).otp_secret).now
       click_on "Verify"
-      assert_text "Welcome to VIVUM Plants"
+      assert_text "Signed in as"
     end
 
     def capture(name, path, wait_for:)
