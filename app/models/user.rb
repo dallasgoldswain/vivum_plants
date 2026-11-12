@@ -16,6 +16,11 @@ class User < ApplicationRecord
   has_many :acquisitions, dependent: :destroy
   has_many :care_events, dependent: :destroy
   has_many :photos, dependent: :destroy
+  has_many :environments, dependent: :destroy
+  has_many :environment_assignments, dependent: :delete_all
+  has_many :plant_setups, dependent: :delete_all
+  has_many :measurements, dependent: :destroy
+  has_many :custom_metrics, dependent: :destroy
 
   encrypts :otp_secret
 

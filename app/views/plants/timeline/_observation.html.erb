@@ -3,6 +3,16 @@
     <%= l(record.occurred_at, format: :long) %> · Observation
   </p>
 
+  <% if capability?("collection.environments") %>
+    <% environment, setup = plant.setting_on(record.occurred_at.to_date) %>
+
+    <% if environment || setup %>
+      <p class="vv-caption">
+        <%= [ ("In #{environment.name}" if environment), setup_summary(setup) ].compact_blank.join(" · ") %>
+      </p>
+    <% end %>
+  <% end %>
+
   <% if record.note.present? %>
     <p class="whitespace-pre-line"><%= record.note %></p>
   <% end %>

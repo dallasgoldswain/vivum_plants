@@ -61,7 +61,7 @@ class PlantTest < ActiveSupport::TestCase
     plant.change_status!("archived", on: Date.yesterday, reason: "Gave up")
     assert_not_includes @user.plants.in_active_collection, plant
     assert_includes @user.plants.filtered(status: "inactive"), plant
-    assert_equal %i[ status_change care_event ], plant.timeline.map(&:kind)
+    assert_equal %i[ status_change observation ], plant.timeline.map(&:kind)
     assert_equal "Gave up", plant.status_changes.last.reason
   end
 
@@ -70,7 +70,7 @@ class PlantTest < ActiveSupport::TestCase
     today = plant.care_events.create!(user: @user, note: "Today", occurred_at: Time.current, idempotency_key: "t")
     yesterday = plant.care_events.create!(user: @user, note: "Yesterday", occurred_at: 1.day.ago, idempotency_key: "y")
 
-    assert_equal [ today, yesterday ], plant.timeline.select { it.kind == :care_event }.map(&:record)
+    assert_equal [ today, yesterday ], plant.timeline.select { it.kind == :observation }.map(&:record)
   end
 
   test "two plants of the same cultivar are found separately" do

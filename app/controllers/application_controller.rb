@@ -21,4 +21,12 @@ class ApplicationController < ActionController::Base
       format.any { head :forbidden }
     end
   end
+
+  private
+    # A date from a form, or today when it's missing or not a date.
+    def date_param(value)
+      Date.iso8601(value.to_s)
+    rescue Date::Error
+      Date.current
+    end
 end

@@ -1,0 +1,50 @@
+<%= form_with model: environment, class: "form grid gap-6" do |form| %>
+  <% if environment.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h2>Please check the details</h2>
+      <section><%= environment.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true, maxlength: 80, autofocus: environment.new_record?, placeholder: "e.g. Lounge shelf 2, 60 cm tank" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :kind, "Type" %>
+        <%= form.select :kind, environment_kind_options, { include_blank: "Choose…" }, required: true, class: "select" %>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 sm:col-span-2">
+        <% { length_cm: "Length (cm)", width_cm: "Width (cm)", height_cm: "Height (cm)" }.each do |field, label| %>
+          <div class="grid gap-2">
+            <%= form.label field, label %>
+            <%= form.number_field field, min: 0, step: 0.1, inputmode: "decimal" %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :volume_litres, "Volume (litres)" %>
+        <%= form.number_field :volume_litres, min: 0, step: 0.1, inputmode: "decimal" %>
+      </div>
+
+      <p class="vv-caption self-end">
+        Size and volume are optional. A tank works with just a name and type.
+      </p>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :notes %>
+        <%= form.text_area :notes, rows: 3, placeholder: "Lights, heater, filter, where it stands" %>
+      </div>
+    </section>
+  </div>
+
+  <div class="flex gap-2">
+    <%= form.submit environment.new_record? ? "Add environment" : "Save", class: "btn" %>
+    <%= link_to "Cancel", environment.new_record? ? environments_path : environment_path(environment), class: "btn-ghost" %>
+  </div>
+<% end %>

@@ -7,6 +7,7 @@ class Plant < ApplicationRecord
   TAG_LIMIT = 20
 
   include Searchable
+  include Placement
 
   belongs_to :user
   belongs_to :acquisition, optional: true
@@ -57,7 +58,7 @@ class Plant < ApplicationRecord
 
   # Newest first: observations, status changes and photos added on their own (PL04).
   def timeline
-    entries = care_events.includes(photos: { image_attachment: :blob }).map { Timeline::Entry.new(:care_event, it.occurred_at, it) }
+    entries = care_events.includes(:environment, :from_environment, :plant_setup, photos: { image_attachment: :blob }).map { Timeline::Entry.new(it.kind.to_sym, it.occurred_at, it) }
     entries += status_changes.map { Timeline::Entry.new(:status_change, it.effective_on.in_time_zone.end_of_day, it) }
     entries += photos.standalone.with_attached_image.map { Timeline::Entry.new(:photo, it.taken_on.in_time_zone.end_of_day, it) }
     entries.sort_by { [ -it.at.to_f, -it.record.created_at.to_f ] }
@@ -65,7 +66,7 @@ class Plant < ApplicationRecord
 
   # What a permanent delete removes (D86).
   def deletion_effects
-    { photos: photos.count, observations: care_events.count, status_changes: status_changes.count }
+    { photos: photos.count, observations: care_events.observation.count, moves: environment_assignments.size, setups: setups.size, status_changes: status_changes.count }
   end
 
   module Timeline

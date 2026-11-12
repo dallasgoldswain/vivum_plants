@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { queue, send, QUEUE_CHANGED } from "lib/offline_queue"
 
-// Sends queued observations for the signed-in user whenever the app is online (OF02, D84).
+// Sends queued entries for the signed-in user whenever the app is online (OF02, D84).
 export default class extends Controller {
   static values = { userId: String }
 
@@ -32,6 +32,6 @@ export default class extends Controller {
     } finally {
       this.syncing = false
     }
-    if (sent && window.location.pathname.startsWith("/plants")) window.Turbo.visit(window.location.pathname, { action: "replace" })
+    if (sent && /^\/(plants|environments)/.test(window.location.pathname)) window.Turbo.visit(window.location.pathname, { action: "replace" })
   }
 }

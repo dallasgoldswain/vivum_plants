@@ -1,0 +1,12 @@
+<% content_for :title, "Add an environment · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Environments</p>
+    <h1 class="vv-h2">Add an environment</h1>
+  </div>
+
+  <%= help_link "environments" %>
+</div>
+
+<%= render "form", environment: @environment %>

@@ -116,9 +116,31 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   Four help topics with screenshots; `collection.plants`, `collection.search`,
   `collection.media` and `collection.acquisition` marked implemented. App time zone set to
   Africa/Johannesburg. CI runs the offline system test in headless Chrome.
+- Environments (B11): `environments` (seven fixed kinds, no nesting, optional dimensions,
+  volume and photos, active or archived; EN01, D88); `environment_assignments` with dated
+  stays and one open stay per plant (partial unique index), moves from the plant page or
+  several plants from the environment page (EN03, D93); `plant_setups` for container, size and
+  watering method from a date (PL05, D89). Moves and setup changes write `movement` and
+  `setup` care events, and observations show the environment and setup on their date (D92).
+  Moving into a type that implies another growing context offers to change it, once per stay
+  (D91). `measurements` and `measurement_values` hold readings with unit, time and source;
+  fixed metrics per kind in `Measurement::METRICS`, per-user `custom_metrics`, blanks never
+  stored, range checks for typing slips (EN02, D90). Archive needs an empty environment;
+  permanent delete only for one that never held a plant (D95). Photos belong to a plant or an
+  environment (`photos_one_subject` check). Collection filter by environment; environment
+  pages cached offline and readings queued offline through a generic `offline-form`
+  controller (IndexedDB store renamed to `queue`, D94). Export sections and purge for all of
+  it. Help topics `environments` and `measurements`; `collection.environments` and
+  `collection.measurements` marked implemented. Shared `PhotoManaging` controller concern and
+  `photos/_section` partial for plant and environment photos.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).
+
+### Fixed
+
+- Layout `<body>` offline-sync attributes rewritten for the Herb rule against ERB output in
+  attribute position.
 
 ### Configuration
 

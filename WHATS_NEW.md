@@ -47,7 +47,14 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   it lands in the right place. Your collection holds 500 photos.
 - Mark plants as quarantined, sold, gifted, lost or archived, with the date and a reason.
   Their history stays.
-- No signal? Plants you've opened stay readable, and new observations wait on your device
-  until you're back online.
+- Add the places your plants grow: shelves, grow cabinets, terrariums, paludariums, tanks
+  and outdoor beds. Move plants between them, one at a time or several at once, and see who
+  lived where and when.
+- Record each plant's pot, size and watering method. When you repot, earlier notes still
+  show the setup the plant had at the time.
+- Record temperature, humidity, light, pH and water hardness for an environment, or your
+  own readings such as TDS. Leave out what you didn't measure; it stays unknown.
+- No signal? Plants and environments you've opened stay readable, and new observations and
+  readings wait on your device until you're back online.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

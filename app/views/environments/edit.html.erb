@@ -1,0 +1,8 @@
+<% content_for :title, "Edit #{@environment.name} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2"><%= environment_kind_label(@environment.kind) %></p>
+  <h1 class="vv-h2">Edit <%= @environment.name %></h1>
+</div>
+
+<%= render "form", environment: @environment %>

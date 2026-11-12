@@ -51,7 +51,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
-| B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Next |
+| B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05 | B10 | Planned |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
@@ -379,7 +379,7 @@ so the test checks the saved cache rather than reading a page offline. The app t
 now Africa/Johannesburg until accounts get their own. Help topics: `collection`,
 `adding-a-plant`, `observations-and-photos`, `working-offline`, reviewed 2026-11-11.
 
-### B11 Environments, occupants and measurements — discussed 2026-11-11
+### B11 Environments, occupants and measurements — discussed 2026-11-11, built 2026-11-12
 
 **Scope**
 - **Environments (EN01, D88):** `environments` owned by a user: name and type required (room or
@@ -425,3 +425,12 @@ earlier events still show the earlier setup; a blank humidity stays unknown, nev
 stored value shows its unit, date and source; a measurement saved offline and synced twice
 creates one reading; an environment that has held a plant can be archived but not deleted.
 
+**Built notes:** a reading is a `measurements` row with one `measurement_values` row per
+metric filled in, so several values share one time and source. Light is two fixed metrics
+(lux and PPFD). Range checks only catch typing slips (humidity 650), not poor conditions.
+Custom metrics are shared across all of a collector's environments. Archiving refuses an
+environment with plants still in it rather than moving them out silently. The offline form
+controller is now generic (`offline-form`), and the IndexedDB store was renamed, which drops
+anything queued by the B10 build (development only). Help topics `environments` and
+`measurements` are new; `working-offline` and `observations-and-photos` changed, so all four
+need review.

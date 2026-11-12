@@ -7,8 +7,13 @@
       <h1 class="vv-h2">Your plants</h1>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center justify-end gap-2">
       <%= help_link "collection" %>
+
+      <% if capability?("collection.environments") %>
+        <%= link_to "Environments", environments_path, class: "btn-outline" %>
+      <% end %>
+
       <%= link_to "Add a plant", new_plant_path, class: "btn" %>
     </div>
   </div>
@@ -26,6 +31,11 @@
         <%= form.select :context, growing_context_options, { include_blank: "All contexts", selected: params[:context] }, class: "select w-auto" %>
         <%= form.label :status, "Status", class: "sr-only" %>
         <%= form.select :status, [ [ "Active collection", "active" ], [ "Inactive plants", "inactive" ], [ "All plants", "all" ] ] + plant_status_options.reject { it.last == "active" }, { selected: params[:status].presence || "active" }, class: "select w-auto" %>
+
+        <% if @environments&.any? %>
+          <%= form.label :environment, "Environment", class: "sr-only" %>
+          <%= form.select :environment, [ [ "No environment", "none" ] ] + @environments.map { [ it.name, it.id ] }, { include_blank: "All environments", selected: params[:environment] }, class: "select w-auto" %>
+        <% end %>
 
         <label class="flex min-h-11 items-center gap-2 text-sm">
           <%= form.check_box :tc, { checked: params[:tc] == "1" }, "1", nil %>

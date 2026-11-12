@@ -1,0 +1,146 @@
+<%# Where the plant grows and how it's set up, with history (EN03, PL05, D89–D93). %>
+<% assignment = plant.current_assignment %>
+<% setup = plant.current_setup %>
+
+<div class="card" id="placement">
+  <header>
+    <h2>Where it grows</h2>
+
+    <p>
+      <% if assignment %>
+        In
+        <%= link_to assignment.environment.name, assignment.environment, class: "underline underline-offset-4" %>
+        since <%= l(assignment.started_on, format: :long) %>.
+      <% else %>
+        Not in an environment.
+      <% end %>
+    </p>
+  </header>
+
+  <section class="grid gap-4">
+    <% if assignment&.context_offer? %>
+      <div class="alert" role="status">
+        <h3>Change its growing context?</h3>
+
+        <section class="grid gap-2">
+          <p>
+            <%= assignment.environment.name %> is
+            <%= environment_kind_label(assignment.environment.kind).downcase.then { it.match?(/\A[aeiou]/) ? "an #{it}" : "a #{it}" } %>.
+            This plant is set to
+            <%= growing_context_label(plant.growing_context).downcase %>.
+          </p>
+
+          <div class="flex flex-wrap gap-2">
+            <%= button_to "Change to #{growing_context_label(assignment.environment.suggested_context).downcase}", plant_context_offer_path(plant), method: :patch, params: { answer: "change" }, class: "btn-sm" %>
+            <%= button_to "Keep #{growing_context_label(plant.growing_context).downcase}", plant_context_offer_path(plant), method: :patch, params: { answer: "keep" }, class: "btn-sm-outline" %>
+          </div>
+        </section>
+      </div>
+    <% end %>
+
+    <dl class="vv-details">
+      <dt>Setup</dt>
+
+      <dd>
+        <% if setup %>
+          <%= setup_summary(setup) %>
+          <span class="vv-caption">since <%= l(setup.started_on, format: :long) %></span>
+        <% else %>
+          Not recorded
+        <% end %>
+      </dd>
+    </dl>
+
+    <details class="grid gap-3">
+      <summary class="btn-sm-outline w-fit">Move</summary>
+
+      <% choices = environments.reject { it.id == assignment&.environment_id } %>
+
+      <% if choices.empty? && assignment.nil? %>
+        <p class="vv-caption mt-3">
+          <%= link_to "Add an environment", new_environment_path, class: "underline underline-offset-4" %>
+          first: a shelf, cabinet or tank.
+        </p>
+      <% else %>
+        <%= form_with url: plant_moves_path(plant), scope: :move, class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+          <div class="grid gap-2">
+            <%= form.label :environment_id, "Move to" %>
+            <%= form.select :environment_id, environment_options(choices), { include_blank: (assignment ? "Take it out of #{assignment.environment.name}" : false) }, class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :moved_on, "On" %>
+            <%= form.date_field :moved_on, value: Date.current, min: assignment&.started_on, max: Date.current %>
+          </div>
+
+          <div><%= form.submit "Move", class: "btn-outline" %></div>
+        <% end %>
+      <% end %>
+    </details>
+
+    <details class="grid gap-3">
+      <summary class="btn-sm-outline w-fit">Change setup</summary>
+
+      <%= form_with model: PlantSetup.new(container: setup&.container, size: setup&.size, size_unit: setup&.size_unit || "cm", watering_method: setup&.watering_method), url: plant_setups_path(plant), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+        <div class="grid gap-2 sm:col-span-2">
+          <%= form.label :container, "Pot or container" %>
+          <%= form.text_field :container, maxlength: 80, placeholder: "e.g. terracotta pot, nursery pot, glass jar" %>
+        </div>
+
+        <div class="grid grid-cols-[1fr_5rem] gap-2">
+          <div class="grid gap-2">
+            <%= form.label :size %>
+            <%= form.number_field :size, min: 0, step: 0.1, inputmode: "decimal" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :size_unit, "Unit" %>
+            <%= form.select :size_unit, PlantSetup::SIZE_UNITS, {}, class: "select" %>
+          </div>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :watering_method, "Watering" %>
+          <%= form.select :watering_method, watering_method_options, { include_blank: "Not set" }, class: "select" %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :started_on, "From" %>
+          <%= form.date_field :started_on, value: Date.current, max: Date.current %>
+        </div>
+
+        <p class="vv-caption sm:col-span-2">
+          Size is the pot's diameter in cm or its volume in litres. Earlier
+          setups stay in the history.
+        </p>
+
+        <div><%= form.submit "Save setup", class: "btn-outline" %></div>
+      <% end %>
+    </details>
+
+    <% if plant.environment_assignments.size > 1 || plant.setups.size > 1 %>
+      <details>
+        <summary class="vv-caption cursor-pointer underline underline-offset-4">
+          History
+        </summary>
+
+        <ul class="mt-2 grid gap-1 text-sm">
+          <% plant.environment_assignments.reverse_each do |stay| %>
+            <li>
+              <%= link_to stay.environment.name, stay.environment, class: "underline underline-offset-4" %>:
+              <%= l(stay.started_on, format: :long) %> –
+              <%= stay.ended_on ? l(stay.ended_on, format: :long) : "now" %>
+            </li>
+          <% end %>
+
+          <% plant.setups.reverse_each do |past| %>
+            <li>
+              <%= setup_summary(past) %>: from
+              <%= l(past.started_on, format: :long) %>
+            </li>
+          <% end %>
+        </ul>
+      </details>
+    <% end %>
+  </section>
+</div>

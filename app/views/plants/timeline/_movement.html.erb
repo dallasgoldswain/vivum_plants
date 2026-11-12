@@ -1,0 +1,14 @@
+<li>
+  <p class="vv-caption">
+    <%= l(record.occurred_at.to_date, format: :long) %> · Moved
+  </p>
+
+  <p>
+    <% if record.environment %>
+      Into
+      <%= link_to record.environment.name, record.environment, class: "underline underline-offset-4" %><% if record.from_environment %> from <%= link_to record.from_environment.name, record.from_environment, class: "underline underline-offset-4" %><% end %>
+    <% else %>
+      Taken out of <%= record.from_environment&.name || "its environment" %>
+    <% end %>
+  </p>
+</li>

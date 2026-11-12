@@ -7,15 +7,8 @@ class Plants::StatusChangesController < ApplicationController
     status = attributes[:status].to_s
     return redirect_to(@plant, alert: "Choose a status.") unless Plant.statuses.key?(status)
 
-    @plant.change_status!(status, on: parse_date(attributes[:effective_on]), reason: attributes[:reason].to_s.first(200))
+    @plant.change_status!(status, on: date_param(attributes[:effective_on]), reason: attributes[:reason].to_s.first(200))
     message = @plant.active? ? "Status set to #{status.humanize.downcase}." : "Status set to #{status.humanize.downcase}. It's kept, with its history, under inactive plants."
     redirect_to @plant, notice: message
   end
-
-  private
-    def parse_date(value)
-      Date.iso8601(value.to_s)
-    rescue Date::Error
-      Date.current
-    end
 end

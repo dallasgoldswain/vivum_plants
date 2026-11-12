@@ -1,0 +1,63 @@
+<% content_for :title, "Environments · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Collection</p>
+
+    <h1 class="vv-h2">
+      <%= @show_archived ? "Archived environments" : "Environments" %>
+    </h1>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= help_link "environments" %>
+    <%= link_to "Add an environment", new_environment_path, class: "btn" %>
+  </div>
+</div>
+
+<% if @environments.empty? && !@show_archived %>
+  <div class="card">
+    <header>
+      <h2>Where do your plants grow?</h2>
+
+      <p>
+        Add a shelf, grow cabinet, terrarium, tank or outdoor bed, then move
+        plants into it. A name and type are all it needs.
+      </p>
+    </header>
+
+    <footer>
+      <%= link_to "Add an environment", new_environment_path, class: "btn" %>
+    </footer>
+  </div>
+<% else %>
+  <ul class="grid gap-2">
+    <% @environments.each do |environment| %>
+      <li>
+        <%= link_to environment_path(environment), class: "vv-plant-row" do %>
+          <%= environment_thumb environment, class: "vv-plant-row-image" %>
+
+          <span class="grid min-w-0 flex-1 gap-0.5">
+            <span class="truncate font-medium"><%= environment.name %></span>
+
+            <span class="vv-caption truncate">
+              <%= [ environment_kind_label(environment.kind), pluralize(environment.current_plants.size, "plant"), (@latest_readings[environment.id] && "read #{l(@latest_readings[environment.id].to_date, format: :short)}") ].compact.join(" · ") %>
+            </span>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+
+  <% if @environments.empty? %>
+    <p class="vv-caption">No archived environments.</p>
+  <% end %>
+<% end %>
+
+<p class="vv-caption">
+  <% if @show_archived %>
+    <%= link_to "Show active environments", environments_path, class: "underline underline-offset-4" %>
+  <% elsif @archived_count.positive? %>
+    <%= link_to "Show #{pluralize(@archived_count, 'archived environment')}", environments_path(archived: 1), class: "underline underline-offset-4" %>
+  <% end %>
+</p>

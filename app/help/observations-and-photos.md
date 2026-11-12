@@ -10,8 +10,8 @@ reviewed: 2026-11-11
 reviewed_digest: ba0667942ddef388c6cb71a0d8cad77646e5dc292717cb56baf62f9176b7deb5
 ---
 
-Each plant has a timeline of observations, photos and status changes, newest
-first.
+Each plant has a timeline of observations, photos, status changes, moves and
+setup changes, newest first.
 
 ![A plant's page](plant)
 

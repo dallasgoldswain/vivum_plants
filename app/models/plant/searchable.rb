@@ -1,6 +1,6 @@
 # Finding a plant in a collection (UX01): names, nickname, record number and tags, plus
-# filters for context, status and TC origin. Collections are personal and small, so a
-# scan with ILIKE is enough; no search index yet.
+# filters for context, status, TC origin, tag and current environment. Collections are
+# personal and small, so a scan with ILIKE is enough; no search index yet.
 module Plant::Searchable
   extend ActiveSupport::Concern
 
@@ -12,8 +12,15 @@ module Plant::Searchable
       words.reduce(all) { |relation, word| relation.where(word_condition(word)) }
     end
 
-    def filtered(context: nil, status: nil, tc_origin: nil, tag: nil)
+    def filtered(context: nil, status: nil, tc_origin: nil, tag: nil, environment: nil)
       relation = all
+      current = EnvironmentAssignment.current.select(:plant_id)
+      relation =
+        case environment.to_s
+        when "" then relation
+        when "none" then relation.where.not(id: current)
+        else relation.where(id: current.where(environment_id: environment.to_i))
+        end
       relation = relation.where(growing_context: context) if growing_contexts.key?(context.to_s)
       relation =
         case status.to_s

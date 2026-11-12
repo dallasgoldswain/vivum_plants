@@ -1,0 +1,186 @@
+<% content_for :title, "#{@environment.name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Environments", environments_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">
+        <%= environment_kind_label(@environment.kind) %>
+      </p>
+
+      <h1 class="vv-h2">
+        <%= @environment.name %>
+
+        <% if @environment.archived? %>
+          <span class="badge-outline">Archived</span>
+        <% end %>
+      </h1>
+
+      <% if (dimensions = environment_dimensions(@environment)) %>
+        <p class="vv-caption mt-1"><%= dimensions %></p>
+      <% end %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "environments" %>
+      <%= link_to "Edit", edit_environment_path(@environment), class: "btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[2fr_3fr]">
+  <div class="order-2 grid content-start gap-6 lg:order-1">
+    <% if @environment.cover_photo&.image&.attached? %>
+      <%= image_tag @environment.cover_photo.image.variant(:large), alt: @environment.cover_photo.caption.presence || "Cover photo of #{@environment.name}", class: "vv-plant-cover" %>
+    <% end %>
+
+    <div class="card" id="plants">
+      <header>
+        <h2>Plants here</h2>
+
+        <p>
+          <%= @occupants.any? ? pluralize(@occupants.size, "plant") : "No plants yet." %>
+        </p>
+      </header>
+
+      <section class="grid gap-4">
+        <% if @context_offers.any? %>
+          <div class="alert" role="status">
+            <h3>Change their growing context?</h3>
+
+            <section class="grid gap-2">
+              <p>
+                <%= @context_offers.map { it.plant.display_name }.to_sentence %>
+                <%= @context_offers.one? ? "isn't" : "aren't" %> set to
+                <%= growing_context_label(@environment.suggested_context).downcase %>.
+              </p>
+
+              <div class="flex flex-wrap gap-2">
+                <%= button_to "Change to #{growing_context_label(@environment.suggested_context).downcase}", environment_context_offer_path(@environment), method: :patch, params: { answer: "change" }, class: "btn-sm" %>
+                <%= button_to "Keep as they are", environment_context_offer_path(@environment), method: :patch, params: { answer: "keep" }, class: "btn-sm-outline" %>
+              </div>
+            </section>
+          </div>
+        <% end %>
+
+        <% if @occupants.any? %>
+          <ul class="grid gap-2">
+            <% @occupants.each do |assignment| %>
+              <li>
+                <%= link_to plant_path(assignment.plant), class: "vv-plant-row" do %>
+                  <%= plant_thumb assignment.plant, class: "vv-plant-row-image" %>
+
+                  <span class="grid min-w-0 flex-1 gap-0.5">
+                    <span class="truncate font-medium"><%= assignment.plant.display_name %></span>
+                    <span class="vv-caption truncate"><%= assignment.plant.record_id %> · since <%= l(assignment.started_on, format: :long) %></span>
+                  </span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <% if @environment.active? && @movable_plants.any? %>
+          <details>
+            <summary class="btn-sm-outline w-fit">Move plants here</summary>
+
+            <%= form_with url: environment_moves_path(@environment), scope: :move, class: "form mt-3 grid gap-3" do |form| %>
+              <fieldset class="grid max-h-72 gap-1 overflow-y-auto">
+                <legend class="sr-only">Plants to move</legend>
+
+                <% @movable_plants.each do |plant| %>
+                  <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+                    <%= check_box_tag "move[plant_ids][]", plant.id, false, id: "move_plant_#{plant.id}" %>
+
+                    <span>
+                      <%= plant.display_name %>
+                      <span class="vv-caption"><%= plant.record_id %><%= " · in #{plant.current_assignment.environment.name}" if plant.current_assignment %></span>
+                    </span>
+                  </label>
+                <% end %>
+              </fieldset>
+
+              <div class="grid gap-2 sm:w-1/2">
+                <%= form.label :moved_on, "On" %>
+                <%= form.date_field :moved_on, value: Date.current, max: Date.current %>
+              </div>
+
+              <div><%= form.submit "Move plants", class: "btn-outline" %></div>
+            <% end %>
+          </details>
+        <% end %>
+
+        <% if @history.any? %>
+          <details>
+            <summary class="vv-caption cursor-pointer underline underline-offset-4">
+              Earlier plants
+            </summary>
+
+            <ul class="mt-2 grid gap-1 text-sm">
+              <% @history.each do |stay| %>
+                <li>
+                  <%= link_to stay.plant.display_name, plant_path(stay.plant), class: "underline underline-offset-4" %>
+                  (<%= stay.plant.record_id %>):
+                  <%= l(stay.started_on, format: :long) %> –
+                  <%= l(stay.ended_on, format: :long) %>
+                </li>
+              <% end %>
+            </ul>
+          </details>
+        <% end %>
+      </section>
+    </div>
+
+    <% if @environment.notes.present? %>
+      <div class="card">
+        <header>
+          <h2>Notes</h2>
+        </header>
+
+        <section>
+          <p class="whitespace-pre-line"><%= @environment.notes %></p>
+        </section>
+      </div>
+    <% end %>
+
+    <div class="card">
+      <header>
+        <h2>
+          <%= @environment.archived? ? "Archived" : "Archive or delete" %>
+        </h2>
+
+        <p>
+          <% if @environment.archived? %>
+            Hidden from your environments and from moves. Its history is kept.
+          <% else %>
+            Archiving hides it and keeps its history. Plants have to move out
+            first.
+          <% end %>
+        </p>
+      </header>
+
+      <footer class="flex flex-wrap gap-2">
+        <% if @environment.archived? %>
+          <%= button_to "Restore", environment_archive_path(@environment), method: :delete, class: "btn-sm-outline" %>
+        <% else %>
+          <%= button_to "Archive", environment_archive_path(@environment), class: "btn-sm-outline" %>
+        <% end %>
+
+        <% if @environment.deletable? %>
+          <%= link_to "Delete…", new_environment_deletion_path(@environment), class: "btn-sm-ghost" %>
+        <% end %>
+      </footer>
+    </div>
+  </div>
+
+  <div class="order-1 grid content-start gap-6 lg:order-2">
+    <% if capability?("collection.measurements") %>
+      <%= render "environments/conditions", environment: @environment, metrics: @metrics, custom_metrics: @custom_metrics, latest_values: @latest_values, measurements: @measurements %>
+    <% end %>
+
+    <% if capability?("collection.media") %>
+      <%= render "photos/section", subject: @environment, photos: @photos, quota: @quota %>
+    <% end %>
+  </div>
+</div>

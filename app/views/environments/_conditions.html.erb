@@ -1,0 +1,152 @@
+<%#
+  Dated readings (EN02, D90): the latest value of each metric, a form that works offline,
+  and the history. Blank fields aren't saved, so what wasn't measured stays unknown.
+%>
+
+<div class="card" id="conditions">
+  <header>
+    <h2>Conditions</h2>
+    <p>Fill in what you measured; leave the rest blank. Works offline.</p>
+  </header>
+
+  <% if latest_values.any? %>
+    <section>
+      <h3 class="vv-h4 mb-2">Latest</h3>
+
+      <dl class="vv-details">
+        <% latest_values.each do |value| %>
+          <dt><%= value.label %></dt>
+
+          <dd>
+            <%= value.display_value %>
+
+            <span class="vv-caption block">
+              <%= l(value.measurement.measured_at.to_date, format: :short) %> ·
+              <%= value.measurement.source %>
+            </span>
+          </dd>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+
+  <% if environment.active? %>
+    <section>
+      <%= form_with url: environment_measurements_path(environment), scope: :measurement, class: "form grid gap-3", data: { controller: "offline-form", offline_form_subject_value: "environment:#{environment.id}", offline_form_empty_message_value: "Enter at least one value.", action: "submit->offline-form#submit" } do |form| %>
+        <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, data: { offline_form_target: "key" } %>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <% metrics.each do |key, metric| %>
+            <div class="grid gap-2">
+              <%= label_tag "measurement_values_#{key}", metric[:text] || metric[:unit] == "pH" ? metric[:label] : "#{metric[:label]} (#{metric[:unit]})" %>
+
+              <% if metric[:text] %>
+                <%= text_field_tag "measurement[values][#{key}]", nil, id: "measurement_values_#{key}", maxlength: 200, placeholder: "e.g. 1 bubble per second", data: { offline_form_target: "content", summary_label: metric[:label] } %>
+              <% else %>
+                <%= text_field_tag "measurement[values][#{key}]", nil, id: "measurement_values_#{key}", inputmode: "decimal", autocomplete: "off", data: { offline_form_target: "content", summary_label: metric[:label] } %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% custom_metrics.each do |custom_metric| %>
+            <div class="grid gap-2">
+              <%= label_tag "measurement_custom_#{custom_metric.id}", "#{custom_metric.name} (#{custom_metric.unit})" %>
+              <%= text_field_tag "measurement[custom][#{custom_metric.id}]", nil, id: "measurement_custom_#{custom_metric.id}", inputmode: "decimal", autocomplete: "off", data: { offline_form_target: "content", summary_label: custom_metric.name } %>
+            </div>
+          <% end %>
+        </div>
+
+        <details>
+          <summary class="vv-caption cursor-pointer underline underline-offset-4">
+            Add your own reading
+          </summary>
+
+          <div class="mt-2 grid grid-cols-[1fr_6rem_6rem] gap-2">
+            <div class="grid gap-2">
+              <%= label_tag "measurement_new_custom_name", "Name" %>
+              <%= text_field_tag "measurement[new_custom][0][name]", nil, id: "measurement_new_custom_name", maxlength: 40, placeholder: "e.g. TDS" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag "measurement_new_custom_unit", "Unit" %>
+              <%= text_field_tag "measurement[new_custom][0][unit]", nil, id: "measurement_new_custom_unit", maxlength: 20, placeholder: "ppm" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag "measurement_new_custom_value", "Value" %>
+              <%= text_field_tag "measurement[new_custom][0][value]", nil, id: "measurement_new_custom_value", inputmode: "decimal", autocomplete: "off", data: { offline_form_target: "content" } %>
+            </div>
+          </div>
+
+          <p class="vv-caption mt-1">It's added to this form for next time.</p>
+        </details>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+          <div class="grid gap-2">
+            <%= form.label :measured_at, "When" %>
+            <%= form.datetime_local_field :measured_at, value: Time.current.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :source %>
+            <%= form.text_field :source, value: "Manual", maxlength: 80, list: "measurement-sources" %>
+
+            <datalist id="measurement-sources">
+              <% Current.user.measurements.distinct.pluck(:source).first(10).each do |source| %>
+                <option value="<%= source %>"></option>
+              <% end %>
+            </datalist>
+          </div>
+
+          <div class="grid gap-2 sm:col-span-2">
+            <%= form.label :note, "Note (optional)" %>
+            <%= form.text_field :note, maxlength: 500 %>
+          </div>
+        </div>
+
+        <p class="vv-caption" data-offline-form-target="status" role="status"></p>
+
+        <div>
+          <%= form.submit "Save reading", class: "btn", data: { offline_form_target: "submit" } %>
+        </div>
+      <% end %>
+    </section>
+
+    <section
+      class="grid gap-2"
+      data-controller="offline-queue-list"
+      data-offline-queue-list-subject-value="environment:<%= environment.id %>"
+      hidden
+    >
+      <h3 class="vv-h4">Waiting to send</h3>
+      <ul class="grid gap-2" data-offline-queue-list-target="list"></ul>
+    </section>
+  <% end %>
+
+  <% if measurements.any? %>
+    <section>
+      <h3 class="vv-h4 mb-2">Readings</h3>
+
+      <ol class="vv-timeline">
+        <% measurements.each do |measurement| %>
+          <li>
+            <p class="vv-caption">
+              <%= l(measurement.measured_at, format: :long) %> ·
+              <%= measurement.source %>
+            </p>
+
+            <p>
+              <%= measurement.values.map { "#{it.label} #{it.display_value}" }.join(" · ") %>
+            </p>
+
+            <% if measurement.note %>
+              <p class="vv-caption"><%= measurement.note %></p>
+            <% end %>
+
+            <%= button_to "Delete", environment_measurement_path(environment, measurement), method: :delete, class: "btn-sm-ghost w-fit", data: { turbo_confirm: "Delete this reading?" } %>
+          </li>
+        <% end %>
+      </ol>
+    </section>
+  <% end %>
+</div>

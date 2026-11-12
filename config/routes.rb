@@ -24,6 +24,22 @@ Rails.application.routes.draw do
         post :cover, on: :member
       end
       resource :deletion, only: %i[ new create ]
+      resources :moves, only: :create
+      resources :setups, only: :create
+      resource :context_offer, only: :update
+    end
+  end
+
+  resources :environments, except: :destroy do
+    scope module: :environments do
+      resources :measurements, only: %i[ create destroy ]
+      resources :moves, only: :create
+      resources :photos, only: %i[ create update destroy ] do
+        post :cover, on: :member
+      end
+      resource :archive, only: %i[ create destroy ]
+      resource :context_offer, only: :update
+      resource :deletion, only: %i[ new create ]
     end
   end
 

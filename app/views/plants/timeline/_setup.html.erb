@@ -1,0 +1,7 @@
+<li>
+  <p class="vv-caption">
+    <%= l(record.occurred_at.to_date, format: :long) %> · Setup
+  </p>
+
+  <p><%= setup_summary(record.plant_setup) %></p>
+</li>

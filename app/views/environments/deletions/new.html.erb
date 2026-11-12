@@ -1,0 +1,24 @@
+<% content_for :title, "Delete #{@environment.name} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2"><%= environment_kind_label(@environment.kind) %></p>
+  <h1 class="vv-h2">Delete <%= @environment.name %>?</h1>
+</div>
+
+<div class="card">
+  <section class="grid gap-3">
+    <p>This can't be undone. It permanently removes:</p>
+
+    <ul class="list-disc pl-5">
+      <li><%= pluralize(@effects[:measurements], "reading") %></li>
+      <li><%= pluralize(@effects[:photos], "photo") %></li>
+    </ul>
+
+    <p>To keep it out of the way instead, archive it.</p>
+  </section>
+
+  <footer class="flex flex-wrap gap-2">
+    <%= button_to "Delete permanently", environment_deletion_path(@environment), class: "btn-destructive" %>
+    <%= link_to "Keep it", environment_path(@environment), class: "btn-outline" %>
+  </footer>
+</div>

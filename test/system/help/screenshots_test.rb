@@ -27,6 +27,18 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
     capture "plant", plant_path(plant), wait_for: "Add an observation"
   end
 
+  test "environment" do
+    owner = users(:owner)
+    hoya = add_sample_plants
+    tank = owner.environments.create!(name: "60 cm planted tank", kind: "aquarium", length_cm: 60, width_cm: 30, height_cm: 36, volume_litres: 54)
+    owner.plants.find_by!(display_name: "Java fern").move_to!(tank, on: 3.weeks.ago.to_date)
+    reading = owner.measurements.new(environment: tank, measured_at: 1.day.ago, source: "API test kit", idempotency_key: "shot")
+    reading.assign_readings(fixed: { "water_temperature" => "24.5", "ph" => "6.8", "gh" => "6", "kh" => "4", "light_hours" => "7" })
+    reading.save!
+    hoya.move_to!(tank)
+    capture "environment", environment_path(tank), wait_for: "Conditions"
+  end
+
   test "privacy" do
     capture "privacy", settings_privacy_path, wait_for: "Your choices"
   end

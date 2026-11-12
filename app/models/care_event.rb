@@ -1,11 +1,14 @@
-# An entry on a plant's timeline (D82). Observations come first; B13 adds watering, feeding,
-# repotting and other kinds. The event date is when it happened, separate from when it was
+# An entry on a plant's timeline (D82): observations, moves between environments and setup
+# changes (D92); B13 adds watering, feeding, repotting and other kinds. The event date is when it happened, separate from when it was
 # entered (PL04). The client's idempotency key makes retries and offline syncs safe (OF02).
 class CareEvent < ApplicationRecord
-  KINDS = %w[ observation ].freeze
+  KINDS = %w[ observation movement setup ].freeze
 
   belongs_to :user
   belongs_to :plant
+  belongs_to :environment, optional: true
+  belongs_to :from_environment, class_name: "Environment", optional: true
+  belongs_to :plant_setup, optional: true
   has_many :photos, -> { order(:id) }, dependent: :destroy
 
   enum :kind, KINDS.index_by(&:itself), validate: true, default: "observation"
@@ -28,7 +31,7 @@ class CareEvent < ApplicationRecord
 
   private
     def note_or_photos
-      errors.add(:note, "can't be blank without a photo") if note.blank? && !photos_expected
+      errors.add(:note, "can't be blank without a photo") if observation? && note.blank? && !photos_expected
     end
 
     def plant_belongs_to_user

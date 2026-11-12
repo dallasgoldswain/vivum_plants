@@ -68,6 +68,10 @@
       </section>
     </div>
 
+    <% if capability?("collection.environments") %>
+      <%= render "plants/placement", plant: @plant, environments: @environments %>
+    <% end %>
+
     <div class="card">
       <header>
         <h2>Status</h2>
@@ -112,12 +116,12 @@
       </header>
 
       <section>
-        <%= form_with model: CareEvent.new, url: plant_care_events_path(@plant), class: "form grid gap-3", data: { controller: "observation-form", observation_form_plant_id_value: @plant.id, action: "submit->observation-form#submit" } do |form| %>
-          <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, data: { observation_form_target: "key" } %>
+        <%= form_with model: CareEvent.new, url: plant_care_events_path(@plant), class: "form grid gap-3", data: { controller: "offline-form", offline_form_subject_value: "plant:#{@plant.id}", offline_form_empty_message_value: "Add a note or a photo.", action: "submit->offline-form#submit" } do |form| %>
+          <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, data: { offline_form_target: "key" } %>
 
           <div class="grid gap-2">
             <%= form.label :note %>
-            <%= form.text_area :note, rows: 3, placeholder: "New leaf unfurling; roots reaching the pot edge" %>
+            <%= form.text_area :note, rows: 3, placeholder: "New leaf unfurling; roots reaching the pot edge", data: { offline_form_target: "content" } %>
           </div>
 
           <div class="grid gap-3 sm:grid-cols-2">
@@ -134,14 +138,10 @@
             <% end %>
           </div>
 
-          <p
-            class="vv-caption"
-            data-observation-form-target="status"
-            role="status"
-          ></p>
+          <p class="vv-caption" data-offline-form-target="status" role="status"></p>
 
           <div>
-            <%= form.submit "Save observation", class: "btn", data: { observation_form_target: "submit" } %>
+            <%= form.submit "Save observation", class: "btn", data: { offline_form_target: "submit" } %>
           </div>
         <% end %>
       </section>
@@ -149,7 +149,7 @@
       <section
         class="grid gap-2"
         data-controller="offline-queue-list"
-        data-offline-queue-list-plant-id-value="<%= @plant.id %>"
+        data-offline-queue-list-subject-value="plant:<%= @plant.id %>"
         hidden
       >
         <h3 class="vv-h4">Waiting to send</h3>
@@ -158,64 +158,7 @@
     </div>
 
     <% if capability?("collection.media") %>
-      <div class="card" id="photos">
-        <header>
-          <h2>Photos</h2>
-
-          <p class="<%= 'text-destructive' if @quota.warning? %>">
-            <%= @quota.used %> of <%= @quota.limit %> photos used in your
-            collection. <%= "Delete some to add more." if @quota.full? %>
-          </p>
-        </header>
-
-        <section class="grid gap-4">
-          <% if @photos.any? %>
-            <ul class="vv-photo-grid">
-              <% @photos.each do |photo| %>
-                <li class="grid gap-1">
-                  <%= link_to url_for(photo.image), target: "_blank", rel: "noopener" do %>
-                    <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo from #{l(photo.taken_on, format: :long)}", loading: "lazy", class: "vv-photo-thumb" %>
-                  <% end %>
-
-                  <p class="vv-caption">
-                    <%= l(photo.taken_on, format: :short) %><%= " · #{photo.caption}" if photo.caption.present? %>
-                    <%= " · cover" if photo.cover? %>
-                  </p>
-
-                  <div class="flex gap-1">
-                    <% unless photo.cover? %>
-                      <%= button_to "Make cover", cover_plant_photo_path(@plant, photo), class: "btn-sm-ghost" %>
-                    <% end %>
-
-                    <%= button_to "Delete", plant_photo_path(@plant, photo), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this photo?" } %>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
-          <% end %>
-
-          <% unless @quota.full? %>
-            <%= form_with url: plant_photos_path(@plant), scope: :photo, class: "form grid gap-3 sm:grid-cols-2" do |form| %>
-              <div class="grid gap-2 sm:col-span-2">
-                <%= form.label :images, "Add photos" %>
-                <%= form.file_field :images, multiple: true, include_hidden: false, required: true, accept: Photo::ACCEPTED_TYPES.join(",") %>
-              </div>
-
-              <div class="grid gap-2">
-                <%= form.label :caption %>
-                <%= form.text_field :caption, maxlength: 200 %>
-              </div>
-
-              <div class="grid gap-2">
-                <%= form.label :taken_on, "Taken on" %>
-                <%= form.date_field :taken_on, value: Date.current, max: Date.current %>
-              </div>
-
-              <div><%= form.submit "Upload", class: "btn-outline" %></div>
-            <% end %>
-          <% end %>
-        </section>
-      </div>
+      <%= render "photos/section", subject: @plant, photos: @photos, quota: @quota %>
     <% end %>
 
     <div class="card">

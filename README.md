@@ -150,12 +150,14 @@ TOTP secrets use Active Record encryption.
 
 ## Collection
 
-Collectors' plant records (B10, PL01–PL04, UX01, OF02, OF03, D80–D87). Plants belong to one user only; controllers load them through `Current.user.plants`, so another user's plant is a 404.
+Collectors' plant records and environments (B10–B11, PL01–PL05, EN01–EN03, UX01, OF02, OF03, D80–D95). Plants and environments belong to one user only; controllers load them through `Current.user.plants` and `Current.user.environments`, so another user's record is a 404.
 
 - **Records:** `Plant` (record number `P-0001` from `users.last_plant_number`, never reused), `Acquisition` (cost in cents, original currency), `PlantStatusChange` (history), `CareEvent` (the timeline; observations now, other kinds with B13), `Photo`.
-- **Photos:** `Photo.build_from_upload` processes with libvips before storing (upright, 2560 px, metadata and location stripped, JPEG); originals are never kept. Collectors can keep 500 (`Photo::COLLECTOR_LIMIT`). Stored with Active Storage on disk (`storage/`, the `vivum_plants_storage` Kamal volume in production). **Back up that volume**: photos aren't in the database.
-- **Offline:** `app/views/pwa/service-worker.js` caches collection and plant pages (network first), assets and photo thumbnails, nothing else. `observation_form` queues observations in IndexedDB when offline; `offline_sync` (on `<body>` when signed in) sends them with their idempotency key, so a resend never saves twice. The sign-in page clears cached pages. Bump `VERSION` in the worker to drop old caches. Tests: `bin/rails test test/system/offline_observation_test.rb`.
-- **New domain data:** add export sections in `AccountExport` and wiping in `User::Deletable#purge!` (done for plants, events and photos).
+- **Environments:** `Environment` (fixed kinds, no nesting; archive, or delete only if it never held a plant), `EnvironmentAssignment` (dated stays; one open stay per plant, enforced by a partial unique index), `PlantSetup` (pot, size, watering from a date). `Plant::Placement#move_to!` and `#change_setup!` write the record plus a `movement` or `setup` care event; `#setting_on(date)` gives the environment and setup on a date. Moving into a type that implies another growing context offers to change it (`EnvironmentAssignment#context_offer?`).
+- **Readings:** `Measurement` (one reading: time, source, idempotency key) with `MeasurementValue`s; fixed metrics and units in `Measurement::METRICS`, plus per-user `CustomMetric`s. Blank fields aren't stored.
+- **Photos:** `Photo.build_from_upload` processes with libvips before storing (upright, 2560 px, metadata and location stripped, JPEG); originals are never kept. A photo belongs to a plant or an environment. Collectors can keep 500 (`Photo::COLLECTOR_LIMIT`). Stored with Active Storage on disk (`storage/`, the `vivum_plants_storage` Kamal volume in production). **Back up that volume**: photos aren't in the database.
+- **Offline:** `app/views/pwa/service-worker.js` caches collection, plant and environment pages (network first), assets and photo thumbnails, nothing else. The `offline-form` Stimulus controller queues a form (observations, readings) in IndexedDB when offline; `offline_sync` (on `<body>` when signed in) sends it with its idempotency key, so a resend never saves twice. The sign-in page clears cached pages. Bump `VERSION` in the worker to drop old caches. Tests: `bin/rails test test/system/offline_test.rb`.
+- **New domain data:** add export sections in `AccountExport` and wiping in `User::Deletable#purge!` (done for plants, events, photos, environments, setups and readings).
 
 ## Help manual and What's new
 

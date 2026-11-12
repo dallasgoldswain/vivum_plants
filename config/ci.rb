@@ -16,7 +16,7 @@ CI.run do
 
   # Offline queue and caching (OF02) need a real browser. Help screenshots stay out of CI:
   # they rewrite images (bin/rails help:screenshots).
-  step "Tests: Offline (headless Chrome)", "bin/rails test test/system/offline_observation_test.rb"
+  step "Tests: Offline (headless Chrome)", "bin/rails test test/system/offline_test.rb"
 
   # Optional: set a green GitHub commit status to unblock PR merge.
   # Requires the `gh` CLI and `gh extension install basecamp/gh-signoff`.

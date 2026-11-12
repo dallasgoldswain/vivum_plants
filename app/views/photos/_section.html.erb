@@ -1,0 +1,59 @@
+<%# Photos of a plant or an environment, with the collection-wide quota (OF03, D94). %>
+<div class="card" id="photos">
+  <header>
+    <h2>Photos</h2>
+
+    <p class="<%= 'text-destructive' if quota.warning? %>">
+      <%= quota.used %> of <%= quota.limit %> photos used in your collection.
+      <%= "Delete some to add more." if quota.full? %>
+    </p>
+  </header>
+
+  <section class="grid gap-4">
+    <% if photos.any? %>
+      <ul class="vv-photo-grid">
+        <% photos.each do |photo| %>
+          <li class="grid gap-1">
+            <%= link_to url_for(photo.image), target: "_blank", rel: "noopener" do %>
+              <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo from #{l(photo.taken_on, format: :long)}", loading: "lazy", class: "vv-photo-thumb" %>
+            <% end %>
+
+            <p class="vv-caption">
+              <%= l(photo.taken_on, format: :short) %><%= " · #{photo.caption}" if photo.caption.present? %>
+              <%= " · cover" if photo.cover? %>
+            </p>
+
+            <div class="flex gap-1">
+              <% unless photo.cover? %>
+                <%= button_to "Make cover", polymorphic_path([ :cover, subject, photo ]), class: "btn-sm-ghost" %>
+              <% end %>
+
+              <%= button_to "Delete", polymorphic_path([ subject, photo ]), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this photo?" } %>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% unless quota.full? %>
+      <%= form_with url: polymorphic_path([ subject, :photos ]), scope: :photo, class: "form grid gap-3 sm:grid-cols-2" do |form| %>
+        <div class="grid gap-2 sm:col-span-2">
+          <%= form.label :images, "Add photos" %>
+          <%= form.file_field :images, multiple: true, include_hidden: false, required: true, accept: Photo::ACCEPTED_TYPES.join(",") %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :caption %>
+          <%= form.text_field :caption, maxlength: 200 %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :taken_on, "Taken on" %>
+          <%= form.date_field :taken_on, value: Date.current, max: Date.current %>
+        </div>
+
+        <div><%= form.submit "Upload", class: "btn-outline" %></div>
+      <% end %>
+    <% end %>
+  </section>
+</div>

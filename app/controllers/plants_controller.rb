@@ -8,17 +8,20 @@ class PlantsController < ApplicationController
     plants = authorized_scope(Plant.all)
     plants =
       if capability?("collection.search")
-        plants.search(params[:q]).filtered(context: params[:context], status: params[:status], tc_origin: params[:tc], tag: params[:tag])
+        plants.search(params[:q]).filtered(context: params[:context], status: params[:status], tc_origin: params[:tc], tag: params[:tag], environment: (params[:environment] if capability?("collection.environments")))
       else
         plants.in_active_collection
       end
     @plants = plants.includes(cover_photo: { image_attachment: { blob: :variant_records } }).order(:display_name, :number)
     @collection_size = Current.user.plants.count
     @view = params[:view] == "list" ? "list" : "grid"
+    @environments = Current.user.environments.active.by_name if capability?("collection.environments")
   end
 
   def show
+    ActiveRecord::Associations::Preloader.new(records: [ @plant ], associations: [ { environment_assignments: :environment }, :setups ]).call
     @timeline = @plant.timeline
+    @environments = Current.user.environments.active.by_name if capability?("collection.environments")
     @photos = @plant.photos.with_attached_image.newest_first
     @quota = Photo.quota_for(Current.user)
   end

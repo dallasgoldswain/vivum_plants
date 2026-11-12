@@ -3,7 +3,7 @@ require "zip"
 # A machine-readable export of everything VIVUM holds about one account (PRD §26, D68).
 # A zip of JSON files, one per section, plus a manifest and a README.
 #
-# Each domain adds its own section to SECTIONS as it ships (plants, photos, setups and so on).
+# Each domain adds its own section to SECTIONS as it ships.
 # A section returns plain data about this user only; never other people's personal data.
 class AccountExport
   FORMAT_VERSION = 1
@@ -49,15 +49,43 @@ class AccountExport
       end
     },
     "care_events" => ->(user) {
-      user.care_events.includes(:plant).order(:occurred_at).map { it.slice(:kind, :note, :occurred_at, :created_at).merge(plant: it.plant.record_id) }
+      user.care_events.includes(:plant, :environment, :from_environment).order(:occurred_at).map do |event|
+        event.slice(:kind, :note, :occurred_at, :created_at).merge(plant: event.plant.record_id, moved_to: event.environment&.name, moved_from: event.from_environment&.name).compact
+      end
     },
     "photos" => ->(user) {
-      user.photos.includes(:plant, image_attachment: :blob).order(:id).map { it.slice(:caption, :taken_on, :created_at).merge(plant: it.plant.record_id, file: AccountExport.photo_path(it)) }
+      user.photos.includes(:plant, :environment, image_attachment: :blob).order(:id).map do |photo|
+        photo.slice(:caption, :taken_on, :created_at).merge(plant: photo.plant&.record_id, environment: photo.environment&.name, file: AccountExport.photo_path(photo)).compact
+      end
+    },
+    "environments" => ->(user) {
+      user.environments.includes(assignments: :plant).order(:id).map do |environment|
+        environment.slice(:id, :name, :kind, :notes, :length_cm, :width_cm, :height_cm, :volume_litres, :status, :created_at, :updated_at).merge(
+          occupants: environment.assignments.sort_by(&:started_on).map { { plant: it.plant.record_id, moved_in: it.started_on, moved_out: it.ended_on } }
+        )
+      end
+    },
+    "plant_setups" => ->(user) {
+      user.plant_setups.includes(:plant).order(:started_on, :id).map { it.slice(:started_on, :container, :size, :size_unit, :watering_method, :created_at).merge(plant: it.plant.record_id) }
+    },
+    "measurements" => ->(user) {
+      user.measurements.includes(:environment, values: :custom_metric).order(:measured_at).map do |measurement|
+        measurement.slice(:measured_at, :source, :note, :created_at).merge(
+          environment: measurement.environment.name,
+          values: measurement.values.map { { metric: it.label, value: it.value, text: it.text_value, unit: it.unit }.compact }
+        )
+      end
+    },
+    "custom_metrics" => ->(user) {
+      user.custom_metrics.by_name.map { it.slice(:name, :unit, :created_at) }
     }
   }.freeze
 
   # Photo files go in the zip beside photos.json (D68).
-  def self.photo_path(photo) = "photos/#{photo.plant.record_id}-#{photo.id}.jpg"
+  def self.photo_path(photo)
+    subject = photo.plant ? photo.plant.record_id : "environment-#{photo.environment_id}"
+    "photos/#{subject}-#{photo.id}.jpg"
+  end
 
   def initialize(user)
     @user = user

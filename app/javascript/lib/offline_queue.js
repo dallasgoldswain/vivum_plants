@@ -1,13 +1,18 @@
-// Observations saved while offline (OF02, D84), kept in IndexedDB until they are sent.
-// Each item carries the signed-in user's id, so it is only ever sent for that account.
+// Entries saved while offline (OF02, D84, D94): observations and environment readings, kept
+// in IndexedDB until they are sent. Each item carries the signed-in user's id, so it is
+// only ever sent for that account, and the record it belongs to ("plant:12").
 const DB_NAME = "vivum-offline"
-const STORE = "observations"
+const STORE = "queue"
 export const QUEUE_CHANGED = "offline-queue:changed"
 
 function open() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1)
-    request.onupgradeneeded = () => request.result.createObjectStore(STORE, { keyPath: "key" })
+    const request = indexedDB.open(DB_NAME, 2)
+    request.onupgradeneeded = () => {
+      const db = request.result
+      if (db.objectStoreNames.contains("observations")) db.deleteObjectStore("observations")
+      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "key" })
+    }
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)
   })
@@ -38,14 +43,12 @@ export function csrfToken() {
   return document.querySelector("meta[name=csrf-token]")?.content
 }
 
-// Sends one queued observation. Resolves "sent", "rejected" (the server refused it) or
-// "offline" (try again later). The idempotency key means a resend never saves twice.
+// Sends one queued form. Resolves "sent", "rejected" (the server refused it) or "offline"
+// (try again later). The form's idempotency key means a resend never saves twice.
 export async function send(item) {
   const body = new FormData()
-  body.append("care_event[idempotency_key]", item.key)
-  body.append("care_event[note]", item.note || "")
-  body.append("care_event[occurred_at]", item.occurredAt || "")
-  for (const file of item.files || []) body.append("care_event[photos][]", file, file.name)
+  for (const [name, value] of item.fields) body.append(name, value)
+  for (const [name, file] of item.files || []) body.append(name, file, file.name)
 
   let response
   try {

@@ -5,7 +5,11 @@
     <%= render "layouts/head" %>
   </head>
 
-  <body class="vv-bg-app min-h-screen" <%= tag.attributes(data: { controller: "offline-sync", offline_sync_user_id_value: Current.user.id }) if app_shell? %>>
+  <body
+    class="vv-bg-app min-h-screen"
+    data-controller="<%= "offline-sync" if app_shell? %>"
+    data-offline-sync-user-id-value="<%= Current.user.id if app_shell? %>"
+  >
     <% if app_shell? %>
       <%= render "shared/sidebar" %>
       <main class="vv-main">

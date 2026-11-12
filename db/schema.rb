@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -96,8 +96,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.string "idempotency_key", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "environment_id"
+    t.bigint "from_environment_id"
+    t.bigint "plant_setup_id"
+    t.index ["environment_id"], name: "index_care_events_on_environment_id"
+    t.index ["from_environment_id"], name: "index_care_events_on_from_environment_id"
     t.index ["plant_id", "occurred_at"], name: "index_care_events_on_plant_id_and_occurred_at"
     t.index ["plant_id"], name: "index_care_events_on_plant_id"
+    t.index ["plant_setup_id"], name: "index_care_events_on_plant_setup_id"
     t.index ["user_id", "idempotency_key"], name: "index_care_events_on_user_id_and_idempotency_key", unique: true
     t.index ["user_id"], name: "index_care_events_on_user_id"
   end
@@ -114,6 +120,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.index ["user_id", "purpose", "created_at"], name: "index_consent_records_on_user_id_and_purpose_and_created_at"
   end
 
+  create_table "custom_metrics", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "unit", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "user_id, lower((name)::text)", name: "index_custom_metrics_on_user_and_name", unique: true
+    t.index ["user_id"], name: "index_custom_metrics_on_user_id"
+  end
+
   create_table "data_requests", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "kind", null: false
@@ -128,6 +144,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.index ["handled_by_id"], name: "index_data_requests_on_handled_by_id"
     t.index ["status", "due_on"], name: "index_data_requests_on_status_and_due_on"
     t.index ["user_id"], name: "index_data_requests_on_user_id"
+  end
+
+  create_table "environment_assignments", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.bigint "environment_id", null: false
+    t.date "started_on", null: false
+    t.date "ended_on"
+    t.boolean "context_answered", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["environment_id"], name: "index_environment_assignments_on_environment_id"
+    t.index ["plant_id"], name: "index_environment_assignments_on_plant_id"
+    t.index ["plant_id"], name: "index_environment_assignments_one_current", unique: true, where: "(ended_on IS NULL)"
+    t.index ["user_id"], name: "index_environment_assignments_on_user_id"
+    t.check_constraint "ended_on IS NULL OR ended_on >= started_on", name: "environment_assignments_dates_in_order"
+  end
+
+  create_table "environments", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "kind", null: false
+    t.text "notes"
+    t.decimal "length_cm", precision: 7, scale: 1
+    t.decimal "width_cm", precision: 7, scale: 1
+    t.decimal "height_cm", precision: 7, scale: 1
+    t.decimal "volume_litres", precision: 8, scale: 1
+    t.string "status", default: "active", null: false
+    t.bigint "cover_photo_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "status"], name: "index_environments_on_user_id_and_status"
+    t.index ["user_id"], name: "index_environments_on_user_id"
   end
 
   create_table "flipper_features", force: :cascade do |t|
@@ -165,6 +214,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.index ["seller_id"], name: "index_invitations_on_seller_id"
   end
 
+  create_table "measurement_values", force: :cascade do |t|
+    t.bigint "measurement_id", null: false
+    t.string "metric", null: false
+    t.bigint "custom_metric_id"
+    t.decimal "value", precision: 10, scale: 2
+    t.string "text_value"
+    t.string "unit", null: false
+    t.index ["custom_metric_id"], name: "index_measurement_values_on_custom_metric_id"
+    t.index ["measurement_id", "metric", "custom_metric_id"], name: "index_measurement_values_one_per_metric", unique: true, nulls_not_distinct: true
+    t.index ["measurement_id"], name: "index_measurement_values_on_measurement_id"
+    t.check_constraint "value IS NOT NULL OR text_value IS NOT NULL", name: "measurement_values_present"
+  end
+
+  create_table "measurements", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "environment_id", null: false
+    t.datetime "measured_at", null: false
+    t.string "source", default: "Manual", null: false
+    t.string "note"
+    t.string "idempotency_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["environment_id", "measured_at"], name: "index_measurements_on_environment_id_and_measured_at"
+    t.index ["environment_id"], name: "index_measurements_on_environment_id"
+    t.index ["user_id", "idempotency_key"], name: "index_measurements_on_user_id_and_idempotency_key", unique: true
+    t.index ["user_id"], name: "index_measurements_on_user_id"
+  end
+
   create_table "memberships", force: :cascade do |t|
     t.bigint "seller_id", null: false
     t.bigint "user_id", null: false
@@ -174,7 +251,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -212,16 +289,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
 
   create_table "photos", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "plant_id", null: false
+    t.bigint "plant_id"
     t.bigint "care_event_id"
     t.string "caption"
     t.date "taken_on", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "environment_id"
     t.index ["care_event_id"], name: "index_photos_on_care_event_id"
+    t.index ["environment_id"], name: "index_photos_on_environment_id"
     t.index ["plant_id", "taken_on"], name: "index_photos_on_plant_id_and_taken_on"
     t.index ["plant_id"], name: "index_photos_on_plant_id"
     t.index ["user_id"], name: "index_photos_on_user_id"
+    t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "photos_one_subject"
   end
 
   create_table "plans", force: :cascade do |t|
@@ -236,6 +316,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_plans_on_key", unique: true
+  end
+
+  create_table "plant_setups", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.date "started_on", null: false
+    t.string "container"
+    t.decimal "size", precision: 7, scale: 1
+    t.string "size_unit"
+    t.string "watering_method"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plant_id", "started_on"], name: "index_plant_setups_on_plant_id_and_started_on"
+    t.index ["plant_id"], name: "index_plant_setups_on_plant_id"
+    t.index ["user_id"], name: "index_plant_setups_on_user_id"
   end
 
   create_table "plant_status_changes", force: :cascade do |t|
@@ -355,20 +450,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_080000) do
   add_foreign_key "acquisitions", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "care_events", "environments", column: "from_environment_id", on_delete: :nullify
+  add_foreign_key "care_events", "environments", on_delete: :nullify
+  add_foreign_key "care_events", "plant_setups", on_delete: :cascade
   add_foreign_key "care_events", "plants", on_delete: :cascade
   add_foreign_key "care_events", "users"
   add_foreign_key "consent_records", "users", on_delete: :cascade
+  add_foreign_key "custom_metrics", "users"
   add_foreign_key "data_requests", "users"
   add_foreign_key "data_requests", "users", column: "handled_by_id"
+  add_foreign_key "environment_assignments", "environments", on_delete: :restrict
+  add_foreign_key "environment_assignments", "plants", on_delete: :cascade
+  add_foreign_key "environment_assignments", "users"
+  add_foreign_key "environments", "photos", column: "cover_photo_id", on_delete: :nullify
+  add_foreign_key "environments", "users"
   add_foreign_key "invitations", "sellers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id", on_delete: :nullify
+  add_foreign_key "measurement_values", "custom_metrics", on_delete: :cascade
+  add_foreign_key "measurement_values", "measurements", on_delete: :cascade
+  add_foreign_key "measurements", "environments", on_delete: :cascade
+  add_foreign_key "measurements", "users"
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
   add_foreign_key "photos", "care_events", on_delete: :cascade
+  add_foreign_key "photos", "environments", on_delete: :cascade
   add_foreign_key "photos", "plants", on_delete: :cascade
   add_foreign_key "photos", "users"
+  add_foreign_key "plant_setups", "plants", on_delete: :cascade
+  add_foreign_key "plant_setups", "users"
   add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
   add_foreign_key "plants", "acquisitions", on_delete: :nullify
   add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify

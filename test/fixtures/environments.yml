@@ -1,0 +1,15 @@
+shelf:
+  user: collector
+  name: Lounge shelf
+  kind: room_shelf
+
+tank:
+  user: collector
+  name: 60 cm tank
+  kind: aquarium
+  volume_litres: 54
+
+owner_cabinet:
+  user: owner
+  name: Grow cabinet
+  kind: grow_cabinet
