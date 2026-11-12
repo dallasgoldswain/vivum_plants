@@ -53,7 +53,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
-| B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
+| B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Planned |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
@@ -491,3 +491,42 @@ environment edit pages turned out to be refused since B10 (Action Policy has no 
 because the only development account has two-step sign-in; headless Chrome tests cover
 scaling offline and the recipe form, and there's a recipe screenshot. Help topics
 `ingredients` and `recipes` need review.
+
+### B13 Care events and quick care entry — discussed 2026-11-12
+
+**Scope**
+- **Kinds and details (CA01, D104, D105):** `care_events` gains the kinds watering, feeding,
+  repotting, pruning, treatment, inspection and custom, plus optional detail columns: amount
+  with unit, watering method, product, dose with unit, strength, treatment target and custom
+  label. Products, targets and custom labels are free text, suggested from the collector's
+  earlier entries. A note is optional for the new kinds; observations still need a note or a
+  photo.
+- **Quick entry (UX02, D103):** a row of care buttons on the plant page. Water saves at once,
+  with Undo and "Add details"; the other kinds open a short sheet with all fields optional and
+  the date defaulting to now.
+- **Repotting (D106):** the repot sheet prefills container, size and recipe version from the
+  current setup. Saving creates one repotting event and a new dated setup in one transaction,
+  shown as one timeline entry.
+- **Several plants (D107):** "Log care" from the environment page (checkboxes for plants
+  there) and from selected plants in the collection list; one event per plant, idempotent per
+  plant under one client key.
+- **Editing and deleting (D108):** edit or delete any care event or observation; movement and
+  setup events stay read-only.
+- **Last care (D109):** a summary of the latest event of each main kind on the plant page;
+  days since last watering on the collection list, with a "not watered in N+ days" filter; a
+  kind filter on the plant timeline.
+- **Offline (OF02, D110):** every kind queues offline with an idempotency key and syncs once.
+- **Account data and help:** the export includes the new event details; a help topic for
+  logging care; `care.logs` marked implemented.
+
+**Deferred:** the Today route and linking events to tasks (B14); stage-change events (B16);
+product records, doses per pot volume, and saved custom kinds; care-due filters (B14).
+
+**Acceptance:** tapping Water saves one watering event without a form; a feeding saved with
+no details is saved; a care log saved offline and synced twice creates one event (OF02); a
+repot into a new container with Aroid mix v2 shows one timeline entry and makes that the
+current setup; watering five plants from an environment creates five events, and a retry
+creates no more; yesterday's watering sorts before today's observation in the timeline
+order by date (PL04); editing an event's date re-sorts the timeline; the collection filter
+"not watered in 7+ days" finds a plant last watered 8 days ago and not one watered 2 days
+ago.
