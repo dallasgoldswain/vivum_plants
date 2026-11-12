@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.logs]
 prerequisites: []
 keywords: [care, log, water, watering, feed, feeding, fertiliser, fertilizer, repot, repotting, prune, treatment, pest, inspect, custom, undo, edit, several plants, last watered, dry, offline]
+reviewed: 2026-11-12
+reviewed_digest: 08deedde7ef38be73209d4e8b0b0142af087b698b73a6f7794b59f2abc0df155
 ---
 
 Each plant's page has a **Log care** card near the top. It shows when the plant was
