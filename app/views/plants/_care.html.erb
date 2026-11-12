@@ -1,0 +1,127 @@
+<%#
+  Quick care entry (UX02, D103): Water saves at once; the other kinds open a short form
+  where everything is optional. Works offline (D110).
+%>
+
+<div class="card" id="care">
+  <header>
+    <h2>Log care</h2>
+    <p><%= last_care_summary(latest) || "Nothing logged yet." %></p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if logged_event %>
+      <div class="alert" role="status">
+        <h3>
+          <%= care_title(logged_event) %>
+          <%= care_ago(logged_event.occurred_at) %>,
+          <%= l(logged_event.occurred_at, format: "%H:%M") %>
+        </h3>
+
+        <section class="flex flex-wrap items-center gap-2">
+          <% if (details = care_details(logged_event)) %>
+            <span class="vv-caption"><%= details %></span>
+          <% end %>
+
+          <%= link_to "Add details", edit_plant_care_event_path(plant, logged_event), class: "btn-sm-outline" %>
+
+          <% if logged_event.deletable? %>
+            <%= button_to "Undo", plant_care_event_path(plant, logged_event), method: :delete, class: "btn-sm-ghost" %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <div class="flex flex-wrap gap-2">
+      <%= form_with model: CareEvent.new(kind: "watering"), url: plant_care_events_path(plant), id: "care-quick-water", data: { controller: "offline-form", offline_form_subject_value: "plant:#{plant.id}", offline_form_label_value: "Watered", action: "submit->offline-form#submit" } do |form| %>
+        <%= form.hidden_field :kind, id: nil %>
+        <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
+        <%= form.button "Water", class: "btn", data: { offline_form_target: "submit" } %>
+
+        <span
+          class="vv-caption"
+          data-offline-form-target="status"
+          role="status"
+        ></span>
+      <% end %>
+
+      <% (CareEvent::LOGGED_KINDS - %w[ watering ]).each do |kind| %>
+        <button
+          type="button"
+          class="btn-outline"
+          commandfor="care-<%= kind %>"
+          command="show-modal"
+        >
+          <%= care_button_label(kind) %>
+        </button>
+      <% end %>
+    </div>
+  </section>
+
+  <section
+    class="grid gap-2"
+    data-controller="offline-queue-list"
+    data-offline-queue-list-subject-value="plant:<%= plant.id %>"
+    hidden
+  >
+    <h3 class="vv-h4">Waiting to send</h3>
+    <ul class="grid gap-2" data-offline-queue-list-target="list"></ul>
+  </section>
+
+  <% (CareEvent::LOGGED_KINDS - %w[ watering ]).each do |kind| %>
+    <dialog
+      id="care-<%= kind %>"
+      class="dialog"
+      aria-labelledby="care-<%= kind %>-title"
+      closedby="any"
+    >
+      <%= form_with model: CareEvent.new(kind: kind, plant: plant), url: plant_care_events_path(plant), class: "form", data: { controller: "offline-form", offline_form_subject_value: "plant:#{plant.id}", offline_form_label_value: CareHelper::CARE_TITLES[kind], action: "submit->offline-form#submit" } do |form| %>
+        <header>
+          <h2 id="care-<%= kind %>-title">
+            <%= care_button_label(kind) %> <%= plant.display_name %>
+          </h2>
+
+          <p>
+            Every detail is
+            optional<%= kind == "custom" ? " except what you did" : "" %>.
+          </p>
+        </header>
+
+        <section class="grid max-h-[60vh] gap-3 overflow-y-auto">
+          <%= form.hidden_field :kind, id: nil %>
+          <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
+          <%= render "plants/care_events/fields", form: form, kind: kind, setup_form: capability?("collection.environments"), setup: setup, recipes: recipes %>
+
+          <div class="grid gap-2">
+            <%= form.label :occurred_at, "When", for: "care_#{kind}_occurred_at" %>
+            <%= form.datetime_local_field :occurred_at, id: "care_#{kind}_occurred_at", value: Time.current.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+          </div>
+
+          <% if capability?("collection.media") %>
+            <div class="grid gap-2">
+              <%= form.label :photos, for: "care_#{kind}_photos" %>
+              <%= form.file_field :photos, id: "care_#{kind}_photos", multiple: true, include_hidden: false, accept: Photo::ACCEPTED_TYPES.join(","), disabled: quota.full? %>
+            </div>
+          <% end %>
+
+          <p class="vv-caption" data-offline-form-target="status" role="status"></p>
+        </section>
+
+        <footer>
+          <button
+            type="button"
+            class="btn-outline"
+            commandfor="care-<%= kind %>"
+            command="close"
+          >
+            Cancel
+          </button>
+
+          <%= form.submit "Save", class: "btn", data: { offline_form_target: "submit" } %>
+        </footer>
+      <% end %>
+    </dialog>
+  <% end %>
+
+  <%= render "plants/care_events/suggestions", suggestions: suggestions %>
+</div>

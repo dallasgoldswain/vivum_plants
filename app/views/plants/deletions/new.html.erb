@@ -11,7 +11,10 @@
 
     <ul class="list-disc pl-5">
       <li><%= pluralize(@effects[:photos], "photo") %></li>
-      <li><%= pluralize(@effects[:observations], "observation") %></li>
+
+      <li>
+        <%= pluralize(@effects[:care_events], "observation and care entry", plural: "observations and care entries") %>
+      </li>
 
       <li>
         <%= pluralize(@effects[:status_changes], "status change") %> and its

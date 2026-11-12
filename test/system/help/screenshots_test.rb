@@ -24,6 +24,8 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
   test "plant" do
     plant = add_sample_plants
     plant.care_events.create!(user: users(:owner), note: "Third leaf hardening off, darker than the last.", occurred_at: 2.days.ago, idempotency_key: "shot")
+    plant.care_events.create!(user: users(:owner), kind: "watering", amount: 300, amount_unit: "mL", watering_method: "bottom", occurred_at: 1.day.ago, idempotency_key: "shot-water")
+    plant.care_events.create!(user: users(:owner), kind: "feeding", product: "Seaweed feed", amount: 2, amount_unit: "mL/L", strength: "half", occurred_at: 9.days.ago, idempotency_key: "shot-feed")
     capture "plant", plant_path(plant), wait_for: "Add an observation"
   end
 

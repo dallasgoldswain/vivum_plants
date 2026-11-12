@@ -42,6 +42,21 @@ module Plant::Placement
     end
   end
 
+  # A repot logs one repotting event and, when a container, size or substrate is given, a
+  # new dated setup that the event points at, so the timeline shows one entry (D106).
+  def repot!(event, setup_attributes)
+    on = event.occurred_at.to_date
+    raise MoveRefused, "Choose a date that isn't in the future." if on > Date.current
+
+    transaction do
+      if setup_attributes.symbolize_keys.except(:size_unit).values.any?(&:present?)
+        event.plant_setup = setups.create!(setup_attributes.merge(user: user, started_on: on))
+      end
+      event.save!
+      event
+    end
+  end
+
   # The environment and setup in place on a date, for timeline entries (PL05).
   def setting_on(date)
     assignment = environment_assignments.select { it.covers?(date) }.last

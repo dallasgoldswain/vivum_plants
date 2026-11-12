@@ -4,7 +4,7 @@ require "application_system_test_case"
 # waiting, and sent once when the connection returns. Run in headless Chrome (bin/ci).
 class OfflineTest < ApplicationSystemTestCase
   setup do
-    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling ].each { Flipper.enable(it) }
+    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling care.logs ].each { Flipper.enable(it) }
     users(:collector).update!(whats_new_seen_at: Time.current)
   end
 
@@ -29,6 +29,43 @@ class OfflineTest < ApplicationSystemTestCase
     page.execute_script("window.dispatchEvent(new Event('online'))")
     sleep 1
     assert_equal 1, CareEvent.where(note: "Pearling under the new light").count
+  end
+
+  test "a watering tapped offline and a feeding saved offline are sent once (D103, D110)" do
+    sign_in
+    visit plant_path(plants(:anubias))
+    assert_text "Log care"
+
+    page.driver.browser.network_conditions = { offline: true, latency: 0, throughput: 0 }
+    click_on "Water"
+    assert_text "Saved on this device"
+    within("#care") { click_on "Feed" }
+    within("#care-feeding") do
+      fill_in "Fertiliser", with: "Seaweed feed"
+      click_on "Save"
+    end
+    assert_no_selector "#care-feeding[open]"
+    assert_text "Fed · Seaweed feed"
+    assert_equal 0, CareEvent.count
+
+    page.driver.browser.network_conditions = { offline: false, latency: 0, throughput: 0 }
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    assert_no_text "Waiting to send", wait: 10
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    sleep 1
+    assert_equal [ "feeding", "watering" ], CareEvent.order(:kind).pluck(:kind)
+    assert_equal "Seaweed feed", CareEvent.feeding.sole.product
+  end
+
+  test "Water saves at once online, and Undo removes it" do
+    sign_in
+    visit plant_path(plants(:anubias))
+    click_on "Water"
+    assert_text "Add details"
+    assert_equal 1, CareEvent.watering.count
+    click_on "Undo"
+    assert_text "Entry deleted."
+    assert_equal 0, CareEvent.count
   end
 
   test "a reading saved offline is sent once when back online" do

@@ -8,11 +8,12 @@ class PlantsController < ApplicationController
     plants = authorized_scope(Plant.all)
     plants =
       if capability?("collection.search")
-        plants.search(params[:q]).filtered(context: params[:context], status: params[:status], tc_origin: params[:tc], tag: params[:tag], environment: (params[:environment] if capability?("collection.environments")))
+        plants.search(params[:q]).filtered(context: params[:context], status: params[:status], tc_origin: params[:tc], tag: params[:tag], environment: (params[:environment] if capability?("collection.environments")), unwatered_days: (params[:unwatered] if capability?("care.logs")))
       else
         plants.in_active_collection
       end
     @plants = plants.includes(cover_photo: { image_attachment: { blob: :variant_records } }).order(:display_name, :number)
+    @last_watered = CareEvent.latest_by_plant(@plants.map(&:id), kinds: %w[ watering ]).transform_values { it["watering"] } if capability?("care.logs")
     @collection_size = Current.user.plants.count
     @view = params[:view] == "list" ? "list" : "grid"
     @environments = Current.user.environments.active.by_name if capability?("collection.environments")
@@ -20,7 +21,10 @@ class PlantsController < ApplicationController
 
   def show
     ActiveRecord::Associations::Preloader.new(records: [ @plant ], associations: [ { environment_assignments: :environment }, { setups: { recipe_version: :recipe } } ]).call
-    @timeline = @plant.timeline
+    @timeline_kinds = @plant.care_events.distinct.pluck(:kind)
+    @timeline_kind = params[:kind].presence_in(@timeline_kinds)
+    @timeline = @plant.timeline(kind: @timeline_kind)
+    load_care if capability?("care.logs")
     @environments = Current.user.environments.active.by_name if capability?("collection.environments")
     @recipes = Current.user.recipes.active.includes(:versions).by_name if capability?("substrate.recipes")
     @photos = @plant.photos.with_attached_image.newest_first
@@ -60,6 +64,13 @@ class PlantsController < ApplicationController
     def set_plant
       @plant = Current.user.plants.find(params[:id])
       authorize! @plant
+    end
+
+    # Quick care entry (D103): last care, the entry just saved, and earlier free text (D105).
+    def load_care
+      @last_care = @plant.last_care
+      @logged_event = @plant.care_events.find_by(id: flash[:logged_care_event]) if flash[:logged_care_event]
+      @care_suggestions = CareEvent.suggestions_for(Current.user)
     end
 
     def plant_params

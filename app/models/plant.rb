@@ -56,17 +56,25 @@ class Plant < ApplicationRecord
     end
   end
 
-  # Newest first: observations, status changes and photos added on their own (PL04).
-  def timeline
-    entries = care_events.includes(:environment, :from_environment, :plant_setup, photos: { image_attachment: :blob }).map { Timeline::Entry.new(it.kind.to_sym, it.occurred_at, it) }
-    entries += status_changes.map { Timeline::Entry.new(:status_change, it.effective_on.in_time_zone.end_of_day, it) }
-    entries += photos.standalone.with_attached_image.map { Timeline::Entry.new(:photo, it.taken_on.in_time_zone.end_of_day, it) }
+  # Newest first: care events, status changes and photos added on their own (PL04). A kind
+  # narrows it to care events of that kind (D109).
+  def timeline(kind: nil)
+    events = care_events.includes(:environment, :from_environment, { plant_setup: { recipe_version: :recipe } }, photos: { image_attachment: :blob })
+    events = events.where(kind: kind) if kind
+    entries = events.map { Timeline::Entry.new(it.kind.to_sym, it.occurred_at, it) }
+    unless kind
+      entries += status_changes.map { Timeline::Entry.new(:status_change, it.effective_on.in_time_zone.end_of_day, it) }
+      entries += photos.standalone.with_attached_image.map { Timeline::Entry.new(:photo, it.taken_on.in_time_zone.end_of_day, it) }
+    end
     entries.sort_by { [ -it.at.to_f, -it.record.created_at.to_f ] }
   end
 
+  # When each main kind of care last happened: { "watering" => time, … } (D109).
+  def last_care = CareEvent.latest_by_plant([ id ])[id]
+
   # What a permanent delete removes (D86).
   def deletion_effects
-    { photos: photos.count, observations: care_events.observation.count, moves: environment_assignments.size, setups: setups.size, status_changes: status_changes.count }
+    { photos: photos.count, care_events: care_events.where(kind: %w[ observation ] + CareEvent::LOGGED_KINDS).count, moves: environment_assignments.size, setups: setups.size, status_changes: status_changes.count }
   end
 
   module Timeline

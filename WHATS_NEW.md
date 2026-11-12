@@ -61,7 +61,15 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   in, it becomes a new version, and those plants keep the one they were potted in.
 - Share a mix with a link that anyone can open without an account. Your private notes and
   plants stay private, and you can turn the link off at any time.
+- Log care in a tap: Water saves straight away, and Feed, Repot, Prune, Treat and Inspect
+  take a few optional details, such as the fertiliser and dose. Changed your mind? Undo it,
+  or edit any entry later.
+- Repotting records the new pot and mix in the same step, so the plant's setup stays up to
+  date.
+- Water a whole shelf at once, or any plants you pick from your collection.
+- See when each plant was last watered, fed and repotted, and find the ones not watered for
+  a week or more.
 - No signal? Plants, environments and recipes you've opened stay readable, and new
-  observations and readings wait on your device until you're back online.
+  observations, care and readings wait on your device until you're back online.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

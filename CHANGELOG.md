@@ -152,6 +152,24 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   removes them. Help topics `ingredients` and `recipes`; `substrate.ingredients`,
   `substrate.recipes`, `substrate.scaling` and `substrate.share` marked implemented. Browser
   tests for offline scaling and the recipe form in `offline_test.rb`.
+- Care events (B13): `care_events` gains watering, feeding, repotting, pruning, treatment,
+  inspection and custom kinds, with optional `amount` and `amount_unit` (volume for
+  watering, dose for feeding and treatment), `watering_method`, `product`, `strength`,
+  `target` and `label`; details that don't belong to the kind are dropped before saving
+  (CA01, D104). Products, targets and custom labels are free text suggested from earlier
+  entries through `<datalist>`s (D105). A **Log care** card on the plant page: Water saves at
+  once, with Undo and "Add details"; other kinds open a native `<dialog>` (invoker commands,
+  no JS) where every field is optional (UX02, D103). `Plant::Placement#repot!` writes one
+  repotting event and a new setup in one transaction (D106). `CareLogsController`
+  (`/care_logs/new`) logs one entry for several plants from an environment or the
+  collection's current filters, one event per plant keyed `"<key>:<plant id>"` (D107). Care
+  events and observations can be edited and deleted; movement and setup events can't, and a
+  repot that made a setup keeps its date and can't be deleted (D108). Last-care summary on the
+  plant page, last watering on the collection, a "not watered in N+ days" filter, and a kind
+  filter on the timeline (D109). Every kind queues offline through `offline-form`, which no
+  longer requires content unless `emptyMessage` is set and now takes `label` and `afterSave`
+  values (D110). Export includes the new details. Help topic `logging-care`; `care.logs`
+  marked implemented. Browser tests for watering and feeding offline and for Undo.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

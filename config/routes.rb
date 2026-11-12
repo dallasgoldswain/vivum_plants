@@ -19,7 +19,7 @@ Rails.application.routes.draw do
   resources :plants do
     scope module: :plants do
       resources :status_changes, only: :create
-      resources :care_events, only: %i[ create destroy ]
+      resources :care_events, only: %i[ create edit update destroy ]
       resources :photos, only: %i[ create update destroy ] do
         post :cover, on: :member
       end
@@ -29,6 +29,8 @@ Rails.application.routes.draw do
       resource :context_offer, only: :update
     end
   end
+
+  resources :care_logs, only: %i[ new create ]
 
   resources :environments, except: :destroy do
     scope module: :environments do

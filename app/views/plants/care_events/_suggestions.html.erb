@@ -1,0 +1,8 @@
+<%# Earlier products, targets and custom labels, suggested as you type (D105). %>
+<% { "product" => :product, "target" => :target, "label" => :label }.each do |name, column| %>
+  <datalist id="care-<%= name %>-suggestions">
+    <% suggestions.fetch(column, []).each do |value| %>
+      <option value="<%= value %>"></option>
+    <% end %>
+  </datalist>
+<% end %>

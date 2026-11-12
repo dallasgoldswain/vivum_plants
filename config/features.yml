@@ -44,7 +44,7 @@ collection.measurements: { domain: collector, state: core, implemented: true, de
 collection.tissue_culture: { domain: collector, state: core, depends_on: [collection.plants], description: "Purchased tissue culture tracking (TC01–TC05)" }
 
 # --- Care and library ---
-care.logs: { domain: care, state: core, depends_on: [collection.plants], description: "Care events and quick care entry (CA01)" }
+care.logs: { domain: care, state: core, implemented: true, depends_on: [collection.plants], description: "Care events and quick care entry (CA01)" }
 care.shared_maintenance: { domain: care, state: core, depends_on: [collection.environments, care.reminders], description: "Environment maintenance tasks (EN04)" }
 care.reminders: { domain: care, state: core, depends_on: [care.logs], description: "Schedules, reminders and the Today inbox (CA02–CA05)" }
 care.library_guidance: { domain: care, state: core, depends_on: [library.profiles, care.reminders], description: "Suggestions from built-in profiles" }

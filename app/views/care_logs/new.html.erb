@@ -1,0 +1,76 @@
+<% content_for :title, "Log care for several plants · VIVUM Plants" %>
+<% back = @environment ? environment_path(@environment) : plants_path %>
+
+<div class="grid gap-3">
+  <%= link_to (@environment ? "← #{@environment.name}" : "← Collection"), back, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Log care</p>
+
+      <h1 class="vv-h2">
+        <%= @environment ? "Plants in #{@environment.name}" : "Several plants" %>
+      </h1>
+    </div>
+
+    <%= help_link "logging-care" %>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <header>
+    <h2>What did you do?</h2>
+    <p>Each plant gets its own entry, with the same date and details.</p>
+  </header>
+
+  <section class="grid gap-4">
+    <nav class="flex flex-wrap gap-1" aria-label="Kind of care">
+      <% CareLogsController::KINDS.each do |kind| %>
+        <%= link_to care_button_label(kind), new_care_log_path(request.query_parameters.merge(kind: kind)), class: (@kind == kind ? "badge" : "badge-outline"), aria: { current: (@kind == kind ? "true" : nil) } %>
+      <% end %>
+    </nav>
+
+    <% if @plants.empty? %>
+      <p>
+        No active plants
+        <%= @environment ? "in #{@environment.name}" : "match" %>.
+      </p>
+    <% else %>
+      <%= form_with model: CareEvent.new(kind: @kind), url: care_logs_path, class: "form grid gap-3", data: { controller: "offline-form", offline_form_subject_value: "care-log", offline_form_label_value: "#{CareHelper::CARE_TITLES[@kind]} for several plants", offline_form_after_save_value: back, action: "submit->offline-form#submit" } do |form| %>
+        <%= form.hidden_field :kind, id: nil %>
+        <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
+        <%= hidden_field_tag :environment_id, @environment&.id, id: nil %>
+
+        <fieldset class="grid max-h-80 gap-1 overflow-y-auto">
+          <legend class="vv-h4 mb-1">Plants</legend>
+
+          <% @plants.each do |plant| %>
+            <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+              <%= check_box_tag "plant_ids[]", plant.id, @selected.include?(plant.id), id: "care_log_plant_#{plant.id}" %>
+
+              <span>
+                <%= plant.display_name %>
+                <span class="vv-caption"><%= plant.record_id %></span>
+              </span>
+            </label>
+          <% end %>
+        </fieldset>
+
+        <%= render "plants/care_events/fields", form: form, kind: @kind %>
+
+        <div class="grid gap-2 sm:w-1/2">
+          <%= form.label :occurred_at, "When" %>
+          <%= form.datetime_local_field :occurred_at, value: Time.current.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+        </div>
+
+        <p class="vv-caption" data-offline-form-target="status" role="status"></p>
+
+        <div>
+          <%= form.submit "Log for chosen plants", class: "btn", data: { offline_form_target: "submit" } %>
+        </div>
+      <% end %>
+
+      <%= render "plants/care_events/suggestions", suggestions: @suggestions %>
+    <% end %>
+  </section>
+</div>

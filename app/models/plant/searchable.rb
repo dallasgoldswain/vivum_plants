@@ -12,7 +12,7 @@ module Plant::Searchable
       words.reduce(all) { |relation, word| relation.where(word_condition(word)) }
     end
 
-    def filtered(context: nil, status: nil, tc_origin: nil, tag: nil, environment: nil)
+    def filtered(context: nil, status: nil, tc_origin: nil, tag: nil, environment: nil, unwatered_days: nil)
       relation = all
       current = EnvironmentAssignment.current.select(:plant_id)
       relation =
@@ -31,6 +31,10 @@ module Plant::Searchable
         end
       relation = relation.where(tc_origin: true) if tc_origin.to_s == "1"
       relation = relation.where("? = ANY (tags)", tag.to_s.downcase) if tag.present?
+      if (days = unwatered_days.to_i).positive?
+        # "Not watered in N+ days" (D109), counting plants never watered.
+        relation = relation.where.not(id: CareEvent.watering.where(occurred_at: days.days.ago..).select(:plant_id))
+      end
       relation
     end
 

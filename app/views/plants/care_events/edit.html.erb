@@ -1,0 +1,41 @@
+<% content_for :title, "Edit #{care_title(@care_event).downcase} · #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@plant.display_name}", plant_path(@plant, anchor: "timeline"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h1 class="vv-h2"><%= care_title(@care_event) %></h1>
+</div>
+
+<div class="card max-w-xl">
+  <section>
+    <%= form_with model: @care_event, url: plant_care_event_path(@plant, @care_event), class: "form grid gap-3" do |form| %>
+      <% if @care_event.errors.any? %>
+        <div class="alert-destructive" role="alert">
+          <h2>Not saved</h2>
+          <section><%= @care_event.errors.full_messages.to_sentence %></section>
+        </div>
+      <% end %>
+
+      <%= render "plants/care_events/fields", form: form, kind: @care_event.kind %>
+      <%= render "plants/care_events/suggestions", suggestions: @suggestions %>
+
+      <% if @care_event.date_editable? %>
+        <div class="grid gap-2">
+          <%= form.label :occurred_at, "When" %>
+          <%= form.datetime_local_field :occurred_at, value: @care_event.occurred_at.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+        </div>
+      <% else %>
+        <p class="vv-caption">
+          <%= l(@care_event.occurred_at, format: :long) %>. A repot's date and
+          new setup stay as they are; change the setup under
+          <strong>Where it grows</strong>.
+        </p>
+      <% end %>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Save", class: "btn" %>
+        <%= link_to "Cancel", plant_path(@plant, anchor: "timeline"), class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </section>
+</div>

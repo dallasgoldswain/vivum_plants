@@ -1,0 +1,91 @@
+<%# The optional details of a care entry, by kind (CA01, D104–D106). %>
+<% prefix = "care_#{kind}_#{dom_id(form.object.plant || form.object, :fields)}" %>
+
+<% if CareEvent::AMOUNT_UNITS.key?(kind) %>
+  <div class="grid grid-cols-[1fr_6rem] gap-2">
+    <div class="grid gap-2">
+      <%= form.label :amount, (kind == "watering" ? "Amount" : "Dose"), for: "#{prefix}_amount" %>
+      <%= form.number_field :amount, id: "#{prefix}_amount", min: 0, step: "any", inputmode: "decimal", data: { offline_form_target: "content", summary_label: (kind == "watering" ? nil : "dose") } %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :amount_unit, "Unit", for: "#{prefix}_amount_unit" %>
+      <%= form.select :amount_unit, care_amount_units(kind), {}, id: "#{prefix}_amount_unit", class: "select" %>
+    </div>
+  </div>
+<% end %>
+
+<% if kind == "watering" %>
+  <div class="grid gap-2">
+    <%= form.label :watering_method, "How", for: "#{prefix}_watering_method" %>
+    <%= form.select :watering_method, care_watering_method_options, { include_blank: "Not set" }, id: "#{prefix}_watering_method", class: "select" %>
+  </div>
+<% end %>
+
+<% if kind.in?(%w[ feeding treatment ]) %>
+  <div class="grid gap-2">
+    <%= form.label :product, (kind == "feeding" ? "Fertiliser" : "Product"), for: "#{prefix}_product" %>
+    <%= form.text_field :product, id: "#{prefix}_product", maxlength: 120, list: "care-product-suggestions", autocomplete: "off", placeholder: (kind == "feeding" ? "e.g. seaweed feed" : "e.g. neem oil"), data: { offline_form_target: "content" } %>
+  </div>
+<% end %>
+
+<% if kind == "feeding" %>
+  <div class="grid gap-2">
+    <%= form.label :strength, for: "#{prefix}_strength" %>
+    <%= form.select :strength, care_strength_options, { include_blank: "Not set" }, id: "#{prefix}_strength", class: "select" %>
+  </div>
+<% end %>
+
+<% if kind == "treatment" %>
+  <div class="grid gap-2">
+    <%= form.label :target, "For", for: "#{prefix}_target" %>
+    <%= form.text_field :target, id: "#{prefix}_target", maxlength: 120, list: "care-target-suggestions", autocomplete: "off", placeholder: "e.g. thrips, root rot", data: { offline_form_target: "content", summary_label: "for" } %>
+  </div>
+<% end %>
+
+<% if kind == "custom" %>
+  <div class="grid gap-2">
+    <%= form.label :label, "What you did", for: "#{prefix}_label" %>
+    <%= form.text_field :label, id: "#{prefix}_label", maxlength: 80, required: true, list: "care-label-suggestions", autocomplete: "off", placeholder: "e.g. flushed with RO water", data: { offline_form_target: "content" } %>
+  </div>
+<% end %>
+
+<% if kind == "repotting" && local_assigns[:setup_form] %>
+  <% setup = local_assigns[:setup] %>
+
+  <%= fields_for :setup, PlantSetup.new(container: setup&.container, size: setup&.size, size_unit: setup&.size_unit || "cm", recipe_version: setup&.recipe_version) do |setup_form| %>
+    <div class="grid gap-2">
+      <%= setup_form.label :container, "Into", for: "#{prefix}_container" %>
+      <%= setup_form.text_field :container, id: "#{prefix}_container", maxlength: 80, placeholder: "e.g. terracotta pot" %>
+    </div>
+
+    <div class="grid grid-cols-[1fr_5rem] gap-2">
+      <div class="grid gap-2">
+        <%= setup_form.label :size, for: "#{prefix}_size" %>
+        <%= setup_form.number_field :size, id: "#{prefix}_size", min: 0, step: 0.1, inputmode: "decimal" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= setup_form.label :size_unit, "Unit", for: "#{prefix}_size_unit" %>
+        <%= setup_form.select :size_unit, PlantSetup::SIZE_UNITS, {}, id: "#{prefix}_size_unit", class: "select" %>
+      </div>
+    </div>
+
+    <% if local_assigns[:recipes] %>
+      <div class="grid gap-2">
+        <%= setup_form.label :recipe_version_id, "Substrate", for: "#{prefix}_recipe_version_id" %>
+        <%= setup_form.select :recipe_version_id, recipe_version_options(recipes, setup&.recipe_version), { include_blank: "Not recorded" }, id: "#{prefix}_recipe_version_id", class: "select" %>
+      </div>
+    <% end %>
+
+    <p class="vv-caption">
+      Filled in from its current setup. Saving makes this its setup from the
+      repot date.
+    </p>
+  <% end %>
+<% end %>
+
+<div class="grid gap-2">
+  <%= form.label :note, (kind == "inspection" ? "What you found" : "Note"), for: "#{prefix}_note" %>
+  <%= form.text_area :note, id: "#{prefix}_note", rows: 2, data: { offline_form_target: "content" } %>
+</div>

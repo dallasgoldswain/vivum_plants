@@ -1,0 +1,42 @@
+<%# An observation or logged care on the timeline (PL04, CA01, D104). %>
+<li>
+  <p class="vv-caption">
+    <%= l(record.occurred_at, format: :long) %> · <%= care_title(record) %>
+  </p>
+
+  <% if (details = care_details(record)) %>
+    <p><%= details %></p>
+  <% end %>
+
+  <% if capability?("collection.environments") && !record.repotting? %>
+    <% environment, setup = plant.setting_on(record.occurred_at.to_date) %>
+
+    <% if environment || setup %>
+      <p class="vv-caption">
+        <%= [ ("In #{environment.name}" if environment), setup_summary(setup) ].compact_blank.join(" · ") %>
+      </p>
+    <% end %>
+  <% end %>
+
+  <% if record.note.present? %>
+    <p class="whitespace-pre-line"><%= record.note %></p>
+  <% end %>
+
+  <% if record.photos.any? %>
+    <div class="flex flex-wrap gap-2">
+      <% record.photos.each do |photo| %>
+        <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo with this entry", loading: "lazy", class: "vv-timeline-thumb" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap gap-1">
+    <% if capability?("care.logs") %>
+      <%= link_to "Edit", edit_plant_care_event_path(plant, record), class: "btn-sm-ghost" %>
+    <% end %>
+
+    <% if record.deletable? %>
+      <%= button_to "Delete", plant_care_event_path(plant, record), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this #{record.observation? ? 'observation' : 'entry'}#{' and its photos' if record.photos.any?}?" } %>
+    <% end %>
+  </div>
+</li>

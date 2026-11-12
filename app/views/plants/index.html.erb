@@ -41,6 +41,11 @@
           <%= form.select :environment, [ [ "No environment", "none" ] ] + @environments.map { [ it.name, it.id ] }, { include_blank: "All environments", selected: params[:environment] }, class: "select w-auto" %>
         <% end %>
 
+        <% if capability?("care.logs") %>
+          <%= form.label :unwatered, "Watering", class: "sr-only" %>
+          <%= form.select :unwatered, [ 3, 7, 14, 30 ].map { [ "Not watered in #{it}+ days", it ] }, { include_blank: "Any watering", selected: params[:unwatered] }, class: "select w-auto" %>
+        <% end %>
+
         <label class="flex min-h-11 items-center gap-2 text-sm">
           <%= form.check_box :tc, { checked: params[:tc] == "1" }, "1", nil %>
           TC origin
@@ -82,7 +87,14 @@
   </div>
 <% else %>
   <div class="flex items-center justify-between gap-3">
-    <p class="vv-caption"><%= pluralize(@plants.size, "plant") %></p>
+    <p class="vv-caption">
+      <%= pluralize(@plants.size, "plant") %>
+
+      <% if capability?("care.logs") %>
+        ·
+        <%= link_to "Log care for several", new_care_log_path(request.query_parameters.slice("q", "context", "status", "tc", "tag", "environment", "unwatered")), class: "underline underline-offset-4" %>
+      <% end %>
+    </p>
 
     <nav class="flex gap-1" aria-label="Layout">
       <%= link_to "Grid", request.query_parameters.merge(view: "grid"), class: "btn-sm-ghost", aria: { current: (@view == "grid" ? "true" : nil) } %>
@@ -101,6 +113,10 @@
               <span class="font-medium"><%= plant.display_name %></span>
               <span class="vv-caption"><%= plant_identity(plant) || growing_context_label(plant.growing_context) %></span>
               <span class="vv-caption"><%= plant.record_id %> <%= plant_status_badge(plant) %></span>
+
+              <% if @last_watered %>
+                <span class="vv-caption"><%= last_watered(@last_watered[plant.id]) %></span>
+              <% end %>
             </span>
           <% end %>
         </li>
@@ -119,6 +135,10 @@
               <span class="vv-caption truncate">
                 <%= [ plant.record_id, plant_identity(plant), growing_context_label(plant.growing_context) ].compact.join(" · ") %>
               </span>
+
+              <% if @last_watered %>
+                <span class="vv-caption truncate"><%= last_watered(@last_watered[plant.id]) %></span>
+              <% end %>
             </span>
 
             <%= plant_status_badge(plant) %>

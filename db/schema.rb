@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -99,13 +99,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_120000) do
     t.bigint "environment_id"
     t.bigint "from_environment_id"
     t.bigint "plant_setup_id"
+    t.decimal "amount", precision: 10, scale: 3
+    t.string "amount_unit"
+    t.string "watering_method"
+    t.string "product"
+    t.string "strength"
+    t.string "target"
+    t.string "label"
     t.index ["environment_id"], name: "index_care_events_on_environment_id"
     t.index ["from_environment_id"], name: "index_care_events_on_from_environment_id"
+    t.index ["plant_id", "kind", "occurred_at"], name: "index_care_events_on_plant_id_and_kind_and_occurred_at"
     t.index ["plant_id", "occurred_at"], name: "index_care_events_on_plant_id_and_occurred_at"
     t.index ["plant_id"], name: "index_care_events_on_plant_id"
     t.index ["plant_setup_id"], name: "index_care_events_on_plant_setup_id"
     t.index ["user_id", "idempotency_key"], name: "index_care_events_on_user_id_and_idempotency_key", unique: true
     t.index ["user_id"], name: "index_care_events_on_user_id"
+    t.check_constraint "amount IS NULL OR amount > 0::numeric", name: "care_events_amount_positive"
   end
 
   create_table "consent_records", force: :cascade do |t|
@@ -276,7 +285,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_120000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|

@@ -53,7 +53,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
-| B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Planned |
+| B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
@@ -492,7 +492,7 @@ because the only development account has two-step sign-in; headless Chrome tests
 scaling offline and the recipe form, and there's a recipe screenshot. Help topics
 `ingredients` and `recipes` need review.
 
-### B13 Care events and quick care entry — discussed 2026-11-12
+### B13 Care events and quick care entry — discussed and built 2026-11-12
 
 **Scope**
 - **Kinds and details (CA01, D104, D105):** `care_events` gains the kinds watering, feeding,
@@ -530,3 +530,15 @@ creates no more; yesterday's watering sorts before today's observation in the ti
 order by date (PL04); editing an event's date re-sorts the timeline; the collection filter
 "not watered in 7+ days" finds a plant last watered 8 days ago and not one watered 2 days
 ago.
+
+**Built notes:** The care forms are native `<dialog>`s opened with invoker commands
+(`commandfor`), so they need no JavaScript and work from the offline-cached plant page. One
+`amount`/`amount_unit` pair serves a watering's volume and a feed or treatment dose, with
+units by kind. A repot that made a setup keeps its date and can't be deleted (the setup would
+be left behind); changing its setup goes through **Where it grows**. A repot with no pot, size
+or substrate is a plain log. Several-plant logging leaves out repots, since each plant gets its
+own setup. The "not watered in N+ days" filter counts plants never watered. The several-plant
+page isn't cached offline, but a form already open there queues like the others. Dev-server
+pages weren't clicked through, because the only development account has two-step sign-in;
+headless Chrome tests cover watering and feeding offline and Undo, and the plant screenshot
+now shows the Log care card. Help topic `logging-care` needs review.

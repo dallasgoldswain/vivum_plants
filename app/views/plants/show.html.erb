@@ -105,6 +105,10 @@
   </div>
 
   <div class="order-1 grid content-start gap-6 lg:order-2">
+    <% if capability?("care.logs") %>
+      <%= render "plants/care", plant: @plant, latest: @last_care, logged_event: @logged_event, setup: @plant.current_setup, recipes: @recipes, quota: @quota, suggestions: @care_suggestions %>
+    <% end %>
+
     <div class="card" id="observe">
       <header>
         <h2>Add an observation</h2>
@@ -161,15 +165,25 @@
       <%= render "photos/section", subject: @plant, photos: @photos, quota: @quota %>
     <% end %>
 
-    <div class="card">
+    <div class="card" id="timeline">
       <header>
         <h2>Timeline</h2>
       </header>
 
-      <section>
+      <section class="grid gap-3">
+        <% if capability?("care.logs") && @timeline_kinds.size > 1 %>
+          <nav class="flex flex-wrap gap-1" aria-label="Show on the timeline">
+            <%= link_to "Everything", plant_path(@plant, anchor: "timeline"), class: (@timeline_kind ? "badge-outline" : "badge"), aria: { current: (@timeline_kind ? nil : "true") } %>
+
+            <% CareHelper::CARE_FILTERS.slice(*@timeline_kinds).each do |kind, label| %>
+              <%= link_to label, plant_path(@plant, kind: kind, anchor: "timeline"), class: (@timeline_kind == kind ? "badge" : "badge-outline"), aria: { current: (@timeline_kind == kind ? "true" : nil) } %>
+            <% end %>
+          </nav>
+        <% end %>
+
         <ol class="vv-timeline">
           <% @timeline.each do |entry| %>
-            <%= render "plants/timeline/#{entry.kind}", plant: @plant, record: entry.record %>
+            <%= render timeline_partial(entry), plant: @plant, record: entry.record %>
           <% end %>
         </ol>
       </section>

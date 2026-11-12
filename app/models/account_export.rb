@@ -49,8 +49,10 @@ class AccountExport
       end
     },
     "care_events" => ->(user) {
-      user.care_events.includes(:plant, :environment, :from_environment).order(:occurred_at).map do |event|
-        event.slice(:kind, :note, :occurred_at, :created_at).merge(plant: event.plant.record_id, moved_to: event.environment&.name, moved_from: event.from_environment&.name).compact
+      user.care_events.includes(:plant, :environment, :from_environment, :plant_setup).order(:occurred_at).map do |event|
+        event.slice(:kind, :label, :note, :occurred_at, :created_at, :amount, :amount_unit, :watering_method, :product, :strength, :target).merge(
+          plant: event.plant.record_id, moved_to: event.environment&.name, moved_from: event.from_environment&.name, setup_from: event.plant_setup&.started_on
+        ).compact
       end
     },
     "photos" => ->(user) {
