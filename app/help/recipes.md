@@ -6,6 +6,8 @@ audience: collector
 capabilities: [substrate.recipes, substrate.scaling, substrate.share]
 prerequisites: []
 keywords: [recipe, substrate, mix, soil, parts, percent, ratio, scale, batch, litres, version, repot, setup, share, link, draft]
+reviewed: 2026-11-12
+reviewed_digest: b514f1c0b51ac8d6632119e1dc31bcc6266af4de150923f3f8db8028a257b374
 ---
 
 A recipe is a substrate mix you use, such as your chunky aroid mix. Open

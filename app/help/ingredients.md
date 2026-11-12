@@ -6,6 +6,8 @@ audience: collector
 capabilities: [substrate.ingredients]
 prerequisites: []
 keywords: [ingredient, substrate, bark, perlite, pumice, coir, sphagnum, moss, leca, charcoal, aquasoil, brand, manufacturer, particle, retention, aeration, copy, archive]
+reviewed: 2026-11-12
+reviewed_digest: e6894fa8c9ac4df1b0a310161235c45f58cfef128696e3685fd037057dae203b
 ---
 
 Ingredients are what your substrate recipes are made of. Open **Substrates**
