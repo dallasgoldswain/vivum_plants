@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.measurements]
 prerequisites: []
 keywords: [measurement, reading, conditions, temperature, humidity, light, lux, ppfd, ph, gh, kh, hardness, co2, tds, meter, custom]
+reviewed: 2026-11-12
+reviewed_digest: b1d97e3ab55c17e0afe0830bad000172348eea632fdc9252761b38df24d1c06d
 ---
 
 Record the conditions in an environment under **Conditions** on its page. Each

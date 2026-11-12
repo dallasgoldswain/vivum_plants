@@ -6,8 +6,8 @@ audience: collector
 capabilities: [collection.plants]
 prerequisites: []
 keywords: [offline, no signal, no connection, sync, queued, waiting to send, airplane mode]
-reviewed: 2026-11-11
-reviewed_digest: 5092feaa909925332305f15ab1e76095f1b8ed077a715a8ff79ac3afb4c8daaa
+reviewed: 2026-11-12
+reviewed_digest: e333805a700098a2d6d3a4e024f1f5b1cfa1a6552e1a7ac45b30ed0393a6219a
 ---
 
 ## Reading offline

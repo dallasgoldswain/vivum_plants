@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.environments]
 prerequisites: []
 keywords: [environment, shelf, room, cabinet, terrarium, paludarium, tank, aquarium, outdoor, bed, move, moving, occupants, pot, repot, container, setup, watering, archive]
+reviewed: 2026-11-12
+reviewed_digest: ccfe543528dd4ae8d67912d62d51bc021c1034760fc3a32a5d4075e2b560df8e
 ---
 
 An environment is where plants grow: a shelf, grow cabinet, terrarium,

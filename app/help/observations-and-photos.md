@@ -6,8 +6,8 @@ audience: collector
 capabilities: [collection.media]
 prerequisites: []
 keywords: [observation, note, timeline, history, photo, picture, upload, cover, caption, limit, quota, 500 photos, full]
-reviewed: 2026-11-11
-reviewed_digest: ba0667942ddef388c6cb71a0d8cad77646e5dc292717cb56baf62f9176b7deb5
+reviewed: 2026-11-12
+reviewed_digest: 80e685da8d14797144863991b2a219a474c4c793508a6ba355adaf5201be34a2
 ---
 
 Each plant has a timeline of observations, photos, status changes, moves and
