@@ -54,7 +54,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
-| B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
+| B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Planned |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
@@ -542,3 +542,48 @@ page isn't cached offline, but a form already open there queues like the others.
 pages weren't clicked through, because the only development account has two-step sign-in;
 headless Chrome tests cover watering and feeding offline and Undo, and the plant screenshot
 now shows the Log care card. Help topic `logging-care` needs review.
+
+### B14 Reminders, schedules and Today inbox — discussed 2026-11-12
+
+**Scope**
+- **Schedules (CA02, D112, D117):** `care_schedules` (user, plant, kind or custom label,
+  once or every N days, weeks or months, `after_completion` or `fixed`, start date, active,
+  paused or ended) and `care_tasks` (schedule, plant, due date, snoozed until, state, a
+  manual-date flag, completed or skipped at, linked care event, idempotency key). A
+  `Schedule#next_due` rule in Ruby covers both modes, keeps weekdays and clamps months, and a
+  preview shows the next five dates. `users.time_zone`, detected from the browser and editable
+  in account settings; due dates are computed in it.
+- **Occurrences (CA03, D118):** one open task per schedule; completing or skipping creates the
+  next. Overdue and due are derived from the date. Editing a schedule recalculates the open
+  task unless its date was changed by hand.
+- **Plant page (D112, D120):** a Reminders card listing schedules with their next date, a form
+  to add one with the date preview, the duplicate check (keep both or replace), edit, pause
+  and end. After logging care, the saved notice offers "Repeat this every…" prefilled with the
+  kind. Several-plant setup from the environment page and the collection.
+- **Today (CA04, D111, D115, D116):** the home page becomes Today and the nav item is renamed.
+  Tasks are grouped by kind with overdue, today and the next 7 days; Done per task or per
+  group (or ticked plants), Done with details, Skip, Snooze (tomorrow, 3 days, a date). Invites
+  and seller cards stay below.
+- **Completing (CA01, D113, D114):** Done logs a linked care event (`care_events.care_task_id`);
+  logging care of the same kind completes an open task that's overdue, due today or due in the
+  next 2 days, and Undo reverses both. Idempotent per task.
+- **Inactive plants (PL03, D119):** inactive statuses pause schedules and cancel open tasks;
+  restoring resumes from today.
+- **Offline (OF02, D120):** the service worker caches Today; Done, Skip and Snooze queue with
+  an idempotency key.
+- **Account data and help:** export sections for schedules and tasks; `purge!` removes them;
+  help topics for reminders and Today; `care.reminders` marked implemented.
+
+**Deferred:** notifications, preferred times and quiet hours (B34); environment maintenance
+tasks (B15); TC stage reminders (B16); library and AI suggestions and their merge, replace or
+keep flow (B18 and later); shared schedules covering several plants; times of day.
+
+**Acceptance (AT07):** a 7-day after-completion schedule done on 10 Nov is next due 17 Nov;
+a fixed weekly schedule completed late keeps its weekday; a monthly schedule from 31 Jan is
+next due 28 Feb (or 29 in a leap year); skipping logs no care and creates the next task; an
+overdue recurring schedule shows one task, not a stack; snoozing hides it until the chosen
+day and keeps the original due date; completing a watering task creates one event, and a
+retry creates no second (CA01); tapping Water on a plant with a watering task due tomorrow
+completes it; Done on "Water · 5 plants" logs five events; marking a plant sold pauses its
+schedules and restoring it creates no past tasks; editing a schedule leaves a hand-changed due
+date alone; with notifications off, tasks still appear in Today (CA04).
