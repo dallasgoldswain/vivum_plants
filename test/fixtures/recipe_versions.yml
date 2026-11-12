@@ -1,0 +1,11 @@
+aroid_v1:
+  recipe: aroid_mix
+  number: 1
+  basis: parts
+  state: ready
+
+owner_v1:
+  recipe: owner_mix
+  number: 1
+  basis: parts
+  state: ready

@@ -133,11 +133,34 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   it. Help topics `environments` and `measurements`; `collection.environments` and
   `collection.measurements` marked implemented. Shared `PhotoManaging` controller concern and
   `photos/_section` partial for plant and environment photos.
+- Substrates (B12): `ingredients`, either built-in (no user, a `key`, synced from
+  `db/seeds/ingredients.yml` by `Ingredient.sync_built_ins!` in `db:seed`, 42 entries,
+  removed entries archived) or personal (generic or branded with a manufacturer); category,
+  low/medium/high water retention and aeration labelled as guidance, particle size range in mm
+  (SU01, D96, D97). Built-ins can't be edited; "Copy to mine" makes a personal copy.
+  `recipes` with numbered `recipe_versions` (parts or percent, draft or ready) and
+  `recipe_components`; a % version must total 100% to be ready; an unused version is edited
+  in place and a change to a version a setup uses saves the next number (SU02, SU04, D98,
+  D99). `Recipe::Scale` and `scale_controller.js` round each component to 50 mL (25 mL under
+  1 L) and show the rounded total (SU03). `plant_setups.recipe_version_id` (restrict) with a
+  picker of the newest ready version of each active recipe; the recipe page lists plants per
+  version, current and past (D100). Archive used recipes and ingredients, delete unused ones
+  (D101). Public share link at `/r/:token` (revocable, `noindex`, no notes or plants, needs
+  the owner's `substrate.share`) on a new `public` layout; recipe search by name and
+  ingredient, context and use filters; recipe and ingredient pages cached offline (D102).
+  Export sections `ingredients` and `recipes`, setups export their recipe version, `purge!`
+  removes them. Help topics `ingredients` and `recipes`; `substrate.ingredients`,
+  `substrate.recipes`, `substrate.scaling` and `substrate.share` marked implemented. Browser
+  tests for offline scaling and the recipe form in `offline_test.rb`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).
 
 ### Fixed
+
+- Editing a plant or an environment was refused ("You don't have access to that"): Action
+  Policy has no default `edit?` rule. `PlantPolicy` (and so `EnvironmentPolicy` and
+  `RecipePolicy`) now aliases `edit?` to `update?`, with tests for both edit pages.
 
 - Layout `<body>` offline-sync attributes rewritten for the Herb rule against ERB output in
   attribute position.

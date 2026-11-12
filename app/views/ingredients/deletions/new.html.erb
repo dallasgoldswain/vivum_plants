@@ -1,0 +1,20 @@
+<% content_for :title, "Delete #{@ingredient.label} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Ingredients</p>
+  <h1 class="vv-h2">Delete <%= @ingredient.label %>?</h1>
+</div>
+
+<div class="card">
+  <section class="grid gap-3">
+    <p>
+      This can't be undone. No recipe uses it, so nothing else changes. To keep
+      it out of the way instead, archive it.
+    </p>
+  </section>
+
+  <footer class="flex flex-wrap gap-2">
+    <%= button_to "Delete permanently", ingredient_deletion_path(@ingredient), class: "btn-destructive" %>
+    <%= link_to "Keep it", ingredient_path(@ingredient), class: "btn-outline" %>
+  </footer>
+</div>

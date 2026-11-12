@@ -1,0 +1,138 @@
+<%# The recipe and the version being edited (SU02, SU04, D98, D99). %>
+<%= form_with model: recipe, class: "form grid gap-6", data: { controller: "recipe-rows" } do |form| %>
+  <% errors = recipe.errors.full_messages + version.errors.full_messages %>
+
+  <% if errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h2>Please check the recipe</h2>
+      <section><%= errors.uniq.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <% if version.in_use? %>
+    <div class="alert" role="note">
+      <h2>Saving a change makes v<%= version.number + 1 %></h2>
+
+      <section>
+        Plants are on <%= version.label %>, so it stays as it is. They keep
+        <%= version.label %> until you set them up with the new version.
+      </section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true, maxlength: 80, autofocus: recipe.new_record?, placeholder: "e.g. Chunky aroid mix" %>
+      </div>
+
+      <fieldset class="grid gap-2 sm:col-span-2">
+        <legend class="mb-2 text-sm font-medium">Suits</legend>
+
+        <div class="flex flex-wrap gap-x-4 gap-y-1">
+          <% growing_context_options.each do |label, value| %>
+            <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+              <%= check_box_tag "recipe[contexts][]", value, recipe.contexts.include?(value), id: "recipe_contexts_#{value}" %>
+              <%= label %>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :source %>
+        <%= form.text_field :source, maxlength: 200, placeholder: "e.g. my own, a friend, a grower's video" %>
+      </div>
+    </section>
+  </div>
+
+  <div class="card">
+    <header>
+      <h2>Ingredients</h2>
+
+      <p>
+        By volume. Use parts (2 bark : 1 perlite) or percentages that add up to
+        100.
+      </p>
+    </header>
+
+    <section class="grid gap-4">
+      <fieldset class="flex flex-wrap gap-x-4 gap-y-1">
+        <legend class="sr-only">Measured in</legend>
+
+        <% [ [ "Parts", "parts" ], [ "Percent", "percent" ] ].each do |label, value| %>
+          <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+            <%= radio_button_tag "version[basis]", value, (version.basis || "parts") == value, id: "version_basis_#{value}", data: { recipe_rows_target: "basis", action: "change->recipe-rows#update" } %>
+            <%= label %>
+          </label>
+        <% end %>
+      </fieldset>
+
+      <div class="grid gap-2" data-recipe-rows-target="rows">
+        <% rows = version.kept_components.presence || [ nil, nil, nil ] %>
+
+        <% rows.each_with_index do |component, index| %>
+          <%= render "recipes/component_row", index: index, component: component, ingredients: ingredients %>
+        <% end %>
+      </div>
+
+      <template data-recipe-rows-target="template">
+        <%= render "recipes/component_row", index: "NEW_ROW", component: nil, ingredients: ingredients %>
+      </template>
+
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          class="btn-sm-outline"
+          data-action="recipe-rows#add"
+        >
+          Add an ingredient
+        </button>
+
+        <p
+          class="vv-caption"
+          data-recipe-rows-target="total"
+          aria-live="polite"
+        ></p>
+      </div>
+
+      <p class="vv-caption">
+        Missing one?
+        <%= link_to "Add an ingredient to your list", new_ingredient_path, class: "underline underline-offset-4", target: "_blank", rel: "noopener" %>
+        (opens in a new tab), then reload this page.
+      </p>
+
+      <div class="grid gap-2">
+        <%= label_tag "version_notes", "Mixing notes" %>
+        <%= text_area_tag "version[notes]", version.notes, id: "version_notes", rows: 2, placeholder: "e.g. soak the bark first, mix damp" %>
+
+        <p class="vv-caption">
+          Saved with this version and shown on a shared link.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div class="card">
+    <section class="grid gap-2">
+      <%= form.label :notes, "Private notes" %>
+      <%= form.text_area :notes, rows: 3 %>
+
+      <p class="vv-caption">
+        Only you see these. They're never on a shared link.
+      </p>
+    </section>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <%= form.button "Save, ready to use", name: "ready", value: "1", class: "btn" %>
+    <%= form.button "Save as draft", class: "btn-outline" %>
+    <%= link_to "Cancel", recipe.new_record? ? recipes_path : recipe_path(recipe), class: "btn-ghost" %>
+  </div>
+
+  <p class="vv-caption">
+    A draft can't be given to a plant yet. A % recipe has to total 100% to be
+    ready.
+  </p>
+<% end %>

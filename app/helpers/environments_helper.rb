@@ -14,12 +14,13 @@ module EnvironmentsHelper
   def environment_kind_options = KIND_LABELS.map { |value, label| [ label, value ] }
   def watering_method_options = WATERING_LABELS.map { |value, label| [ label, value ] }
 
-  # "Terracotta pot · 12 cm · Bottom watering"
+  # "Terracotta pot · 12 cm · Bottom watering · Aroid mix v2"
   def setup_summary(setup)
     return unless setup
 
     size = setup.size && "#{setup.size.to_s('F').delete_suffix('.0')} #{setup.size_unit}"
-    [ setup.container, size, WATERING_LABELS[setup.watering_method] ].compact.join(" · ")
+    recipe = setup.recipe_version && "#{setup.recipe_version.recipe.name} #{setup.recipe_version.label}"
+    [ setup.container, size, WATERING_LABELS[setup.watering_method], recipe ].compact.join(" · ")
   end
 
   # "60 × 30 × 45 cm · 81 L"

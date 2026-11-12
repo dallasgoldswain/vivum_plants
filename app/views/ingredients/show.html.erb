@@ -1,0 +1,159 @@
+<% content_for :title, "#{@ingredient.label} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Ingredients", ingredients_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">
+        <%= ingredient_category_label(@ingredient.category) %> ·
+        <%= @ingredient.built_in? ? "Built-in" : "Yours" %>
+      </p>
+
+      <h1 class="vv-h2">
+        <%= @ingredient.name %>
+
+        <% if @ingredient.archived? %>
+          <span class="badge-outline">Archived</span>
+        <% end %>
+      </h1>
+
+      <% if @ingredient.branded? %>
+        <p class="vv-caption mt-1">Made by <%= @ingredient.manufacturer %></p>
+      <% end %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "ingredients" %>
+
+      <% if @ingredient.built_in? %>
+        <%= button_to "Copy to mine", ingredient_copy_path(@ingredient), class: "btn-outline" %>
+      <% else %>
+        <%= link_to "Edit", edit_ingredient_path(@ingredient), class: "btn-outline" %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="card">
+    <header>
+      <h2>Properties</h2>
+      <p>Guidance from growers' experience, not measurements.</p>
+    </header>
+
+    <section>
+      <dl class="vv-details">
+        <dt>Water retention</dt>
+
+        <dd>
+          <%= SubstratesHelper::LEVEL_LABELS[@ingredient.water_retention] || "Not set" %>
+        </dd>
+
+        <dt>Aeration</dt>
+
+        <dd>
+          <%= SubstratesHelper::LEVEL_LABELS[@ingredient.aeration] || "Not set" %>
+        </dd>
+
+        <dt>Particle size</dt>
+
+        <dd><%= particle_size(@ingredient) || "Not set" %></dd>
+
+        <% if @ingredient.source.present? %>
+          <dt>Source</dt>
+          <dd><%= @ingredient.source %></dd>
+        <% end %>
+
+        <% if @ingredient.copied_from %>
+          <dt>Copied from</dt>
+          <dd>
+            <%= link_to @ingredient.copied_from.name, @ingredient.copied_from, class: "underline underline-offset-4" %>
+          </dd>
+        <% end %>
+      </dl>
+    </section>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <% { "Intended use" => @ingredient.intended_use, "Preparation" => @ingredient.preparation, "Notes" => @ingredient.notes }.compact_blank.each do |heading, text| %>
+      <div class="card">
+        <header>
+          <h2><%= heading %></h2>
+        </header>
+
+        <section>
+          <p class="whitespace-pre-line"><%= text %></p>
+        </section>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="card">
+  <header>
+    <h2>Your recipes with it</h2>
+
+    <p>
+      <%= @recipes.any? ? pluralize(@recipes.size, "recipe") : "None yet." %>
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if @recipes.any? %>
+      <ul class="grid gap-1">
+        <% @recipes.each do |recipe| %>
+          <li>
+            <%= link_to recipe.name, recipe, class: "underline underline-offset-4" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if capability?("substrate.recipes") && @ingredient.active? %>
+      <p class="vv-caption">
+        <%= link_to "Make a recipe with only #{@ingredient.name.downcase}", new_recipe_path(ingredient_id: @ingredient.id), class: "underline underline-offset-4" %>,
+        for a single-material substrate.
+      </p>
+    <% end %>
+
+    <% if @copies.present? %>
+      <p class="vv-caption">
+        Your copies:
+        <% @copies.each_with_index do |copy, index| %>
+          <%= ", " if index.positive? %><%= link_to copy.label, copy, class: "underline underline-offset-4" %>
+        <% end %>
+      </p>
+    <% end %>
+  </section>
+</div>
+
+<% unless @ingredient.built_in? %>
+  <div class="card">
+    <header>
+      <h2>
+        <%= @ingredient.archived? ? "Archived" : "Archive or delete" %>
+      </h2>
+
+      <p>
+        <% if @ingredient.archived? %>
+          Hidden from recipe pickers. Recipes that use it keep it.
+        <% else %>
+          Archiving hides it from recipe pickers. Recipes that use it keep it.
+        <% end %>
+      </p>
+    </header>
+
+    <footer class="flex flex-wrap gap-2">
+      <% if @ingredient.archived? %>
+        <%= button_to "Restore", ingredient_archive_path(@ingredient), method: :delete, class: "btn-sm-outline" %>
+      <% else %>
+        <%= button_to "Archive", ingredient_archive_path(@ingredient), class: "btn-sm-outline" %>
+      <% end %>
+
+      <% unless @ingredient.used? %>
+        <%= link_to "Delete…", new_ingredient_deletion_path(@ingredient), class: "btn-sm-ghost" %>
+      <% end %>
+    </footer>
+  </div>
+<% end %>

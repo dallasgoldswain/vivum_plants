@@ -1,0 +1,12 @@
+<% content_for :title, "Edit #{@recipe.name} · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Recipes</p>
+    <h1 class="vv-h2">Edit <%= @recipe.name %></h1>
+  </div>
+
+  <%= help_link "recipes" %>
+</div>
+
+<%= render "form", recipe: @recipe, version: @version, ingredients: @ingredients %>

@@ -1,0 +1,85 @@
+<%= form_with model: ingredient, class: "form grid gap-6" do |form| %>
+  <% if ingredient.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h2>Please check the details</h2>
+      <section><%= ingredient.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true, maxlength: 80, autofocus: ingredient.new_record?, placeholder: "e.g. Pumice 3–6 mm" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :category %>
+        <%= form.select :category, ingredient_category_options, { include_blank: "Choose…" }, required: true, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :manufacturer, "Brand or manufacturer" %>
+        <%= form.text_field :manufacturer, maxlength: 120 %>
+
+        <p class="vv-caption">Leave blank for a generic ingredient.</p>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :source, "Where you get it" %>
+        <%= form.text_field :source, maxlength: 120, placeholder: "e.g. local nursery" %>
+      </div>
+    </section>
+  </div>
+
+  <div class="card">
+    <header>
+      <h2>Properties</h2>
+      <p>Optional, and guidance only: how it tends to behave in a mix.</p>
+    </header>
+
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2">
+        <%= form.label :water_retention %>
+        <%= form.select :water_retention, ingredient_level_options, { include_blank: "Not set" }, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :aeration %>
+        <%= form.select :aeration, ingredient_level_options, { include_blank: "Not set" }, class: "select" %>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 sm:col-span-2">
+        <div class="grid gap-2">
+          <%= form.label :particle_min_mm, "Smallest particles (mm)" %>
+          <%= form.number_field :particle_min_mm, min: 0, step: 0.1, inputmode: "decimal" %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :particle_max_mm, "Largest particles (mm)" %>
+          <%= form.number_field :particle_max_mm, min: 0, step: 0.1, inputmode: "decimal" %>
+        </div>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :intended_use %>
+        <%= form.text_area :intended_use, rows: 2 %>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :preparation %>
+        <%= form.text_area :preparation, rows: 2, placeholder: "e.g. rinse, sieve, soak" %>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :notes %>
+        <%= form.text_area :notes, rows: 3 %>
+      </div>
+    </section>
+  </div>
+
+  <div class="flex gap-2">
+    <%= form.submit ingredient.new_record? ? "Add ingredient" : "Save", class: "btn" %>
+    <%= link_to "Cancel", ingredient.new_record? ? ingredients_path : ingredient_path(ingredient), class: "btn-ghost" %>
+  </div>
+<% end %>

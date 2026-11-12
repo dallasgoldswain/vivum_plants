@@ -45,6 +45,10 @@
         <% if setup %>
           <%= setup_summary(setup) %>
           <span class="vv-caption">since <%= l(setup.started_on, format: :long) %></span>
+
+          <% if setup.recipe_version && capability?("substrate.recipes") %>
+            <%= link_to "See the recipe", recipe_path(setup.recipe_version.recipe, version: setup.recipe_version.number), class: "vv-caption block underline underline-offset-4" %>
+          <% end %>
         <% else %>
           Not recorded
         <% end %>
@@ -81,7 +85,7 @@
     <details class="grid gap-3">
       <summary class="btn-sm-outline w-fit">Change setup</summary>
 
-      <%= form_with model: PlantSetup.new(container: setup&.container, size: setup&.size, size_unit: setup&.size_unit || "cm", watering_method: setup&.watering_method), url: plant_setups_path(plant), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+      <%= form_with model: PlantSetup.new(container: setup&.container, size: setup&.size, size_unit: setup&.size_unit || "cm", watering_method: setup&.watering_method, recipe_version: setup&.recipe_version), url: plant_setups_path(plant), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
         <div class="grid gap-2 sm:col-span-2">
           <%= form.label :container, "Pot or container" %>
           <%= form.text_field :container, maxlength: 80, placeholder: "e.g. terracotta pot, nursery pot, glass jar" %>
@@ -103,6 +107,18 @@
           <%= form.label :watering_method, "Watering" %>
           <%= form.select :watering_method, watering_method_options, { include_blank: "Not set" }, class: "select" %>
         </div>
+
+        <% if recipes %>
+          <div class="grid gap-2 sm:col-span-2">
+            <%= form.label :recipe_version_id, "Substrate" %>
+            <%= form.select :recipe_version_id, recipe_version_options(recipes, setup&.recipe_version), { include_blank: "Not recorded" }, class: "select" %>
+
+            <p class="vv-caption">
+              The newest ready version of each recipe.
+              <%= link_to "New recipe", new_recipe_path, class: "underline underline-offset-4" %>
+            </p>
+          </div>
+        <% end %>
 
         <div class="grid gap-2">
           <%= form.label :started_on, "From" %>

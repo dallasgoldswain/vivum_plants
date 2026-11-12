@@ -1,0 +1,37 @@
+<%# A version's ingredients with quantities and % equivalents (SU02, D98). %>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Ingredient</th>
+      <th class="text-right"><%= version.percent? ? "%" : "Parts" %></th>
+
+      <% if version.parts? %>
+        <th class="text-right">Share</th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% version.components.each do |component| %>
+      <tr>
+        <td>
+          <% if link_ingredients %>
+            <%= link_to component.ingredient.label, component.ingredient, class: "underline underline-offset-4" %>
+          <% else %>
+            <%= component.ingredient.label %>
+          <% end %>
+        </td>
+
+        <td class="text-right">
+          <%= plain_number(component.quantity) %><%= "%" if version.percent? %>
+        </td>
+
+        <% if version.parts? %>
+          <td class="text-right">
+            <%= component_percent(version, component) %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

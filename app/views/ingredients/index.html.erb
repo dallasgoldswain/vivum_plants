@@ -1,0 +1,61 @@
+<% content_for :title, "Ingredients · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <%= link_to "← Recipes", recipes_path, class: "vv-kicker underline-offset-4 hover:underline" if capability?("substrate.recipes") %>
+
+    <h1 class="vv-h2 mt-2">
+      <%= @show_archived ? "Archived ingredients" : "Ingredients" %>
+    </h1>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= help_link "ingredients" %>
+    <%= link_to "Add an ingredient", new_ingredient_path, class: "btn" %>
+  </div>
+</div>
+
+<%= form_with url: ingredients_path, method: :get, class: "grid gap-2", role: "search" do |form| %>
+  <%= hidden_field_tag :archived, "1" if @show_archived %>
+
+  <div class="flex gap-2">
+    <%= form.label :q, "Search ingredients", class: "sr-only" %>
+    <%= form.search_field :q, value: params[:q], placeholder: "Bark, pumice, a brand", class: "input flex-1" %>
+    <%= form.submit "Search", name: nil, class: "btn-outline" %>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <%= form.label :category, "Category", class: "sr-only" %>
+    <%= form.select :category, ingredient_category_options, { include_blank: "All categories", selected: params[:category] }, class: "select w-auto" %>
+    <%= form.label :source, "Whose", class: "sr-only" %>
+    <%= form.select :source, [ [ "Built-in and mine", "" ], [ "Mine only", "mine" ], [ "Built-in only", "built_in" ] ], { selected: params[:source] }, class: "select w-auto" %>
+  </div>
+<% end %>
+
+<% if @ingredients.any? %>
+  <ul class="grid gap-2">
+    <% @ingredients.each do |ingredient| %>
+      <li>
+        <%= link_to ingredient_path(ingredient), class: "vv-plant-row" do %>
+          <span class="grid min-w-0 flex-1 gap-0.5">
+            <span class="truncate font-medium"><%= ingredient.label %></span>
+
+            <span class="vv-caption truncate">
+              <%= [ ingredient_category_label(ingredient.category), particle_size(ingredient), (ingredient.built_in? ? "Built-in" : "Yours") ].compact.join(" · ") %>
+            </span>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="vv-caption">No ingredients match.</p>
+<% end %>
+
+<p class="vv-caption">
+  <% if @show_archived %>
+    <%= link_to "Show active ingredients", ingredients_path, class: "underline underline-offset-4" %>
+  <% elsif @archived_count.positive? %>
+    <%= link_to "Show #{pluralize(@archived_count, 'archived ingredient')}", ingredients_path(archived: 1), class: "underline underline-offset-4" %>
+  <% end %>
+</p>

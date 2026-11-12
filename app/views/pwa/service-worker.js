@@ -4,7 +4,7 @@
 const VERSION = "v1"
 const PAGES = `vivum-pages-${VERSION}`
 const ASSETS = `vivum-assets-${VERSION}`
-const COLLECTION_PAGE = /^\/(plants|environments)(\/\d+)?\/?$/
+const COLLECTION_PAGE = /^\/(plants|environments|recipes|ingredients)(\/\d+)?\/?$/
 
 self.addEventListener("install", () => self.skipWaiting())
 

@@ -1,0 +1,88 @@
+<% content_for :title, "Recipes · VIVUM Plants" %>
+
+<div class="flex items-start justify-between gap-3">
+  <div>
+    <p class="vv-kicker mb-2">Substrates</p>
+
+    <h1 class="vv-h2">
+      <%= @show_archived ? "Archived recipes" : "Recipes" %>
+    </h1>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    <%= help_link "recipes" %>
+    <%= link_to "Ingredients", ingredients_path, class: "btn-outline" if capability?("substrate.ingredients") %>
+    <%= link_to "New recipe", new_recipe_path, class: "btn" %>
+  </div>
+</div>
+
+<% if @recipe_count.zero? %>
+  <div class="card">
+    <header>
+      <h2>Write down your mixes</h2>
+
+      <p>
+        Save a substrate as parts or percentages, scale it to the batch you
+        need, and record which plants are potted in it. A single material, like
+        pure sphagnum, is a one-ingredient recipe.
+      </p>
+    </header>
+
+    <footer class="flex flex-wrap gap-2">
+      <%= link_to "New recipe", new_recipe_path, class: "btn" %>
+      <%= link_to "Browse ingredients", ingredients_path, class: "btn-outline" if capability?("substrate.ingredients") %>
+    </footer>
+  </div>
+<% else %>
+  <%= form_with url: recipes_path, method: :get, class: "grid gap-2", role: "search" do |form| %>
+    <%= hidden_field_tag :archived, "1" if @show_archived %>
+
+    <div class="flex gap-2">
+      <%= form.label :q, "Search recipes", class: "sr-only" %>
+      <%= form.search_field :q, value: params[:q], placeholder: "Recipe or ingredient name", class: "input flex-1" %>
+      <%= form.submit "Search", name: nil, class: "btn-outline" %>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <%= form.label :context, "Suits", class: "sr-only" %>
+      <%= form.select :context, growing_context_options, { include_blank: "All contexts", selected: params[:context] }, class: "select w-auto" %>
+      <%= form.label :use, "Use", class: "sr-only" %>
+      <%= form.select :use, [ [ "In use now", "now" ], [ "Used before", "before" ], [ "Never used", "never" ] ], { include_blank: "Any use", selected: params[:use] }, class: "select w-auto" %>
+    </div>
+  <% end %>
+
+  <% if @recipes.any? %>
+    <ul class="grid gap-2">
+      <% @recipes.each do |recipe| %>
+        <% version = recipe.versions.last %>
+
+        <li>
+          <%= link_to recipe_path(recipe), class: "vv-plant-row" do %>
+            <span class="grid min-w-0 flex-1 gap-0.5">
+              <span class="truncate font-medium">
+                <%= recipe.name %>
+                <span class="vv-caption"><%= version.label %><%= " · draft" if version.draft? %></span>
+              </span>
+
+              <span class="vv-caption truncate"><%= recipe_formula(version) %></span>
+
+              <span class="vv-caption truncate">
+                <%= [ recipe.contexts.map { growing_context_label(it) }.join(", ").presence, ("In use" if @in_use_now.include?(recipe.id)) ].compact.join(" · ") %>
+              </span>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="vv-caption">No recipes match.</p>
+  <% end %>
+<% end %>
+
+<p class="vv-caption">
+  <% if @show_archived %>
+    <%= link_to "Show active recipes", recipes_path, class: "underline underline-offset-4" %>
+  <% elsif @archived_count.positive? %>
+    <%= link_to "Show #{pluralize(@archived_count, 'archived recipe')}", recipes_path(archived: 1), class: "underline underline-offset-4" %>
+  <% end %>
+</p>

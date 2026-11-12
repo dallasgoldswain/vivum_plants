@@ -1,0 +1,23 @@
+<div
+  class="grid grid-cols-[1fr_6rem_auto] items-end gap-2"
+  data-recipe-rows-row
+>
+  <div class="grid gap-2">
+    <%= label_tag "version_components_#{index}_ingredient_id", "Ingredient", class: "sr-only" %>
+    <%= select_tag "version[components][#{index}][ingredient_id]", options_for_select(ingredients.map { [ it.label, it.id ] }, component&.ingredient_id), include_blank: "Choose an ingredient…", id: "version_components_#{index}_ingredient_id", class: "select" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= label_tag "version_components_#{index}_quantity", "Amount", class: "sr-only" %>
+    <%= number_field_tag "version[components][#{index}][quantity]", component && plain_number(component.quantity), id: "version_components_#{index}_quantity", min: 0, step: "any", inputmode: "decimal", placeholder: "Amount", data: { recipe_rows_target: "quantity", action: "input->recipe-rows#update" } %>
+  </div>
+
+  <button
+    type="button"
+    class="btn-sm-ghost"
+    data-action="recipe-rows#remove"
+    aria-label="Remove this ingredient"
+  >
+    Remove
+  </button>
+</div>

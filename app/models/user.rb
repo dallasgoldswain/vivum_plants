@@ -21,6 +21,8 @@ class User < ApplicationRecord
   has_many :plant_setups, dependent: :delete_all
   has_many :measurements, dependent: :destroy
   has_many :custom_metrics, dependent: :destroy
+  has_many :recipes, dependent: :destroy
+  has_many :ingredients, dependent: :destroy
 
   encrypts :otp_secret
 

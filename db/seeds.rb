@@ -25,6 +25,10 @@ elsif !Rails.env.test?
   puts "Skipping admin user: set user.admin_email and user.admin_password in credentials."
 end
 
+# Built-in substrate ingredients (D96), from db/seeds/ingredients.yml. Matched by key, so
+# edits to the file update them; removed entries are archived.
+Ingredient.sync_built_ins!
+
 # Feature flags: add every registered capability to Flipper so the console lists them.
 # In development, implemented core capabilities are switched on (PRD FF02).
 Capabilities.sync!

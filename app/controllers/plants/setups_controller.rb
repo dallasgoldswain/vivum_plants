@@ -1,10 +1,10 @@
-# A new pot, size or watering method from a date on (PL05, D89).
+# A new pot, size, watering method or recipe version from a date on (PL05, D89, D100).
 class Plants::SetupsController < ApplicationController
   include PlantScoped
   requires_capability "collection.environments"
 
   def create
-    attributes = params.expect(plant_setup: %i[ container size size_unit watering_method started_on ])
+    attributes = params.expect(plant_setup: %i[ container size size_unit watering_method recipe_version_id started_on ])
     @plant.change_setup!(attributes.except(:started_on).to_h.transform_values(&:presence), on: date_param(attributes[:started_on]))
     redirect_to plant_path(@plant, anchor: "placement"), notice: "Setup saved."
   rescue ActiveRecord::RecordInvalid => error

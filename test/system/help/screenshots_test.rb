@@ -39,6 +39,17 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
     capture "environment", environment_path(tank), wait_for: "Conditions"
   end
 
+  test "recipe" do
+    owner = users(:owner)
+    Ingredient.sync_built_ins!
+    bark, perlite, coir = %w[ orchid_bark_medium perlite coco_coir ].map { Ingredient.find_by!(key: it) }
+    recipe = owner.recipes.new(name: "Chunky aroid mix", contexts: %w[ indoor terrarium ], source: "My own")
+    rows = [ [ bark, 2 ], [ perlite, 1 ], [ coir, 1 ] ].map { |ingredient, quantity| { ingredient_id: ingredient.id, quantity: quantity } }
+    recipe.save_revision(recipe.build_revision(basis: "parts", notes: "Soak the bark overnight and mix damp.", ready: true, components: rows))
+    add_sample_plants.change_setup!({ container: "Clear nursery pot", recipe_version_id: recipe.current_version.id }, on: 2.weeks.ago.to_date)
+    capture "recipe", recipe_path(recipe), wait_for: "Make a batch"
+  end
+
   test "privacy" do
     capture "privacy", settings_privacy_path, wait_for: "Your choices"
   end

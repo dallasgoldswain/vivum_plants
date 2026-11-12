@@ -54,7 +54,14 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   show the setup the plant had at the time.
 - Record temperature, humidity, light, pH and water hardness for an environment, or your
   own readings such as TDS. Leave out what you didn't measure; it stays unknown.
-- No signal? Plants and environments you've opened stay readable, and new observations and
-  readings wait on your device until you're back online.
+- Write down your substrate mixes in parts or percentages, from about 40 common ingredients
+  or your own, including branded ones. Scale a mix to the batch you need, in litres or
+  millilitres.
+- Record which mix each plant is potted in. When you change a mix that plants are already
+  in, it becomes a new version, and those plants keep the one they were potted in.
+- Share a mix with a link that anyone can open without an account. Your private notes and
+  plants stay private, and you can turn the link off at any time.
+- No signal? Plants, environments and recipes you've opened stay readable, and new
+  observations and readings wait on your device until you're back online.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

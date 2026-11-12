@@ -14,6 +14,10 @@
         <%= link_to "Environments", environments_path, class: "btn-outline" %>
       <% end %>
 
+      <% if capability?("substrate.recipes") %>
+        <%= link_to "Substrates", recipes_path, class: "btn-outline" %>
+      <% end %>
+
       <%= link_to "Add a plant", new_plant_path, class: "btn" %>
     </div>
   </div>

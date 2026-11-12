@@ -1,0 +1,31 @@
+<% content_for :title, "#{@recipe.name} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">
+    <%= @version.label %> · Substrate
+    recipe<%= " · #{@recipe.contexts.map { growing_context_label(it) }.join(', ')}" if @recipe.contexts.any? %>
+  </p>
+
+  <h1 class="vv-h2"><%= @recipe.name %></h1>
+
+  <% if @recipe.source.present? %>
+    <p class="vv-caption mt-1">Source: <%= @recipe.source %></p>
+  <% end %>
+</div>
+
+<div class="card">
+  <header>
+    <h2>Mix</h2>
+    <p><%= recipe_formula(@version) %>, by volume</p>
+  </header>
+
+  <section class="grid gap-3">
+    <%= render "recipes/composition", version: @version, link_ingredients: false %>
+
+    <% if @version.notes.present? %>
+      <p class="whitespace-pre-line"><%= @version.notes %></p>
+    <% end %>
+  </section>
+</div>
+
+<%= render "recipes/scaler", version: @version %>

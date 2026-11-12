@@ -1,0 +1,22 @@
+<% content_for :title, "Delete #{@recipe.name} · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Recipes</p>
+  <h1 class="vv-h2">Delete <%= @recipe.name %>?</h1>
+</div>
+
+<div class="card">
+  <section class="grid gap-3">
+    <p>
+      This can't be undone. It permanently removes
+      <%= pluralize(@recipe.versions.size, "version") %>
+      <%= "and its share link" if @recipe.shared? %>. No plant has used it. To
+      keep it out of the way instead, archive it.
+    </p>
+  </section>
+
+  <footer class="flex flex-wrap gap-2">
+    <%= button_to "Delete permanently", recipe_deletion_path(@recipe), class: "btn-destructive" %>
+    <%= link_to "Keep it", recipe_path(@recipe), class: "btn-outline" %>
+  </footer>
+</div>

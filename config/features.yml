@@ -50,9 +50,9 @@ care.reminders: { domain: care, state: core, depends_on: [care.logs], descriptio
 care.library_guidance: { domain: care, state: core, depends_on: [library.profiles, care.reminders], description: "Suggestions from built-in profiles" }
 care.ai_guidance: { domain: care, state: pilot, depends_on: [ai.care_suggestions, care.reminders], description: "AI care suggestions in the care plan" }
 library.profiles: { domain: care, state: core, description: "Built-in species reference profiles (GU01)" }
-substrate.ingredients: { domain: care, state: core, description: "Ingredient library (SU01)" }
-substrate.recipes: { domain: care, state: core, depends_on: [substrate.ingredients], description: "Versioned substrate recipes (SU02, SU04)" }
-substrate.scaling: { domain: care, state: core, depends_on: [substrate.recipes], description: "Scale a mix to a target volume (SU03)" }
+substrate.ingredients: { domain: care, state: core, implemented: true, description: "Ingredient library (SU01)" }
+substrate.recipes: { domain: care, state: core, implemented: true, depends_on: [substrate.ingredients], description: "Versioned substrate recipes (SU02, SU04)" }
+substrate.scaling: { domain: care, state: core, implemented: true, depends_on: [substrate.recipes], description: "Scale a mix to a target volume (SU03)" }
 
 # --- Notifications ---
 notifications.native_push: { domain: notifications, state: core, description: "APNs and FCM push via the native apps" }
@@ -133,7 +133,7 @@ buyer.phone_verification: { domain: buyer, state: core, depends_on: [seller.buye
 care.sheets: { domain: handover, state: core, depends_on: [seller.workspace], description: "Care sheet templates and published versions (CP01)" }
 care.packs: { domain: handover, state: core, depends_on: [care.sheets, seller.orders], description: "Care packs per order (CP02)" }
 care.pdf: { domain: handover, state: core, depends_on: [care.packs], description: "Printable care pack PDF (CP02)" }
-substrate.share: { domain: handover, state: core, depends_on: [substrate.recipes], description: "Shareable substrate recipes (CP02)" }
+substrate.share: { domain: handover, state: core, implemented: true, depends_on: [substrate.recipes], description: "Shareable substrate recipes (CP02)" }
 care.qr_labels: { domain: handover, state: core, depends_on: [care.sheets], description: "Printable care QR labels (QR01)" }
 buyer.collection_import: { domain: handover, state: core, depends_on: [collection.plants, care.packs], description: "Copy a care pack plant into a collection (CP03)" }
 care.sitter: { domain: handover, state: core, depends_on: [care.reminders], description: "Plant Sitter scoped access (PS01, PS02)" }

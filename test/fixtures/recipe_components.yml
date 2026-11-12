@@ -1,0 +1,22 @@
+aroid_bark:
+  recipe_version: aroid_v1
+  ingredient: bark
+  quantity: 2
+  position: 0
+
+aroid_perlite:
+  recipe_version: aroid_v1
+  ingredient: perlite
+  quantity: 1
+  position: 1
+
+aroid_coir:
+  recipe_version: aroid_v1
+  ingredient: coir
+  quantity: 1
+  position: 2
+
+owner_moss:
+  recipe_version: owner_v1
+  ingredient: owner_moss
+  quantity: 1

@@ -43,6 +43,14 @@ class PlantsTest < ActionDispatch::IntegrationTest
     assert_match "ZAR 80.00", response.body
   end
 
+  test "editing a plant" do
+    plant = plants(:monstera_one)
+    get edit_plant_path(plant)
+    assert_response :success
+    patch plant_path(plant), params: { plant: { nickname: "Connie" } }
+    assert_equal "Connie", plant.reload.nickname
+  end
+
   test "an invalid plant shows the form again" do
     post plants_path, params: { plant: { display_name: "", growing_context: "" } }
     assert_response :unprocessable_entity

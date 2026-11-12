@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -195,6 +195,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
     t.index ["feature_key", "key", "value"], name: "index_flipper_gates_on_feature_key_and_key_and_value", unique: true
   end
 
+  create_table "ingredients", force: :cascade do |t|
+    t.bigint "user_id"
+    t.string "key"
+    t.bigint "copied_from_id"
+    t.string "name", null: false
+    t.string "manufacturer"
+    t.string "category", null: false
+    t.string "water_retention"
+    t.string "aeration"
+    t.decimal "particle_min_mm", precision: 5, scale: 1
+    t.decimal "particle_max_mm", precision: 5, scale: 1
+    t.text "intended_use"
+    t.text "preparation"
+    t.string "source"
+    t.text "notes"
+    t.string "status", default: "active", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["copied_from_id"], name: "index_ingredients_on_copied_from_id"
+    t.index ["key"], name: "index_ingredients_on_key", unique: true, where: "(key IS NOT NULL)"
+    t.index ["user_id", "status"], name: "index_ingredients_on_user_id_and_status"
+    t.index ["user_id"], name: "index_ingredients_on_user_id"
+    t.check_constraint "(user_id IS NULL) = (key IS NOT NULL)", name: "ingredients_built_in_or_personal"
+  end
+
   create_table "invitations", force: :cascade do |t|
     t.string "kind", null: false
     t.string "email_address", null: false
@@ -328,8 +353,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
     t.string "watering_method"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "recipe_version_id"
     t.index ["plant_id", "started_on"], name: "index_plant_setups_on_plant_id_and_started_on"
     t.index ["plant_id"], name: "index_plant_setups_on_plant_id"
+    t.index ["recipe_version_id"], name: "index_plant_setups_on_recipe_version_id"
     t.index ["user_id"], name: "index_plant_setups_on_user_id"
   end
 
@@ -368,6 +395,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
     t.index ["user_id", "status"], name: "index_plants_on_user_id_and_status"
     t.index ["user_id"], name: "index_plants_on_user_id"
     t.check_constraint "quantity >= 0", name: "plants_quantity_not_negative"
+  end
+
+  create_table "recipe_components", force: :cascade do |t|
+    t.bigint "recipe_version_id", null: false
+    t.bigint "ingredient_id", null: false
+    t.decimal "quantity", precision: 8, scale: 2, null: false
+    t.integer "position", default: 0, null: false
+    t.index ["ingredient_id"], name: "index_recipe_components_on_ingredient_id"
+    t.index ["recipe_version_id", "ingredient_id"], name: "index_recipe_components_on_recipe_version_id_and_ingredient_id", unique: true
+    t.check_constraint "quantity > 0::numeric", name: "recipe_components_quantity_positive"
+  end
+
+  create_table "recipe_versions", force: :cascade do |t|
+    t.bigint "recipe_id", null: false
+    t.integer "number", null: false
+    t.string "basis", null: false
+    t.string "state", default: "draft", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["recipe_id", "number"], name: "index_recipe_versions_on_recipe_id_and_number", unique: true
+  end
+
+  create_table "recipes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "contexts", default: [], null: false, array: true
+    t.string "source"
+    t.text "notes"
+    t.string "status", default: "active", null: false
+    t.string "share_token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["share_token"], name: "index_recipes_on_share_token", unique: true, where: "(share_token IS NOT NULL)"
+    t.index ["user_id", "status"], name: "index_recipes_on_user_id_and_status"
+    t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 
   create_table "refer_referral_codes", force: :cascade do |t|
@@ -464,6 +527,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
   add_foreign_key "environment_assignments", "users"
   add_foreign_key "environments", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "environments", "users"
+  add_foreign_key "ingredients", "ingredients", column: "copied_from_id", on_delete: :nullify
+  add_foreign_key "ingredients", "users"
   add_foreign_key "invitations", "sellers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id", on_delete: :nullify
@@ -479,11 +544,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_090000) do
   add_foreign_key "photos", "plants", on_delete: :cascade
   add_foreign_key "photos", "users"
   add_foreign_key "plant_setups", "plants", on_delete: :cascade
+  add_foreign_key "plant_setups", "recipe_versions", on_delete: :restrict
   add_foreign_key "plant_setups", "users"
   add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
   add_foreign_key "plants", "acquisitions", on_delete: :nullify
   add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "plants", "users"
+  add_foreign_key "recipe_components", "ingredients", on_delete: :restrict
+  add_foreign_key "recipe_components", "recipe_versions", on_delete: :cascade
+  add_foreign_key "recipe_versions", "recipes", on_delete: :cascade
+  add_foreign_key "recipes", "users"
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify

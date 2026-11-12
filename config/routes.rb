@@ -43,6 +43,25 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :ingredients, except: :destroy do
+    scope module: :ingredients do
+      resource :copy, only: :create
+      resource :archive, only: %i[ create destroy ]
+      resource :deletion, only: %i[ new create ]
+    end
+  end
+
+  resources :recipes, except: :destroy do
+    scope module: :recipes do
+      resource :archive, only: %i[ create destroy ]
+      resource :deletion, only: %i[ new create ]
+      resource :share, only: %i[ create destroy ]
+    end
+  end
+
+  # A recipe's public link (D102): opens without signing in.
+  get "r/:token", to: "shared_recipes#show", as: :shared_recipe
+
   namespace :sell do
     root "home#show"
     resources :members, only: %i[ index update destroy ], controller: "memberships"

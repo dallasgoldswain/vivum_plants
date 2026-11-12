@@ -1,0 +1,386 @@
+# Built-in substrate ingredients (SU01, D96). Generic, not branded. Maintained by the
+# founder; Ingredient.sync_built_ins! (run by db:seed) matches entries by key, so never
+# rename a key. Removing an entry archives the ingredient rather than deleting it.
+#
+# category: bark mineral aggregate fibre moss organic charcoal amendment aquatic other
+# water_retention, aeration: low medium high (guidance, not measurements)
+# particle sizes in mm, where a typical range is meaningful
+
+orchid_bark_fine:
+  name: Orchid bark, fine
+  category: bark
+  water_retention: medium
+  aeration: medium
+  particle_min_mm: 3
+  particle_max_mm: 8
+  intended_use: Aroid, hoya and small-pot mixes; opens up denser mixes without large gaps.
+  preparation: Rinse off dust. Soak dry bark before use so it takes up water evenly.
+
+orchid_bark_medium:
+  name: Orchid bark, medium
+  category: bark
+  water_retention: low
+  aeration: high
+  particle_min_mm: 8
+  particle_max_mm: 15
+  intended_use: Chunky aroid mixes and epiphytic orchids in larger pots.
+  preparation: Rinse off dust. Soak before use.
+
+orchid_bark_coarse:
+  name: Orchid bark, coarse
+  category: bark
+  water_retention: low
+  aeration: high
+  particle_min_mm: 15
+  particle_max_mm: 30
+  intended_use: Large epiphytic orchids and very open mixes for big pots.
+  preparation: Rinse and soak before use.
+
+pine_bark_fines:
+  name: Composted pine bark fines
+  category: bark
+  water_retention: medium
+  aeration: medium
+  particle_max_mm: 6
+  intended_use: Base for general potting mixes; holds more water than chunky bark.
+  preparation: Use composted rather than fresh bark.
+
+coco_chips:
+  name: Coco chips (husk chips)
+  category: fibre
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 5
+  particle_max_mm: 20
+  intended_use: Chunky aroid and orchid mixes; breaks down more slowly than bark.
+  preparation: Buffer and rinse unbuffered coco to wash out salts before use.
+
+coco_coir:
+  name: Coco coir (fine fibre)
+  category: fibre
+  water_retention: high
+  aeration: medium
+  intended_use: Moisture-holding base for most houseplant mixes; a peat alternative.
+  preparation: Rehydrate compressed blocks in water. Rinse unbuffered coir to wash out salts.
+
+peat_moss:
+  name: Peat moss
+  category: organic
+  water_retention: high
+  aeration: low
+  intended_use: Acid-loving and moisture-loving plants, carnivorous plants, seed mixes.
+  preparation: Moisten before mixing; dry peat repels water.
+
+sphagnum_long_fibre:
+  name: Sphagnum moss, long-fibre
+  category: moss
+  water_retention: high
+  aeration: medium
+  intended_use: Rooting cuttings, orchids, carnivorous plants, moss poles and terrarium layers.
+  preparation: Soak dried moss, then squeeze out excess water. Pack loosely for air.
+
+sphagnum_milled:
+  name: Sphagnum moss, milled
+  category: moss
+  water_retention: high
+  aeration: low
+  intended_use: Seed sowing and tissue-culture deflasking where an even, fine surface helps.
+  preparation: Moisten before use.
+
+sheet_moss:
+  name: Sheet or cushion moss
+  category: moss
+  water_retention: medium
+  aeration: medium
+  intended_use: Top dressing in terrariums and vivariums.
+  preparation: Rinse and check for pests before adding to a closed setup.
+
+perlite:
+  name: Perlite
+  category: aggregate
+  water_retention: low
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 6
+  intended_use: Lightens almost any mix and adds air around roots. Floats to the top over time.
+  preparation: Dampen first and avoid breathing the dust.
+
+perlite_coarse:
+  name: Perlite, coarse
+  category: aggregate
+  water_retention: low
+  aeration: high
+  particle_min_mm: 5
+  particle_max_mm: 10
+  intended_use: Chunky aroid and hoya mixes where fine perlite would fill the gaps.
+  preparation: Dampen first and avoid breathing the dust.
+
+vermiculite:
+  name: Vermiculite
+  category: mineral
+  water_retention: high
+  aeration: medium
+  particle_min_mm: 1
+  particle_max_mm: 4
+  intended_use: Seed and cutting mixes; holds water and nutrients.
+  preparation: Use horticultural grade.
+
+pumice:
+  name: Pumice
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 3
+  particle_max_mm: 10
+  intended_use: Succulent, cactus, aroid and bonsai mixes; heavier than perlite, so it stays mixed in.
+  preparation: Sieve out fines and rinse.
+
+lava_rock:
+  name: Lava rock (scoria)
+  category: mineral
+  water_retention: low
+  aeration: high
+  particle_min_mm: 5
+  particle_max_mm: 15
+  intended_use: Gritty mixes for succulents and bonsai, drainage layers, aquascape hardscape.
+  preparation: Rinse well; edges can be sharp.
+
+akadama:
+  name: Akadama
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 6
+  intended_use: Bonsai and some succulents and carnivores; breaks down over a couple of years.
+  preparation: Sieve out dust.
+
+zeolite:
+  name: Zeolite
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 5
+  intended_use: Gritty mixes; holds some nutrients. Also used in semi-hydro and pond filters.
+  preparation: Rinse off dust.
+
+calcined_clay:
+  name: Calcined clay
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 1
+  particle_max_mm: 5
+  intended_use: Gritty succulent and bonsai mixes that need to stay open for years.
+  preparation: Sieve and rinse off dust.
+
+diatomaceous_earth_granules:
+  name: Diatomaceous earth granules
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 6
+  intended_use: Gritty mixes and bonsai; holds water inside each granule.
+  preparation: Use calcined granules made for growing, not the powder sold for pest control.
+
+river_sand:
+  name: Coarse river sand
+  category: mineral
+  water_retention: low
+  aeration: medium
+  particle_min_mm: 0.5
+  particle_max_mm: 2
+  intended_use: Cactus and succulent mixes; adds weight and drainage.
+  preparation: Wash out fines. Avoid fine building or beach sand, which packs tight.
+
+horticultural_grit:
+  name: Horticultural grit
+  category: mineral
+  water_retention: low
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 6
+  intended_use: Succulent and alpine mixes and top dressing.
+  preparation: Rinse before use.
+
+gravel:
+  name: Gravel or small pebbles
+  category: mineral
+  water_retention: low
+  aeration: high
+  particle_min_mm: 5
+  particle_max_mm: 20
+  intended_use: Top dressing and terrarium drainage layers.
+  preparation: Rinse well.
+
+leca:
+  name: LECA (expanded clay balls)
+  category: aggregate
+  water_retention: low
+  aeration: high
+  particle_min_mm: 4
+  particle_max_mm: 16
+  intended_use: Semi-hydro on its own, drainage layers, or chunks in an open mix.
+  preparation: Rinse off dust and soak before use.
+
+pon:
+  name: Mineral semi-hydro mix (pon-style)
+  category: mineral
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 8
+  intended_use: Semi-hydro and inorganic growing for aroids, hoyas and succulents.
+  preparation: Rinse before use.
+
+horticultural_charcoal:
+  name: Horticultural charcoal
+  category: charcoal
+  water_retention: low
+  aeration: high
+  particle_min_mm: 3
+  particle_max_mm: 15
+  intended_use: A small share in aroid, orchid and terrarium mixes to keep them open.
+  preparation: Rinse off dust.
+
+biochar:
+  name: Biochar
+  category: charcoal
+  water_retention: medium
+  aeration: high
+  particle_min_mm: 1
+  particle_max_mm: 10
+  intended_use: Amendment in potting and garden mixes.
+  preparation: Charge it (soak in a weak feed or compost tea) before use; raw biochar can hold nutrients back at first.
+
+worm_castings:
+  name: Worm castings
+  category: amendment
+  water_retention: high
+  aeration: low
+  intended_use: A small share for gentle nutrition in houseplant and garden mixes.
+  preparation: Use a small proportion; a lot makes a mix dense.
+
+compost:
+  name: Compost
+  category: organic
+  water_retention: high
+  aeration: low
+  intended_use: Garden beds and heavier outdoor potting mixes.
+  preparation: Use well-rotted compost and sieve out large pieces for pots.
+
+potting_soil:
+  name: General potting soil
+  category: organic
+  water_retention: high
+  aeration: low
+  intended_use: Base for many mixes, usually opened up with bark, perlite or pumice.
+  preparation: Check the bag for added fertiliser or water-retaining crystals.
+
+cactus_mix:
+  name: Cactus and succulent mix
+  category: organic
+  water_retention: low
+  aeration: medium
+  intended_use: Base for succulents, often with extra grit or pumice.
+  preparation: Commercial mixes vary a lot; add grit if it stays wet.
+
+loam:
+  name: Garden loam
+  category: organic
+  water_retention: medium
+  aeration: low
+  intended_use: Outdoor beds, and a small share in some aquarium and pond setups.
+  preparation: Sieve. Avoid soil from beds treated with pesticides.
+
+leaf_litter:
+  name: Leaf litter
+  category: organic
+  water_retention: medium
+  aeration: medium
+  intended_use: Top layer in bioactive terrariums and paludariums, food for cleanup crews.
+  preparation: Use dried leaves from untreated trees, such as oak or magnolia; bake or rinse first.
+
+tree_fern_fibre:
+  name: Tree fern fibre
+  category: fibre
+  water_retention: medium
+  aeration: high
+  intended_use: Mounts and backgrounds for epiphytes, and chunks in orchid mixes.
+  preparation: Use from legal, sustainable sources only.
+
+cork_bark:
+  name: Cork bark
+  category: bark
+  water_retention: low
+  aeration: high
+  intended_use: Mounts for epiphytes and terrarium hardscape.
+  preparation: Rinse; boil or bake smaller pieces before adding to a closed setup.
+
+rice_hulls:
+  name: Parboiled rice hulls
+  category: organic
+  water_retention: low
+  aeration: high
+  intended_use: A light alternative to perlite in potting mixes.
+  preparation: Use parboiled hulls, which won't sprout.
+
+dolomitic_lime:
+  name: Dolomitic lime
+  category: amendment
+  intended_use: Raises the pH of acidic mixes such as peat; adds calcium and magnesium.
+  preparation: Use a small measured amount, a teaspoon or so per litre of peat-heavy mix at most.
+
+slow_release_fertiliser:
+  name: Slow-release fertiliser granules
+  category: amendment
+  intended_use: Mixed into potting mixes for steady feeding over months.
+  preparation: Follow the label rate for the pot volume.
+
+aquasoil:
+  name: Aquasoil
+  category: aquatic
+  water_retention: high
+  aeration: medium
+  particle_min_mm: 1
+  particle_max_mm: 4
+  intended_use: Planted aquarium substrate; feeds roots and softens water at first.
+  preparation: Expect ammonia and cloudy water for the first weeks; do frequent water changes.
+
+aquarium_sand:
+  name: Aquarium sand
+  category: aquatic
+  water_retention: low
+  aeration: low
+  particle_min_mm: 0.5
+  particle_max_mm: 1.5
+  intended_use: Inert aquarium substrate and cap over a nutrient layer.
+  preparation: Rinse until the water runs clear.
+
+aquarium_gravel:
+  name: Aquarium gravel
+  category: aquatic
+  water_retention: low
+  aeration: high
+  particle_min_mm: 2
+  particle_max_mm: 5
+  intended_use: Inert aquarium substrate; root feeders help heavy-rooting plants.
+  preparation: Rinse until the water runs clear.
+
+root_tabs:
+  name: Root tabs
+  category: aquatic
+  intended_use: Fertiliser pushed into inert aquarium substrate near heavy-rooting plants.
+  preparation: Push deep so they don't release into the water column.
+
+clay_balls_aquatic:
+  name: Clay pebbles for aquatic plants
+  category: aquatic
+  water_retention: low
+  aeration: high
+  particle_min_mm: 8
+  particle_max_mm: 16
+  intended_use: Pond and bog-plant baskets, and paludarium land areas over water.
+  preparation: Rinse off dust.

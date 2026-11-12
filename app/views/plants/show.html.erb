@@ -69,7 +69,7 @@
     </div>
 
     <% if capability?("collection.environments") %>
-      <%= render "plants/placement", plant: @plant, environments: @environments %>
+      <%= render "plants/placement", plant: @plant, environments: @environments, recipes: @recipes %>
     <% end %>
 
     <div class="card">

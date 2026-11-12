@@ -1,0 +1,33 @@
+bark:
+  key: orchid_bark_medium
+  name: Orchid bark, medium
+  category: bark
+  water_retention: low
+  aeration: high
+  particle_min_mm: 8
+  particle_max_mm: 15
+
+perlite:
+  key: perlite
+  name: Perlite
+  category: aggregate
+  water_retention: low
+  aeration: high
+
+coir:
+  key: coco_coir
+  name: Coco coir (fine fibre)
+  category: fibre
+  water_retention: high
+  aeration: medium
+
+branded_pumice:
+  user: collector
+  name: Pumice
+  manufacturer: Kiwi Pumice Co
+  category: mineral
+
+owner_moss:
+  user: owner
+  name: Secret moss
+  category: moss

@@ -66,7 +66,11 @@ class AccountExport
       end
     },
     "plant_setups" => ->(user) {
-      user.plant_setups.includes(:plant).order(:started_on, :id).map { it.slice(:started_on, :container, :size, :size_unit, :watering_method, :created_at).merge(plant: it.plant.record_id) }
+      user.plant_setups.includes(:plant, recipe_version: :recipe).order(:started_on, :id).map do |setup|
+        setup.slice(:started_on, :container, :size, :size_unit, :watering_method, :created_at).merge(
+          plant: setup.plant.record_id, recipe: setup.recipe_version&.recipe&.name, recipe_version: setup.recipe_version&.number
+        ).compact
+      end
     },
     "measurements" => ->(user) {
       user.measurements.includes(:environment, values: :custom_metric).order(:measured_at).map do |measurement|
@@ -78,6 +82,22 @@ class AccountExport
     },
     "custom_metrics" => ->(user) {
       user.custom_metrics.by_name.map { it.slice(:name, :unit, :created_at) }
+    },
+    # Personal ingredients only; built-ins are the same for everyone (D96).
+    "ingredients" => ->(user) {
+      user.ingredients.by_name.map { it.slice(:id, :name, :manufacturer, :category, :water_retention, :aeration, :particle_min_mm, :particle_max_mm, :intended_use, :preparation, :source, :notes, :status, :created_at, :updated_at) }
+    },
+    "recipes" => ->(user) {
+      user.recipes.includes(versions: { components: :ingredient }).by_name.map do |recipe|
+        recipe.slice(:name, :contexts, :source, :notes, :status, :created_at, :updated_at).merge(
+          shared_link: recipe.shared?,
+          versions: recipe.versions.map do |version|
+            version.slice(:number, :basis, :state, :notes, :created_at, :updated_at).merge(
+              components: version.components.map { { ingredient: it.ingredient.label, built_in: it.ingredient.built_in?, quantity: it.quantity } }
+            )
+          end
+        )
+      end
     }
   }.freeze
 

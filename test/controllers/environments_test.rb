@@ -25,6 +25,13 @@ class EnvironmentsTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "editing an environment" do
+    get edit_environment_path(@shelf)
+    assert_response :success
+    patch environment_path(@shelf), params: { environment: { name: "Lounge shelf 3" } }
+    assert_equal "Lounge shelf 3", @shelf.reload.name
+  end
+
   test "adding an environment with only a name and type" do
     get environments_path
     assert_select "h1", "Environments"

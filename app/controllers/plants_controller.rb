@@ -19,9 +19,10 @@ class PlantsController < ApplicationController
   end
 
   def show
-    ActiveRecord::Associations::Preloader.new(records: [ @plant ], associations: [ { environment_assignments: :environment }, :setups ]).call
+    ActiveRecord::Associations::Preloader.new(records: [ @plant ], associations: [ { environment_assignments: :environment }, { setups: { recipe_version: :recipe } } ]).call
     @timeline = @plant.timeline
     @environments = Current.user.environments.active.by_name if capability?("collection.environments")
+    @recipes = Current.user.recipes.active.includes(:versions).by_name if capability?("substrate.recipes")
     @photos = @plant.photos.with_attached_image.newest_first
     @quota = Photo.quota_for(Current.user)
   end

@@ -1,0 +1,8 @@
+aroid_mix:
+  user: collector
+  name: Aroid mix
+  contexts: [indoor]
+
+owner_mix:
+  user: owner
+  name: Owner's mix

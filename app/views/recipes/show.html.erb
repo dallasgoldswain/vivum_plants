@@ -1,0 +1,202 @@
+<% content_for :title, "#{@recipe.name} · VIVUM Plants" %>
+<% latest = @versions.last %>
+
+<div class="grid gap-3">
+  <%= link_to "← Recipes", recipes_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">
+        <%= @version.label %> ·
+        <%= @recipe.contexts.map { growing_context_label(it) }.join(", ").presence || "Substrate recipe" %>
+      </p>
+
+      <h1 class="vv-h2">
+        <%= @recipe.name %>
+
+        <% if @version.draft? %>
+          <span class="badge-outline">Draft</span>
+        <% end %>
+
+        <% if @recipe.archived? %>
+          <span class="badge-outline">Archived</span>
+        <% end %>
+      </h1>
+
+      <% if @recipe.source.present? %>
+        <p class="vv-caption mt-1">Source: <%= @recipe.source %></p>
+      <% end %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "recipes" %>
+      <%= link_to "Edit", edit_recipe_path(@recipe), class: "btn-outline" %>
+    </div>
+  </div>
+
+  <% if @version != latest %>
+    <div class="alert" role="note">
+      <h2>You're looking at <%= @version.label %></h2>
+
+      <section>
+        The newest is
+        <%= link_to latest.label, recipe_path(@recipe), class: "underline underline-offset-4" %>.
+        Plants set up with <%= @version.label %> stay on it.
+      </section>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <div class="grid content-start gap-6">
+    <div class="card" id="composition">
+      <header>
+        <h2>Mix</h2>
+        <p><%= recipe_formula(@version) %></p>
+      </header>
+
+      <section class="grid gap-3">
+        <%= render "recipes/composition", version: @version, link_ingredients: true %>
+
+        <% if @version.notes.present? %>
+          <p class="whitespace-pre-line"><%= @version.notes %></p>
+        <% end %>
+      </section>
+    </div>
+
+    <% if capability?("substrate.scaling") %>
+      <%= render "recipes/scaler", version: @version %>
+    <% end %>
+
+    <% if @recipe.notes.present? %>
+      <div class="card">
+        <header>
+          <h2>Private notes</h2>
+        </header>
+
+        <section>
+          <p class="whitespace-pre-line"><%= @recipe.notes %></p>
+        </section>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <div class="card" id="versions">
+      <header>
+        <h2>Versions and plants</h2>
+        <p>Plants keep the exact version they were potted in.</p>
+      </header>
+
+      <section>
+        <ul class="grid gap-4">
+          <% @versions.reverse_each do |version| %>
+            <% plants = @plants_by_version.fetch(version.id, []) %>
+
+            <li class="grid gap-1">
+              <p class="font-medium">
+                <%= link_to_unless version == @version, version.label, recipe_path(@recipe, version: version.number), class: "underline underline-offset-4" %>
+
+                <span class="vv-caption">
+                  <%= version.draft? ? "Draft" : "Ready" %> · saved
+                  <%= l(version.updated_at.to_date, format: :long) %>
+                </span>
+              </p>
+
+              <% if plants.any? %>
+                <ul class="grid gap-1 text-sm">
+                  <% plants.each do |plant, since, current| %>
+                    <li>
+                      <%= link_to plant.display_name, plant, class: "underline underline-offset-4" %>
+                      (<%= plant.record_id %>) · from
+                      <%= l(since, format: :long) %><%= current ? ", in it now" : ", since repotted" %>
+                    </li>
+                  <% end %>
+                </ul>
+              <% else %>
+                <p class="vv-caption">No plants.</p>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+
+      <footer>
+        <p class="vv-caption">
+          To pot a plant in this recipe, open the plant and use
+          <strong>Change setup</strong>.
+        </p>
+      </footer>
+    </div>
+
+    <% if capability?("substrate.share") %>
+      <div class="card" id="sharing">
+        <header>
+          <h2>Share</h2>
+
+          <p>
+            <% if @recipe.shared? %>
+              Anyone with this link can see the newest ready version and scale
+              it, without signing in. Private notes and plants aren't shown.
+            <% else %>
+              Make a link anyone can open without signing in. It shows the
+              newest ready version, never your private notes or plants.
+            <% end %>
+          </p>
+        </header>
+
+        <section class="grid gap-3">
+          <% if @recipe.shared? %>
+            <% if @recipe.latest_ready_version.nil? || @recipe.archived? %>
+              <p class="vv-caption text-destructive">
+                The link won't open until the recipe is
+                <%= @recipe.archived? ? "restored" : "ready" %>.
+              </p>
+            <% end %>
+
+            <%= text_field_tag "share_url", shared_recipe_url(@recipe.share_token), readonly: true, class: "input", aria: { label: "Share link" } %>
+          <% end %>
+        </section>
+
+        <footer class="flex flex-wrap gap-2">
+          <% if @recipe.shared? %>
+            <%= button_to "New link", recipe_share_path(@recipe), class: "btn-sm-outline", data: { turbo_confirm: "The current link will stop working. Make a new one?" } %>
+            <%= button_to "Turn off link", recipe_share_path(@recipe), method: :delete, class: "btn-sm-ghost" %>
+          <% else %>
+            <%= button_to "Make a link", recipe_share_path(@recipe), class: "btn-sm-outline" %>
+          <% end %>
+        </footer>
+      </div>
+    <% end %>
+
+    <div class="card">
+      <header>
+        <h2>
+          <%= @recipe.archived? ? "Archived" : "Archive or delete" %>
+        </h2>
+
+        <p>
+          <% if @recipe.archived? %>
+            Hidden from your recipes and the setup picker. Plants that use it
+            keep it.
+          <% else %>
+            Archiving hides it from the setup picker. Plants that use it keep
+            it.
+          <% end %>
+        </p>
+      </header>
+
+      <footer class="flex flex-wrap gap-2">
+        <% if @recipe.archived? %>
+          <%= button_to "Restore", recipe_archive_path(@recipe), method: :delete, class: "btn-sm-outline" %>
+        <% else %>
+          <%= button_to "Archive", recipe_archive_path(@recipe), class: "btn-sm-outline" %>
+        <% end %>
+
+        <% if @recipe.deletable? %>
+          <%= link_to "Delete…", new_recipe_deletion_path(@recipe), class: "btn-sm-ghost" %>
+        <% end %>
+      </footer>
+    </div>
+  </div>
+</div>

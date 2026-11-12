@@ -7,6 +7,9 @@ class PlantPolicy < ApplicationPolicy
   def update? = owner?
   def destroy? = owner?
 
+  # Action Policy only aliases new? to create?; without this the edit pages were refused.
+  alias_rule :edit?, to: :update?
+
   relation_scope { |relation| user ? relation.where(user_id: user.id) : relation.none }
 
   private

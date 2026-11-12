@@ -1,0 +1,58 @@
+<%#
+  Scale a version to a target volume (SU03, D98). Rounded to 50 mL, or 25 mL under 1 L.
+  The browser recalculates as you type (scale_controller.js), so it works offline; the
+  first figures come from Recipe::Scale for 1 L.
+%>
+<% scale = Recipe::Scale.new(version, 1000) %>
+
+<div class="card" id="scale" data-controller="scale">
+  <header>
+    <h2>Make a batch</h2>
+
+    <p>
+      How much mix do you need? Volumes are rounded so they're easy to measure.
+    </p>
+  </header>
+
+  <section class="grid gap-4">
+    <div class="form flex items-end gap-2">
+      <div class="grid gap-2">
+        <%= label_tag "scale_amount", "Total" %>
+        <%= number_field_tag "scale_amount", 1, id: "scale_amount", min: 0, step: "any", inputmode: "decimal", class: "w-28", data: { scale_target: "amount", action: "input->scale#update" } %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= label_tag "scale_unit", "Unit", class: "sr-only" %>
+        <%= select_tag "scale_unit", options_for_select([ "L", "mL" ], "L"), id: "scale_unit", class: "select w-24", data: { scale_target: "unit", action: "change->scale#update" } %>
+      </div>
+    </div>
+
+    <table class="table">
+      <tbody>
+        <% scale.lines.each do |line| %>
+          <tr>
+            <td><%= line.component.ingredient.label %></td>
+
+            <td
+              class="text-right font-medium"
+              data-scale-target="volume"
+              data-fraction="<%= version.fraction_for(line.component).round(10).to_s("F") %>"
+            >
+              <%= volume_label(line.millilitres) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+
+      <tfoot>
+        <tr>
+          <td>Total after rounding</td>
+
+          <td class="text-right font-medium" data-scale-target="total">
+            <%= volume_label(scale.total_ml) %>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+</div>

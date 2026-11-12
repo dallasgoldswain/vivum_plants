@@ -52,7 +52,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 |---|---|---|---|---|
 | B10 | Plant records, acquisition, status, photos, search | PL01–PL04, UX01, OF02, OF03, D80–D87 | B03 | Done |
 | B11 | Environments, occupants, measurements | EN01–EN03, PL05, D88–D95 | B10 | Done |
-| B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Planned |
+| B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
 | B13 | Care events and quick care entry | CA01, UX02, PL04 | B10 | Planned |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05 | B13 | Planned |
 | B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
@@ -435,7 +435,7 @@ anything queued by the B10 build (development only). Help topics `environments` 
 `measurements` are new; `working-offline` and `observations-and-photos` changed; all four
 reviewed 2026-11-12.
 
-### B12 Substrate ingredients and versioned recipes, scaling — discussed 2026-11-12
+### B12 Substrate ingredients and versioned recipes, scaling — discussed and built 2026-11-12
 
 **Scope**
 - **Ingredients (SU01, D96, D97):** `ingredients` that are either built-in (no user, seeded
@@ -480,3 +480,14 @@ saved, and its earlier setup events still show v1; a branded ingredient keeps it
 manufacturer and is distinct from the generic one; built-ins can't be edited but can be
 copied; a used recipe can be archived but not deleted; a shared link opens signed out,
 shows no notes, and stops working once revoked.
+
+**Built notes:** 42 built-in ingredients. They reach a database through `db:seed`, which the
+production deploy (B44) must run, since `db:prepare` only seeds a new database. Recipes are
+reached from a **Substrates** button on the collection page, like Environments. The recipe
+form saves as a draft or as ready; the version number shows above the recipe name. The
+public link page has its own `public` layout with `noindex`. While testing, the plant and
+environment edit pages turned out to be refused since B10 (Action Policy has no default
+`edit?` rule); fixed in `PlantPolicy` with tests. Dev-server pages weren't clicked through,
+because the only development account has two-step sign-in; headless Chrome tests cover
+scaling offline and the recipe form, and there's a recipe screenshot. Help topics
+`ingredients` and `recipes` need review.

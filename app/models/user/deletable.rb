@@ -94,6 +94,8 @@ module User::Deletable
       acquisitions.destroy_all
       environments.destroy_all
       custom_metrics.destroy_all
+      recipes.destroy_all
+      ingredients.destroy_all
       Invitation.for_email(address).update_all(email_address: tombstone_email_address)
       Invitation.pending.where(invited_by: self).update_all(revoked_at: Time.current)
       data_requests.each { it.export_file.purge }
