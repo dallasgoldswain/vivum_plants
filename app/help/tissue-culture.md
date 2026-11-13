@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.tissue_culture]
 prerequisites: []
 keywords: [tissue culture, tc, plantlet, flask, cup, deflask, deflasked, acclimatise, acclimatising, established, sealed, stage, contamination, purchase, lost, check, humidity]
+reviewed: 2026-11-13
+reviewed_digest: 7c3a2a50ffa0ddc0b2df41cbcf317e6618a346f69b6388f56fbfaaf2c337fe3c
 ---
 
 VIVUM Plants follows tissue culture plantlets you've bought, from arrival until

@@ -6,6 +6,8 @@ audience: collector
 capabilities: [collection.plants]
 prerequisites: []
 keywords: [split, divide, separate, quantity, planting, bunch, pot, stems, records, number]
+reviewed: 2026-11-13
+reviewed_digest: 72c7c32d6f6db6d453c4f3db76ca3695c6238f906d352bed5fdaffb872c479eb
 ---
 
 A record can hold more than one plant, such as a pot of 5 stems or an aquatic
