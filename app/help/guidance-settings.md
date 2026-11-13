@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.guidance_settings]
 prerequisites: [adding-a-plant]
 keywords: [guidance, suggestions, library, defaults, settings, switches, revision, apply]
+reviewed: 2026-11-13
+reviewed_digest: 5c32c4bb627e89426e8650f26218388da683340aa4b2ec44c98a87b14a0d903c
 ---
 
 Guidance switches decide where a plant's care suggestions come from. Library
