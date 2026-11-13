@@ -4,7 +4,7 @@ require "application_system_test_case"
 # waiting, and sent once when the connection returns. Run in headless Chrome (bin/ci).
 class OfflineTest < ApplicationSystemTestCase
   setup do
-    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling care.logs care.reminders ].each { Flipper.enable(it) }
+    %w[ collection.plants collection.media collection.environments collection.measurements substrate.ingredients substrate.recipes substrate.scaling care.logs care.reminders care.shared_maintenance ].each { Flipper.enable(it) }
     users(:collector).update!(whats_new_seen_at: Time.current)
   end
 
@@ -110,6 +110,31 @@ class OfflineTest < ApplicationSystemTestCase
     choose "Once"
     assert_text "Sun 31 Jan"
     assert_no_text "28 Feb"
+  end
+
+  test "a water change saved offline is sent once and linked to the plants in the tank (D126)" do
+    plants(:anubias).move_to!(environments(:tank))
+    sign_in
+    visit environment_path(environments(:tank))
+    assert_text "Maintenance"
+
+    page.driver.browser.network_conditions = { offline: true, latency: 0, throughput: 0 }
+    within("#maintenance") { click_on "Water change" }
+    within("#maintenance-water_change") do
+      fill_in "How much", with: "25"
+      click_on "Save"
+    end
+    assert_text "Water change · 25"
+    assert_equal 0, EnvironmentEvent.count
+
+    page.driver.browser.network_conditions = { offline: false, latency: 0, throughput: 0 }
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    assert_no_text "Waiting to send", wait: 10
+    page.execute_script("window.dispatchEvent(new Event('online'))")
+    sleep 1
+    event = EnvironmentEvent.sole
+    assert_equal [ 25, "%" ], [ event.amount, event.amount_unit ]
+    assert_equal [ plants(:anubias) ], event.plants.to_a
   end
 
   test "a reading saved offline is sent once when back online" do

@@ -11,7 +11,7 @@ class Environments::ArchivesController < ApplicationController
   end
 
   def destroy
-    @environment.update!(status: "active")
+    @environment.restore!
     redirect_to @environment, notice: "#{@environment.name} restored."
   end
 end

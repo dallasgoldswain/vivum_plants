@@ -1,0 +1,26 @@
+<% content_for :title, "Edit reminder · #{subject_name(@subject)} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{subject_name(@subject)}", polymorphic_path(@subject, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h1 class="vv-h2">Edit reminder</h1>
+</div>
+
+<div class="card max-w-2xl">
+  <section class="grid gap-3">
+    <%= form_with model: @schedule, url: polymorphic_path([ @subject, @schedule ]), class: "form grid gap-4" do |form| %>
+      <%= render "shared/form_errors", record: @schedule %>
+      <%= render "schedules/fields", form: form, schedule: @schedule, subject: @subject %>
+
+      <p class="vv-caption">
+        Saving moves the next task to match, unless you changed its date
+        yourself.
+      </p>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Save", class: "btn" %>
+        <%= link_to "Cancel", polymorphic_path(@subject, anchor: "reminders"), class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </section>
+</div>

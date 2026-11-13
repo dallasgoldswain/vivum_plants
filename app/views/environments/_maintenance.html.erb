@@ -1,0 +1,183 @@
+<%# Environment maintenance (EN04, D121–D124, D126): log it in a tap or two, see its history. %>
+<div class="card" id="maintenance">
+  <header>
+    <h2>Maintenance</h2>
+
+    <p>
+      Water changes, cleaning and checks. Plants here see it on their timelines.
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if logged_event %>
+      <div class="alert" role="status">
+        <h3>
+          <%= maintenance_title(logged_event) %>
+          <%= care_ago(logged_event.occurred_at) %>,
+          <%= l(logged_event.occurred_at, format: "%H:%M") %>
+        </h3>
+
+        <section class="flex flex-wrap items-center gap-2">
+          <% if (details = maintenance_details(logged_event)) %>
+            <span class="vv-caption"><%= details %></span>
+          <% end %>
+
+          <% if logged_event.care_task %>
+            <span class="vv-caption basis-full">Also completed its <%= care_task_title(logged_event.care_task).downcase %> reminder.</span>
+          <% end %>
+
+          <%= link_to "Add details", edit_environment_maintenance_event_path(environment, logged_event), class: "btn-sm-outline" %>
+
+          <% if logged_event.water_change? && capability?("collection.measurements") %>
+            <%= link_to "Add a reading", environment_path(environment, anchor: "conditions"), class: "btn-sm-outline" %>
+          <% end %>
+
+          <%= button_to "Undo", environment_maintenance_event_path(environment, logged_event), method: :delete, class: "btn-sm-ghost" %>
+        </section>
+      </div>
+    <% end %>
+
+    <% featured = EnvironmentEvent.featured_kinds(environment) %>
+
+    <div class="flex flex-wrap gap-2">
+      <% featured.each do |kind| %>
+        <button
+          type="button"
+          class="btn-outline"
+          commandfor="maintenance-<%= kind %>"
+          command="show-modal"
+        >
+          <%= maintenance_label(kind) %>
+        </button>
+      <% end %>
+    </div>
+
+    <details>
+      <summary class="btn-sm-ghost w-fit">More</summary>
+
+      <div class="mt-2 flex flex-wrap gap-2">
+        <% EnvironmentEvent.other_kinds(environment).each do |kind| %>
+          <button
+            type="button"
+            class="btn-sm-outline"
+            commandfor="maintenance-<%= kind %>"
+            command="show-modal"
+          >
+            <%= maintenance_label(kind) %>
+          </button>
+        <% end %>
+      </div>
+    </details>
+
+    <% if events.any? || kinds_logged.size > 1 %>
+      <div class="grid gap-2">
+        <h3 class="vv-h4">History</h3>
+
+        <% if kinds_logged.size > 1 %>
+          <nav class="flex flex-wrap gap-1" aria-label="Show maintenance">
+            <%= link_to "Everything", environment_path(environment, anchor: "maintenance"), class: (kind_filter ? "badge-outline" : "badge"), aria: { current: (kind_filter ? nil : "true") } %>
+
+            <% kinds_logged.each do |kind| %>
+              <%= link_to maintenance_label(kind), environment_path(environment, maintenance_kind: kind, anchor: "maintenance"), class: (kind_filter == kind ? "badge" : "badge-outline"), aria: { current: (kind_filter == kind ? "true" : nil) } %>
+            <% end %>
+          </nav>
+        <% end %>
+
+        <ol class="vv-timeline">
+          <% events.each do |event| %>
+            <li>
+              <p class="vv-caption">
+                <%= l(event.occurred_at, format: :long) %> ·
+                <%= maintenance_title(event) %>
+              </p>
+
+              <% if (details = maintenance_details(event)) %>
+                <p><%= details %></p>
+              <% end %>
+
+              <% if event.plants.any? %>
+                <p class="vv-caption">
+                  With <%= event.plants.map(&:display_name).to_sentence %>
+                </p>
+              <% end %>
+
+              <% if event.note.present? %>
+                <p class="whitespace-pre-line"><%= event.note %></p>
+              <% end %>
+
+              <% if event.photos.any? %>
+                <div class="flex flex-wrap gap-2">
+                  <% event.photos.each do |photo| %>
+                    <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo with this entry", loading: "lazy", class: "vv-timeline-thumb" %>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <div class="flex flex-wrap gap-1">
+                <%= link_to "Edit", edit_environment_maintenance_event_path(environment, event), class: "btn-sm-ghost" %>
+                <%= button_to "Delete", environment_maintenance_event_path(environment, event), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this entry? It goes from the plants' timelines too." } %>
+              </div>
+            </li>
+          <% end %>
+        </ol>
+      </div>
+    <% end %>
+  </section>
+
+  <% EnvironmentEvent::KINDS.each do |kind| %>
+    <dialog
+      id="maintenance-<%= kind %>"
+      class="dialog"
+      aria-labelledby="maintenance-<%= kind %>-title"
+      closedby="any"
+    >
+      <%= form_with model: EnvironmentEvent.new(kind: kind), url: environment_maintenance_events_path(environment), class: "form", data: { controller: "offline-form", offline_form_subject_value: "environment:#{environment.id}", offline_form_label_value: maintenance_label(kind), action: "submit->offline-form#submit" } do |form| %>
+        <header>
+          <h2 id="maintenance-<%= kind %>-title">
+            <%= maintenance_label(kind) %> · <%= environment.name %>
+          </h2>
+
+          <p>
+            Every detail is
+            optional<%= kind == "custom" ? " except what you did" : "" %>.
+          </p>
+        </header>
+
+        <section class="grid max-h-[60vh] gap-3 overflow-y-auto">
+          <%= form.hidden_field :kind, id: nil %>
+          <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
+          <%= render "environments/maintenance/fields", form: form, kind: kind %>
+
+          <div class="grid gap-2">
+            <%= form.label :occurred_at, "When", for: "maintenance_#{kind}_occurred_at" %>
+            <%= form.datetime_local_field :occurred_at, id: "maintenance_#{kind}_occurred_at", value: Time.current.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+          </div>
+
+          <% if capability?("collection.media") %>
+            <div class="grid gap-2">
+              <%= form.label :photos, for: "maintenance_#{kind}_photos" %>
+              <%= form.file_field :photos, id: "maintenance_#{kind}_photos", multiple: true, include_hidden: false, accept: Photo::ACCEPTED_TYPES.join(","), disabled: quota.full? %>
+            </div>
+          <% end %>
+
+          <p class="vv-caption" data-offline-form-target="status" role="status"></p>
+        </section>
+
+        <footer>
+          <button
+            type="button"
+            class="btn-outline"
+            commandfor="maintenance-<%= kind %>"
+            command="close"
+          >
+            Cancel
+          </button>
+
+          <%= form.submit "Save", class: "btn", data: { offline_form_target: "submit" } %>
+        </footer>
+      <% end %>
+    </dialog>
+  <% end %>
+
+  <%= render "environments/maintenance/suggestions", suggestions: suggestions %>
+</div>

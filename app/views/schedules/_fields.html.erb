@@ -7,7 +7,7 @@
       <% if schedule.persisted? %>
         <p><%= care_task_title(schedule) %></p>
       <% else %>
-        <%= form.select :kind, schedule_kind_options, {}, class: "select" %>
+        <%= form.select :kind, schedule_kind_options(local_assigns[:subject]), {}, class: "select" %>
       <% end %>
     </div>
 
@@ -39,7 +39,7 @@
 
     <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
       <%= form.radio_button :mode, "after_completion", data: { action: "schedule-preview#update" } %>
-      When it's done (water 7 days after the last watering)
+      When it's done (7 days after the last time)
     </label>
 
     <label class="flex min-h-11 items-center gap-2 text-sm font-normal">

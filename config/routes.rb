@@ -46,6 +46,10 @@ Rails.application.routes.draw do
 
   resources :environments, except: :destroy do
     scope module: :environments do
+      resources :maintenance_events, only: %i[ create edit update destroy ]
+      resources :care_schedules, only: %i[ new create edit update destroy ] do
+        resource :pause, only: %i[ create destroy ], module: :care_schedules
+      end
       resources :measurements, only: %i[ create destroy ]
       resources :moves, only: :create
       resources :photos, only: %i[ create update destroy ] do

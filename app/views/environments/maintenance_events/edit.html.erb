@@ -1,0 +1,31 @@
+<% content_for :title, "Edit #{maintenance_title(@event).downcase} · #{@environment.name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@environment.name}", environment_path(@environment, anchor: "maintenance"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h1 class="vv-h2"><%= maintenance_title(@event) %></h1>
+</div>
+
+<div class="card max-w-xl">
+  <section>
+    <%= form_with model: @event, url: environment_maintenance_event_path(@environment, @event), class: "form grid gap-3" do |form| %>
+      <%= render "shared/form_errors", record: @event %>
+      <%= render "environments/maintenance/fields", form: form, kind: @event.kind %>
+      <%= render "environments/maintenance/suggestions", suggestions: @suggestions %>
+
+      <div class="grid gap-2">
+        <%= form.label :occurred_at, "When" %>
+        <%= form.datetime_local_field :occurred_at, value: @event.occurred_at.strftime("%Y-%m-%dT%H:%M"), max: Time.current.end_of_day.strftime("%Y-%m-%dT%H:%M") %>
+      </div>
+
+      <p class="vv-caption">
+        Changing the date links it to the plants that were here then.
+      </p>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Save", class: "btn" %>
+        <%= link_to "Cancel", environment_path(@environment, anchor: "maintenance"), class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </section>
+</div>

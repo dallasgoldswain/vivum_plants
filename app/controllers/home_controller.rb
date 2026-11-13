@@ -1,5 +1,6 @@
-# The signed-in home page. With reminders on it's Today (CA04, D111, D115): due and overdue
-# tasks grouped by kind, the next 7 days, and what's snoozed, then invites and businesses.
+# The signed-in home page. With reminders on it's Today (CA04, D111, D115, D125): due and
+# overdue tasks grouped by kind, environments before plants, the next 7 days, and what's
+# snoozed, then invites and businesses.
 class HomeController < ApplicationController
   skip_verify_authorized
 
@@ -12,15 +13,17 @@ class HomeController < ApplicationController
   private
     def load_today
       today = Date.current
-      tasks = Current.user.care_tasks.includes(:plant, :care_schedule).order(:due_on, :id)
+      tasks = Current.user.care_tasks.includes(:plant, :environment, :care_schedule).order(:due_on, :id)
       visible = tasks.visible_on(today).to_a
       @due_groups = group(visible.select { it.due_on <= today })
       @upcoming_groups = group(visible.select { it.due_on > today && it.due_on <= today + 7 })
       @snoozed = tasks.snoozed_on(today).to_a
     end
 
-    # "Water · 5 plants": by kind, and by label for your own kinds (D115).
+    # "Water · 5 plants": by kind, and by label for your own kinds (D115). Environment tasks
+    # come first, one per environment, never per plant (D125).
     def group(tasks)
-      tasks.group_by { [ it.kind, it.label.to_s.downcase ] }.values.sort_by { |list| [ list.first.due_on, helpers.care_task_title(list.first) ] }
+      tasks.group_by { [ it.environment_id ? 0 : 1, it.kind, it.label.to_s.downcase ] }
+        .sort_by { |(environment, _, _), list| [ environment, list.first.due_on, helpers.care_task_title(list.first) ] }.map(&:last)
     end
 end

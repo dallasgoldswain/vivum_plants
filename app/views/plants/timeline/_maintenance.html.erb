@@ -1,0 +1,15 @@
+<%# Maintenance of an environment the plant was in, read from the environment (D124). %>
+<li>
+  <p class="vv-caption">
+    <%= l(record.occurred_at, format: :long) %> · Environment care
+  </p>
+
+  <p>
+    <%= maintenance_title(record) %> in
+    <%= link_to record.environment.name, environment_path(record.environment, anchor: "maintenance"), class: "underline underline-offset-4" %><% if (details = maintenance_details(record)) %> · <%= details %><% end %>
+  </p>
+
+  <% if record.note.present? %>
+    <p class="whitespace-pre-line"><%= record.note %></p>
+  <% end %>
+</li>

@@ -16,7 +16,7 @@ module CareHelper
   CARE_FILTERS = {
     "observation" => "Observations", "watering" => "Watering", "feeding" => "Feeding", "repotting" => "Repotting",
     "pruning" => "Pruning", "treatment" => "Treatments", "inspection" => "Inspections", "custom" => "Other care",
-    "movement" => "Moves", "setup" => "Setup changes"
+    "movement" => "Moves", "setup" => "Setup changes", "maintenance" => "Environment care"
   }.freeze
 
   WATERING_METHOD_LABELS = { "top" => "From the top", "bottom" => "Bottom watered", "soak" => "Soaked", "mist" => "Misted" }.freeze
@@ -73,7 +73,11 @@ module CareHelper
   INTERVAL_UNIT_LABELS = { "day" => "days", "week" => "weeks", "month" => "months" }.freeze
 
   # What a reminder asks you to do: "Water", "Feed", or your own label.
-  def care_task_title(task_or_schedule) = (task_or_schedule.kind == "custom" && task_or_schedule.label) || CARE_BUTTONS.fetch(task_or_schedule.kind)
+  # Environment reminders use the maintenance names (D125).
+  def care_task_title(task_or_schedule)
+    return task_or_schedule.label if task_or_schedule.kind == "custom" && task_or_schedule.label
+    task_or_schedule.environment_id ? MaintenanceHelper::MAINTENANCE_LABELS.fetch(task_or_schedule.kind) : CARE_BUTTONS.fetch(task_or_schedule.kind)
+  end
 
   # "Every 7 days after it's done", "Every 2 weeks on fixed dates", "Once"
   def schedule_cadence(schedule)
@@ -95,7 +99,11 @@ module CareHelper
   end
 
   def interval_unit_options = INTERVAL_UNIT_LABELS.map { |value, label| [ label, value ] }
-  def schedule_kind_options = CareSchedule::KINDS.map { [ (it == "custom" ? "Your own" : CARE_BUTTONS[it]), it ] }
+  def schedule_kind_options(subject)
+    return maintenance_kind_options if subject.is_a?(Environment)
+
+    CareSchedule::KINDS.map { [ (it == "custom" ? "Your own" : CARE_BUTTONS[it]), it ] }
+  end
 
   # Timezones by their IANA name (what browsers report), with the current one kept even if
   # it isn't among Rails' friendly names (D117).

@@ -26,6 +26,8 @@ class EnvironmentsController < ApplicationController
     end
     @photos = @environment.photos.with_attached_image.newest_first
     @quota = Photo.quota_for(Current.user)
+    load_maintenance if capability?("care.shared_maintenance")
+    @schedules = @environment.care_schedules.where.not(status: "ended").includes(:open_task).order(:created_at) if capability?("care.reminders")
   end
 
   def new
@@ -58,6 +60,17 @@ class EnvironmentsController < ApplicationController
     def set_environment
       @environment = Current.user.environments.find(params[:id])
       authorize! @environment
+    end
+
+    # Maintenance history with a kind filter, and the entry just saved (D122, D126).
+    def load_maintenance
+      events = @environment.maintenance_events
+      @maintenance_kinds = events.distinct.pluck(:kind).sort_by { EnvironmentEvent::KINDS.index(it) }
+      @maintenance_kind = params[:maintenance_kind].presence_in(@maintenance_kinds)
+      @maintenance_events = events.includes(:plants, photos: { image_attachment: :blob }).newest_first.limit(30)
+      @maintenance_events = @maintenance_events.where(kind: @maintenance_kind) if @maintenance_kind
+      @logged_maintenance = events.find_by(id: flash[:logged_environment_event]) if flash[:logged_environment_event]
+      @maintenance_suggestions = EnvironmentEvent.suggestions_for(Current.user)
     end
 
     def environment_params

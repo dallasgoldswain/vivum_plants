@@ -1,9 +1,9 @@
-<% content_for :title, "Already set · #{@plant.display_name} · VIVUM Plants" %>
+<% content_for :title, "Already set · #{subject_name(@subject)} · VIVUM Plants" %>
 
 <div class="grid gap-3">
-  <%= link_to "← #{@plant.display_name}", plant_path(@plant, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
+  <%= link_to "← #{subject_name(@subject)}", polymorphic_path(@subject, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
 
-  <h1 class="vv-h2"><%= @plant.display_name %> already has this reminder</h1>
+  <h1 class="vv-h2"><%= subject_name(@subject) %> already has this reminder</h1>
 </div>
 
 <div class="card max-w-2xl">
@@ -29,7 +29,7 @@
 
     <div class="flex flex-wrap gap-2">
       <% { "replace" => [ "Replace it", "btn" ], "keep" => [ "Keep both", "btn-outline" ] }.each do |choice, (label, style)| %>
-        <%= form_with url: plant_care_schedules_path(@plant) do |form| %>
+        <%= form_with url: polymorphic_path([ @subject, :care_schedules ]) do |form| %>
           <% params.fetch(:care_schedule, {}).permit(:kind, :label, :note, :repeats, :interval, :interval_unit, :mode, :starts_on).each do |name, value| %>
             <%= hidden_field_tag "care_schedule[#{name}]", value, id: nil %>
           <% end %>
@@ -39,7 +39,7 @@
         <% end %>
       <% end %>
 
-      <%= link_to "Cancel", plant_path(@plant, anchor: "reminders"), class: "btn-ghost" %>
+      <%= link_to "Cancel", polymorphic_path(@subject, anchor: "reminders"), class: "btn-ghost" %>
     </div>
   </section>
 </div>

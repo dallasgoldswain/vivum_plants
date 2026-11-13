@@ -12,6 +12,12 @@
     <ul class="list-disc pl-5">
       <li><%= pluralize(@effects[:measurements], "reading") %></li>
       <li><%= pluralize(@effects[:photos], "photo") %></li>
+
+      <li>
+        <%= pluralize(@effects[:maintenance], "maintenance entry", plural: "maintenance entries") %>
+      </li>
+
+      <li><%= pluralize(@effects[:reminders], "reminder") %></li>
     </ul>
 
     <p>To keep it out of the way instead, archive it.</p>

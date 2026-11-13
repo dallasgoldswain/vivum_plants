@@ -1,19 +1,20 @@
-# A reminder for one plant: what to do, how often, and how the next date is counted (CA02,
-# D112, D117). It has at most one open task; the next one is made when that task is done or
+# A reminder for one plant or one environment (D125): what to do, how often, and how the next
+# date is counted (CA02, D112, D117). It has at most one open task; the next one is made when that task is done or
 # skipped, so an overdue reminder never stacks up (CA03, D118).
 class CareSchedule < ApplicationRecord
   KINDS = CareEvent::LOGGED_KINDS
+  ENVIRONMENT_KINDS = EnvironmentEvent::KINDS
   INTERVAL_UNITS = %w[ day week month ].freeze
   # after_completion counts from when it was done; fixed keeps to the calendar from the start.
   MODES = %w[ after_completion fixed ].freeze
   STATUSES = %w[ active paused ended ].freeze
 
   belongs_to :user
-  belongs_to :plant
+  belongs_to :plant, optional: true
+  belongs_to :environment, optional: true
   has_many :tasks, class_name: "CareTask", dependent: :destroy
   has_one :open_task, -> { open }, class_name: "CareTask"
 
-  enum :kind, KINDS.index_by(&:itself), validate: true
   enum :mode, MODES.index_by(&:itself), validate: true
   enum :status, STATUSES.index_by(&:itself), validate: true, default: "active"
 
@@ -22,15 +23,18 @@ class CareSchedule < ApplicationRecord
   before_validation { self.interval_unit = nil if interval.nil? }
 
   validates :starts_on, presence: true
+  validates :kind, inclusion: { in: ->(schedule) { schedule.environment_id ? ENVIRONMENT_KINDS : KINDS } }
   validates :label, presence: { message: "can't be blank for your own kind of care" }, if: :custom?
   validates :label, length: { maximum: 80 }
   validates :note, length: { maximum: 200 }
   validates :interval, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }, allow_nil: true
   validates :interval_unit, inclusion: { in: INTERVAL_UNITS }, if: :interval
-  validate :plant_belongs_to_user
+  validate :one_subject_of_ours
 
   scope :running, -> { where(status: "active") }
 
+  def subject = plant || environment
+  def custom? = kind == "custom"
   def repeating? = interval.present?
   def once? = !repeating?
 
@@ -38,8 +42,8 @@ class CareSchedule < ApplicationRecord
   # check (D120) and for logged care completing a task (D114).
   def matches?(kind, label = nil) = self.kind == kind && (!custom? || self.label.to_s.casecmp?(label.to_s))
 
-  def same_kind_for_plant
-    plant.care_schedules.running.where(kind: kind).where.not(id: id).select { it.matches?(kind, label) }
+  def same_kind_for_subject
+    subject.care_schedules.running.where(kind: kind).where.not(id: id).select { it.matches?(kind, label) }
   end
 
   # The date after a task due on `due_on` was resolved on `resolved_on`, or nil when a one-off
@@ -73,7 +77,7 @@ class CareSchedule < ApplicationRecord
 
   # Creates the open task if there isn't one: when a reminder starts or resumes.
   def open_task_from!(date)
-    tasks.open.first || tasks.create!(user: user, plant: plant, due_on: due_from(date)).tap { association(:open_task).reset }
+    tasks.open.first || tasks.create!(user: user, plant: plant, environment: environment, due_on: due_from(date)).tap { association(:open_task).reset }
   end
 
   # A change to the schedule moves its open task, unless that date was set by hand (D118).
@@ -132,7 +136,9 @@ class CareSchedule < ApplicationRecord
       advance(starts_on, steps)
     end
 
-    def plant_belongs_to_user
+    def one_subject_of_ours
+      errors.add(:base, "A reminder is for one plant or one environment") unless [ plant, environment ].compact.one?
       errors.add(:plant, "must be yours") if plant && plant.user_id != user_id
+      errors.add(:environment, "must be yours") if environment && environment.user_id != user_id
     end
 end

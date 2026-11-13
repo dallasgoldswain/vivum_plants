@@ -15,6 +15,7 @@ class Photo < ApplicationRecord
   belongs_to :plant, optional: true
   belongs_to :environment, optional: true
   belongs_to :care_event, optional: true
+  belongs_to :environment_event, optional: true
 
   has_one_attached :image do |attachable|
     attachable.variant :thumb, resize_to_fill: [ 480, 480 ], format: :jpeg, saver: { quality: 80, strip: true }, preprocessed: true
@@ -28,7 +29,7 @@ class Photo < ApplicationRecord
 
   after_create :become_cover_if_none
 
-  scope :standalone, -> { where(care_event_id: nil) }
+  scope :standalone, -> { where(care_event_id: nil, environment_event_id: nil) }
   scope :newest_first, -> { order(taken_on: :desc, id: :desc) }
 
   # The quota (OF03): collectors keep up to 500 photos; deleting photos frees space.
@@ -44,13 +45,13 @@ class Photo < ApplicationRecord
 
   # Builds a processed photo from an uploaded file, or raises Rejected with a reason the
   # collector can read. Never stores the original.
-  def self.build_from_upload(upload, user:, plant: nil, environment: nil, care_event: nil, caption: nil, taken_on: nil)
+  def self.build_from_upload(upload, user:, plant: nil, environment: nil, care_event: nil, environment_event: nil, caption: nil, taken_on: nil)
     raise Rejected, "You've reached your #{COLLECTOR_LIMIT} photos. Delete some to add more." if quota_for(user).full?
     raise Rejected, "Choose a JPEG, PNG or WebP photo." unless ACCEPTED_TYPES.include?(Marcel::MimeType.for(upload.tempfile))
     raise Rejected, "That photo is over #{MAX_UPLOAD_SIZE / 1.megabyte} MB." if upload.size > MAX_UPLOAD_SIZE
 
     processed = process(upload.tempfile.path)
-    new(user: user, plant: plant, environment: environment, care_event: care_event, caption: caption.presence, taken_on: taken_on.presence || care_event&.occurred_at&.to_date || Date.current).tap do |photo|
+    new(user: user, plant: plant, environment: environment, care_event: care_event, environment_event: environment_event, caption: caption.presence, taken_on: taken_on.presence || (care_event || environment_event)&.occurred_at&.to_date || Date.current).tap do |photo|
       photo.image.attach(io: File.open(processed.path), filename: "#{File.basename(upload.original_filename.to_s, '.*').parameterize.presence || 'photo'}.jpg", content_type: "image/jpeg")
     end
   rescue Vips::Error

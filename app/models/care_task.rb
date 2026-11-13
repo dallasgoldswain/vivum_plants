@@ -7,9 +7,11 @@ class CareTask < ApplicationRecord
   EARLY_DAYS = 2
 
   belongs_to :user
-  belongs_to :plant
+  belongs_to :plant, optional: true
+  belongs_to :environment, optional: true
   belongs_to :care_schedule
   has_one :care_event, dependent: :nullify
+  has_one :environment_event, dependent: :nullify
 
   enum :state, STATES.index_by(&:itself), validate: true, default: "open"
 
@@ -21,6 +23,9 @@ class CareTask < ApplicationRecord
   scope :snoozed_on, ->(date) { open.where("snoozed_until > ?", date) }
 
   delegate :kind, :label, :note, to: :care_schedule
+
+  def subject = plant || environment
+  def logged_event = care_event || environment_event
 
   def overdue?(today = Date.current) = open? && due_on < today
   def due_today?(today = Date.current) = open? && due_on == today
@@ -38,11 +43,12 @@ class CareTask < ApplicationRecord
   # or a task already done, logs nothing more.
   def complete!(idempotency_key:, occurred_at: Time.current, **details)
     with_lock do
-      return care_event if completed?
+      return logged_event if completed?
       return unless open?
 
-      existing = user.care_events.find_by(idempotency_key: idempotency_key)
-      event = existing || user.care_events.create!(plant: plant, kind: kind, label: label, occurred_at: occurred_at, idempotency_key: idempotency_key, care_task: self, **details)
+      events = environment ? user.environment_events : user.care_events
+      attributes = { kind: kind, label: label, occurred_at: occurred_at, idempotency_key: idempotency_key, care_task: self, **details.except(:label) }
+      event = events.find_by(idempotency_key: idempotency_key) || events.create!(environment ? { environment: environment, **attributes } : { plant: plant, **attributes })
       resolve_with!(event) unless completed?
       event
     end
@@ -86,7 +92,7 @@ class CareTask < ApplicationRecord
       transaction do
         update!(state: state, resolved_at: Time.current, resolved_on: on, snoozed_until: nil)
         if care_schedule.active? && (due = care_schedule.next_due_after(due_on: due_on, resolved_on: on))
-          care_schedule.tasks.create!(user: user, plant: plant, due_on: due)
+          care_schedule.tasks.create!(user: user, plant: plant, environment: environment, due_on: due)
         end
       end
     end

@@ -63,7 +63,7 @@
           <% @snoozed.each do |task| %>
             <li>
               <%= care_task_title(task) %> ·
-              <%= link_to task.plant.display_name, plant_path(task.plant, anchor: "reminders"), class: "underline underline-offset-4" %>:
+              <%= link_to subject_name(task.subject), polymorphic_path(task.subject, anchor: "reminders"), class: "underline underline-offset-4" %>:
               until <%= l(task.snoozed_until, format: :long) %>
               (<%= task_due_label(task).downcase %>)
             </li>

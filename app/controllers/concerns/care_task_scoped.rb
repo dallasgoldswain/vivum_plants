@@ -10,8 +10,8 @@ module CareTaskScoped
 
   private
     def set_care_task
-      @care_task = Current.user.care_tasks.includes(:plant, :care_schedule).find(params[:care_task_id] || params[:id])
-      authorize! @care_task.plant, to: :update?
+      @care_task = Current.user.care_tasks.includes(:plant, :environment, :care_schedule).find(params[:care_task_id] || params[:id])
+      authorize! @care_task.subject, to: :update?
     end
 
     # Today answers JSON for the offline queue (D120), and HTML otherwise.

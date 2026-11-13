@@ -55,7 +55,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
-| B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Planned |
+| B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Done |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
 | B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
@@ -601,7 +601,7 @@ because the only development account has two-step sign-in; headless Chrome tests
 offline and the date preview, and there's a Today screenshot. Help topics `reminders` and
 `today` need review.
 
-### B15 Shared environment maintenance — discussed 2026-11-13
+### B15 Shared environment maintenance — discussed and built 2026-11-13
 
 **Scope**
 - **Maintenance events (EN04, D121–D123):** `environment_events` (user, environment, kind or
@@ -631,3 +631,13 @@ isn't linked; each linked plant's timeline shows "Water change in 60 cm tank"; d
 event removes it from those timelines; a weekly water-change reminder shows on Today once,
 not per plant, and Done logs one event; archiving the environment pauses its reminder; a
 water change saved offline and synced twice creates one event.
+
+**Built notes:** Maintenance photos belong to the environment, so they also show in its
+Photos section and count toward the 500-photo cap. A plant is linked when it was in the
+environment on the entry's date (moved in on or before, and out after). Logging maintenance
+completes a matching environment reminder due within 2 days, like plant care (D114).
+Several-environment reminders aren't included; reminders for several plants still work as
+before. Queued maintenance shows under the conditions card's "Waiting to send". Dev-server
+pages weren't clicked through, because the only development account has two-step sign-in; a
+headless Chrome test covers a water change offline, and the environment screenshot now shows
+maintenance. Help topic `environment-maintenance` needs review.

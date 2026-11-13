@@ -1,0 +1,8 @@
+<%# Earlier dosing products and your own maintenance labels (D121). %>
+<% { "product" => :product, "label" => :label }.each do |name, column| %>
+  <datalist id="maintenance-<%= name %>-suggestions">
+    <% suggestions.fetch(column, []).each do |value| %>
+      <option value="<%= value %>"></option>
+    <% end %>
+  </datalist>
+<% end %>

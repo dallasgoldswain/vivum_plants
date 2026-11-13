@@ -22,6 +22,7 @@ class PlantsController < ApplicationController
   def show
     ActiveRecord::Associations::Preloader.new(records: [ @plant ], associations: [ { environment_assignments: :environment }, { setups: { recipe_version: :recipe } } ]).call
     @timeline_kinds = @plant.care_events.distinct.pluck(:kind)
+    @timeline_kinds << "maintenance" if capability?("care.shared_maintenance") && @plant.environment_event_plants.exists?
     @timeline_kind = params[:kind].presence_in(@timeline_kinds)
     @timeline = @plant.timeline(kind: @timeline_kind)
     load_care if capability?("care.logs")

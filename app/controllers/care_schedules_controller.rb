@@ -27,7 +27,7 @@ class CareSchedulesController < ApplicationController
       plants.each do |plant|
         schedule = plant.care_schedules.new(user: Current.user, **schedule_attributes)
         schedule.validate!
-        duplicates = schedule.same_kind_for_plant
+        duplicates = schedule.same_kind_for_subject
         next if duplicates.any? && choice == "leave_out"
 
         duplicates.each(&:end!) if choice == "replace"

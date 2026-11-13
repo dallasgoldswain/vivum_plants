@@ -16,6 +16,8 @@ class Plant < ApplicationRecord
   has_many :care_events, dependent: :destroy
   has_many :care_schedules, dependent: :destroy
   has_many :care_tasks
+  has_many :environment_event_plants, dependent: :delete_all
+  has_many :maintenance_events, through: :environment_event_plants, source: :environment_event
   has_many :photos, dependent: :destroy
 
   accepts_nested_attributes_for :acquisition, reject_if: :acquisition_blank?
@@ -60,12 +62,19 @@ class Plant < ApplicationRecord
     end
   end
 
-  # Newest first: care events, status changes and photos added on their own (PL04). A kind
-  # narrows it to care events of that kind (D109).
+  # Newest first: care events, maintenance of the environments it was in (D124), status
+  # changes and photos added on their own (PL04). A kind narrows it to care events of that
+  # kind, or "maintenance" to environment care (D109).
   def timeline(kind: nil)
-    events = care_events.includes(:environment, :from_environment, { plant_setup: { recipe_version: :recipe } }, photos: { image_attachment: :blob })
-    events = events.where(kind: kind) if kind
-    entries = events.map { Timeline::Entry.new(it.kind.to_sym, it.occurred_at, it) }
+    entries = []
+    unless kind == "maintenance"
+      events = care_events.includes(:environment, :from_environment, { plant_setup: { recipe_version: :recipe } }, photos: { image_attachment: :blob })
+      events = events.where(kind: kind) if kind
+      entries += events.map { Timeline::Entry.new(it.kind.to_sym, it.occurred_at, it) }
+    end
+    if kind.nil? || kind == "maintenance"
+      entries += maintenance_events.includes(:environment).map { Timeline::Entry.new(:maintenance, it.occurred_at, it) }
+    end
     unless kind
       entries += status_changes.map { Timeline::Entry.new(:status_change, it.effective_on.in_time_zone.end_of_day, it) }
       entries += photos.standalone.with_attached_image.map { Timeline::Entry.new(:photo, it.taken_on.in_time_zone.end_of_day, it) }

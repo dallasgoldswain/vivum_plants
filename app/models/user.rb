@@ -25,6 +25,7 @@ class User < ApplicationRecord
   has_many :ingredients, dependent: :destroy
   has_many :care_schedules, dependent: :destroy
   has_many :care_tasks, dependent: :delete_all
+  has_many :environment_events, dependent: :destroy
 
   # The collector's timezone, for due dates (D117); the app's when not set yet.
   def time_zone_or_default = (time_zone.presence && ActiveSupport::TimeZone[time_zone]) || Time.zone_default

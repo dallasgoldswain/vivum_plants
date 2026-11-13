@@ -3,9 +3,13 @@
 
 <div class="card">
   <header>
+    <% if tasks.first.environment_id %>
+      <p class="vv-kicker">Environment</p>
+    <% end %>
+
     <h3 class="vv-h3">
       <%= care_task_title(tasks.first) %> ·
-      <%= pluralize(tasks.size, "plant") %>
+      <%= pluralize(tasks.size, tasks.first.environment_id ? "environment" : "plant") %>
     </h3>
   </header>
 
@@ -14,13 +18,13 @@
       <% tasks.each do |task| %>
         <li class="grid gap-2 rounded-[4px] border border-line bg-linen px-3 py-2">
           <div class="flex items-start gap-3">
-            <%= check_box_tag "task_ids[]", task.id, true, id: "task_#{section}_#{task.id}", form: form_id, class: "mt-1", aria: { label: "Include #{task.plant.display_name}" } %>
+            <%= check_box_tag "task_ids[]", task.id, true, id: "task_#{section}_#{task.id}", form: form_id, class: "mt-1", aria: { label: "Include #{subject_name(task.subject)}" } %>
 
             <div class="grid min-w-0 flex-1 gap-0.5">
-              <%= link_to task.plant.display_name, plant_path(task.plant, anchor: "reminders"), class: "font-medium underline-offset-4 hover:underline" %>
+              <%= link_to subject_name(task.subject), polymorphic_path(task.subject, anchor: "reminders"), class: "font-medium underline-offset-4 hover:underline" %>
 
               <span class="vv-caption">
-                <%= [ task.plant.record_id, task_due_label(task), task.note ].compact.join(" · ") %>
+                <%= [ task.plant&.record_id, task_due_label(task), task.note ].compact.join(" · ") %>
               </span>
             </div>
           </div>
@@ -28,7 +32,7 @@
           <div class="flex flex-wrap items-center gap-1">
             <%= link_to "Done with details…", new_care_task_completion_path(task), class: "btn-sm-ghost" %>
 
-            <%= form_with url: care_task_skip_path(task), data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Skip #{care_task_title(task).downcase} · #{task.plant.display_name}", action: "submit->offline-form#submit" } do |form| %>
+            <%= form_with url: care_task_skip_path(task), data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Skip #{care_task_title(task).downcase} · #{subject_name(task.subject)}", action: "submit->offline-form#submit" } do |form| %>
               <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
               <%= form.button "Skip", class: "btn-sm-ghost", data: { offline_form_target: "submit" } %>
 
@@ -44,7 +48,7 @@
 
               <div class="mt-2 flex flex-wrap items-center gap-1">
                 <% { "tomorrow" => "Tomorrow", "3" => "3 days" }.each do |value, label| %>
-                  <%= form_with url: care_task_snooze_path(task), data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Snooze #{care_task_title(task).downcase} · #{task.plant.display_name} · #{label.downcase}", action: "submit->offline-form#submit" } do |form| %>
+                  <%= form_with url: care_task_snooze_path(task), data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Snooze #{care_task_title(task).downcase} · #{subject_name(task.subject)} · #{label.downcase}", action: "submit->offline-form#submit" } do |form| %>
                     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
                     <%= hidden_field_tag :until, value, id: nil %>
                     <%= form.button label, class: "btn-sm-outline", data: { offline_form_target: "submit" } %>
@@ -57,7 +61,7 @@
                   <% end %>
                 <% end %>
 
-                <%= form_with url: care_task_snooze_path(task), class: "flex items-center gap-1", data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Snooze #{care_task_title(task).downcase} · #{task.plant.display_name}", action: "submit->offline-form#submit" } do |form| %>
+                <%= form_with url: care_task_snooze_path(task), class: "flex items-center gap-1", data: { controller: "offline-form", offline_form_subject_value: "today", offline_form_label_value: "Snooze #{care_task_title(task).downcase} · #{subject_name(task.subject)}", action: "submit->offline-form#submit" } do |form| %>
                   <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
                   <%= label_tag "snooze_#{section}_#{task.id}", "Until", class: "sr-only" %>
                   <%= date_field_tag :until_date, Date.current + 1, id: "snooze_#{section}_#{task.id}", min: Date.current + 1, class: "input w-auto", data: { offline_form_target: "content", summary_label: "until" } %>
@@ -80,7 +84,7 @@
       <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
 
       <div class="flex flex-wrap items-center gap-2">
-        <%= form.button "Done for ticked plants", class: (section == "due" ? "btn" : "btn-outline"), data: { offline_form_target: "submit" } %>
+        <%= form.button (tasks.first.environment_id ? (tasks.one? ? "Done" : "Done for ticked environments") : "Done for ticked plants"), class: (section == "due" ? "btn" : "btn-outline"), data: { offline_form_target: "submit" } %>
 
         <span
           class="vv-caption"

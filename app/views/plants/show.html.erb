@@ -110,7 +110,7 @@
     <% end %>
 
     <% if capability?("care.reminders") %>
-      <%= render "plants/reminders", plant: @plant, schedules: @schedules %>
+      <%= render "schedules/reminders", subject: @plant, schedules: @schedules %>
     <% end %>
 
     <div class="card" id="observe">

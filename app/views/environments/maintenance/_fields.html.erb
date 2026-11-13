@@ -1,0 +1,35 @@
+<%# The optional details of a maintenance entry, by kind (D122). %>
+<% prefix = "maintenance_#{kind}" %>
+
+<% if EnvironmentEvent::AMOUNT_UNITS.key?(kind) %>
+  <div class="grid grid-cols-[1fr_6rem] gap-2">
+    <div class="grid gap-2">
+      <%= form.label :amount, (kind == "dosing" ? "Dose" : "How much"), for: "#{prefix}_amount" %>
+      <%= form.number_field :amount, id: "#{prefix}_amount", min: 0, step: "any", inputmode: "decimal", data: { offline_form_target: "content" } %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :amount_unit, "Unit", for: "#{prefix}_amount_unit" %>
+      <%= form.select :amount_unit, EnvironmentEvent::AMOUNT_UNITS.fetch(kind), {}, id: "#{prefix}_amount_unit", class: "select" %>
+    </div>
+  </div>
+<% end %>
+
+<% if kind == "dosing" %>
+  <div class="grid gap-2">
+    <%= form.label :product, for: "#{prefix}_product" %>
+    <%= form.text_field :product, id: "#{prefix}_product", maxlength: 120, list: "maintenance-product-suggestions", autocomplete: "off", placeholder: "e.g. liquid fertiliser", data: { offline_form_target: "content" } %>
+  </div>
+<% end %>
+
+<% if kind == "custom" %>
+  <div class="grid gap-2">
+    <%= form.label :label, "What you did", for: "#{prefix}_label" %>
+    <%= form.text_field :label, id: "#{prefix}_label", maxlength: 80, required: true, list: "maintenance-label-suggestions", autocomplete: "off", placeholder: "e.g. replaced the fan filter", data: { offline_form_target: "content" } %>
+  </div>
+<% end %>
+
+<div class="grid gap-2">
+  <%= form.label :note, for: "#{prefix}_note" %>
+  <%= form.text_area :note, id: "#{prefix}_note", rows: 2, data: { offline_form_target: "content" } %>
+</div>

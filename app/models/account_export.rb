@@ -56,10 +56,17 @@ class AccountExport
       end
     },
     "care_schedules" => ->(user) {
-      user.care_schedules.includes(:plant, :tasks).order(:id).map do |schedule|
+      user.care_schedules.includes(:plant, :environment, :tasks).order(:id).map do |schedule|
         schedule.slice(:kind, :label, :note, :interval, :interval_unit, :mode, :starts_on, :status, :created_at).merge(
-          plant: schedule.plant.record_id,
+          plant: schedule.plant&.record_id, environment: schedule.environment&.name,
           tasks: schedule.tasks.sort_by(&:id).map { it.slice(:due_on, :state, :snoozed_until, :resolved_on).compact }
+        ).compact
+      end
+    },
+    "environment_maintenance" => ->(user) {
+      user.environment_events.includes(:environment, :plants).order(:occurred_at).map do |event|
+        event.slice(:kind, :label, :note, :occurred_at, :created_at, :amount, :amount_unit, :product).merge(
+          environment: event.environment.name, plants_present: event.plants.map(&:record_id).sort
         ).compact
       end
     },

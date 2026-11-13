@@ -188,6 +188,21 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   actions queue through `offline-form` (D120). Export section `care_schedules`. Help topics
   `reminders` and `today`; `care.reminders` marked implemented. Browser tests for Today offline
   and the date preview; the offline tests now reset the network after each test.
+- Environment maintenance (B15): `environment_events` (fixed kinds plus custom label, optional
+  amount with unit and dosing product, photos, idempotency key) with `environment_event_plants`
+  linking the plants present on the event's date, relinked when the date changes (EN04,
+  D121–D123). Log maintenance card on the environment page with `<dialog>` forms, the type's
+  kinds first and the rest under More, Undo, "Add details", "Add a reading" after a water
+  change, history with a kind filter, edit and delete (D122, D126). Plant timelines show the
+  maintenance they were present for, with an "Environment care" filter (D124).
+  `care_schedules` and `care_tasks` now belong to a plant or an environment (check
+  constraints); the reminder controllers share `SubjectSchedules` and
+  `SubjectSchedulePausing`, and the views moved to `app/views/schedules`. Environment tasks
+  show first on Today, Done logs one environment event, logging maintenance completes a due
+  environment reminder, and archiving pauses and restoring resumes them (D125). Export
+  section `environment_maintenance`; deletion warning counts maintenance and reminders. Help
+  topic `environment-maintenance`; `care.shared_maintenance` marked implemented. Browser test
+  for a water change saved offline.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

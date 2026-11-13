@@ -1,10 +1,14 @@
-<%# A plant's reminders (CA02, D112, D118–D120): next date, change it, pause, edit, end. %>
+<%#
+  A plant's or environment's reminders (CA02, D112, D118–D120, D125): next date, change it,
+  pause, edit, end.
+%>
+
 <div class="card" id="reminders">
   <header>
     <h2>Reminders</h2>
 
     <p>
-      <%= schedules.any? ? "What's next for #{plant.display_name}." : "None yet. Set one up and it shows on Today." %>
+      <%= schedules.any? ? "What's next for #{subject_name(subject)}." : "None yet. Set one up and it shows on Today." %>
     </p>
   </header>
 
@@ -39,7 +43,7 @@
             <% end %>
 
             <div class="flex flex-wrap items-center gap-1">
-              <%= link_to "Edit", edit_plant_care_schedule_path(plant, schedule), class: "btn-sm-ghost" %>
+              <%= link_to "Edit", edit_polymorphic_path([ subject, schedule ]), class: "btn-sm-ghost" %>
 
               <% if task %>
                 <details>
@@ -54,12 +58,12 @@
               <% end %>
 
               <% if schedule.paused? %>
-                <%= button_to "Resume", plant_care_schedule_pause_path(plant, schedule), method: :delete, class: "btn-sm-ghost" %>
+                <%= button_to "Resume", polymorphic_path([ subject, schedule, :pause ]), method: :delete, class: "btn-sm-ghost" %>
               <% else %>
-                <%= button_to "Pause", plant_care_schedule_pause_path(plant, schedule), class: "btn-sm-ghost" %>
+                <%= button_to "Pause", polymorphic_path([ subject, schedule, :pause ]), class: "btn-sm-ghost" %>
               <% end %>
 
-              <%= button_to "End", plant_care_schedule_path(plant, schedule), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "End this reminder? Its history stays." } %>
+              <%= button_to "End", polymorphic_path([ subject, schedule ]), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "End this reminder? Its history stays." } %>
             </div>
           </li>
         <% end %>
@@ -67,7 +71,7 @@
     <% end %>
 
     <div>
-      <%= link_to "Add a reminder", new_plant_care_schedule_path(plant), class: "btn-sm-outline" %>
+      <%= link_to "Add a reminder", new_polymorphic_path([ subject, :care_schedule ]), class: "btn-sm-outline" %>
     </div>
   </section>
 </div>

@@ -183,6 +183,14 @@
   </div>
 
   <div class="order-1 grid content-start gap-6 lg:order-2">
+    <% if capability?("care.shared_maintenance") %>
+      <%= render "environments/maintenance", environment: @environment, events: @maintenance_events, kinds_logged: @maintenance_kinds, kind_filter: @maintenance_kind, logged_event: @logged_maintenance, quota: @quota, suggestions: @maintenance_suggestions %>
+    <% end %>
+
+    <% if capability?("care.reminders") %>
+      <%= render "schedules/reminders", subject: @environment, schedules: @schedules %>
+    <% end %>
+
     <% if capability?("collection.measurements") %>
       <%= render "environments/conditions", environment: @environment, metrics: @metrics, custom_metrics: @custom_metrics, latest_values: @latest_values, measurements: @measurements %>
     <% end %>

@@ -1,10 +1,10 @@
-<% content_for :title, "#{care_task_title(@care_task)} · #{@care_task.plant.display_name} · VIVUM Plants" %>
+<% content_for :title, "#{care_task_title(@care_task)} · #{subject_name(@care_task.subject)} · VIVUM Plants" %>
 
 <div class="grid gap-3">
   <%= link_to "← Today", root_path, class: "vv-kicker underline-offset-4 hover:underline" %>
 
   <h1 class="vv-h2">
-    <%= care_task_title(@care_task) %> <%= @care_task.plant.display_name %>
+    <%= care_task_title(@care_task) %> <%= subject_name(@care_task.subject) %>
   </h1>
 
   <p class="vv-caption">
@@ -14,10 +14,16 @@
 
 <div class="card max-w-xl">
   <section>
-    <%= form_with model: @care_event, url: care_task_completion_path(@care_task), class: "form grid gap-3" do |form| %>
+    <%= form_with model: @event, url: care_task_completion_path(@care_task), class: "form grid gap-3" do |form| %>
       <%= form.hidden_field :idempotency_key, value: SecureRandom.uuid %>
-      <%= render "plants/care_events/fields", form: form, kind: (@care_task.kind == "custom" ? "pruning" : @care_task.kind) %>
-      <%= render "plants/care_events/suggestions", suggestions: @suggestions %>
+
+      <% if @care_task.environment %>
+        <%= render "environments/maintenance/fields", form: form, kind: (@care_task.kind == "custom" ? "glass_clean" : @care_task.kind) %>
+        <%= render "environments/maintenance/suggestions", suggestions: @suggestions %>
+      <% else %>
+        <%= render "plants/care_events/fields", form: form, kind: (@care_task.kind == "custom" ? "pruning" : @care_task.kind) %>
+        <%= render "plants/care_events/suggestions", suggestions: @suggestions %>
+      <% end %>
 
       <div class="grid gap-2 sm:w-1/2">
         <%= form.label :occurred_at, "When" %>

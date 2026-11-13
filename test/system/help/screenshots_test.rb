@@ -50,6 +50,9 @@ class HelpScreenshotsTest < ApplicationSystemTestCase
     reading.assign_readings(fixed: { "water_temperature" => "24.5", "ph" => "6.8", "gh" => "6", "kh" => "4", "light_hours" => "7" })
     reading.save!
     hoya.move_to!(tank)
+    owner.environment_events.create!(environment: tank, kind: "water_change", amount: 30, amount_unit: "%", occurred_at: 2.days.ago, idempotency_key: "shot-wc")
+    owner.environment_events.create!(environment: tank, kind: "dosing", product: "Liquid fertiliser", amount: 5, amount_unit: "mL", occurred_at: 2.days.ago, idempotency_key: "shot-dose")
+    owner.care_schedules.create!(environment: tank, kind: "water_change", interval: 1, interval_unit: "week", mode: "fixed", starts_on: 5.days.from_now.to_date, note: "25–30%").start!
     capture "environment", environment_path(tank), wait_for: "Conditions"
   end
 

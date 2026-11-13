@@ -20,6 +20,9 @@ class Environment < ApplicationRecord
   has_many :current_plants, through: :current_assignments, source: :plant
   has_many :measurements, dependent: :destroy
   has_many :photos, dependent: :destroy
+  has_many :maintenance_events, class_name: "EnvironmentEvent", dependent: :destroy
+  has_many :care_schedules, dependent: :destroy
+  has_many :care_tasks
 
   enum :kind, KINDS.index_by(&:itself), validate: true
   enum :status, STATUSES.index_by(&:itself), validate: true, default: "active"
@@ -40,14 +43,25 @@ class Environment < ApplicationRecord
   def archive!
     raise NotArchivable, "Move or remove its plants first." if current_assignments.exists?
 
-    update!(status: "archived")
+    transaction do
+      update!(status: "archived")
+      care_schedules.running.each { it.pause!(by_status: true) }
+    end
+  end
+
+  # Restoring resumes the reminders archiving paused, from today (D125).
+  def restore!
+    transaction do
+      update!(status: "active")
+      care_schedules.paused.where(paused_by_status: true).each(&:resume!)
+    end
   end
 
   # Permanent delete is only for an environment that has never held a plant (D95).
   def deletable? = !assignments.exists?
 
   def deletion_effects
-    { measurements: measurements.count, photos: photos.count }
+    { measurements: measurements.count, photos: photos.count, maintenance: maintenance_events.count, reminders: care_schedules.where.not(status: "ended").count }
   end
 
   # The most recent value of each metric, with the reading it came from (EN02).
