@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.shared_maintenance]
 prerequisites: []
 keywords: [maintenance, water change, top up, filter, dosing, fertiliser, vacuum, glass, misting, ventilation, equipment, light, tank, aquarium, terrarium, paludarium, cabinet, reminder]
+reviewed: 2026-11-13
+reviewed_digest: 1d28323944f050047a5ae66330624b7c6209367dfd3d16ae83fc2dc020382962
 ---
 
 Some care is for a whole environment, not one plant: a tank's water change, a
