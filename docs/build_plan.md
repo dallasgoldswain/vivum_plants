@@ -728,41 +728,45 @@ page and the plant's Guidance section rather than a new nav item. Tests cover th
 acceptance cases; the settings, warning, plant comparison and phone-size bulk pages were
 checked in a browser. Help topic `guidance-settings` needs review.
 
-### B18 Built-in library profiles and suggestions — discussed 2026-11-13
+### B18 Library profiles: platform and personal libraries, suggestions — discussed 2026-11-13
 
 **Scope**
-- **Profiles (GU01, D141, D143):** `library_profiles` (key, botanical name, synonyms, common
-  names, family) and `library_profile_versions` (number, status draft, in review, published
-  or retired; per-context care notes and suggested reminders as structured data; references,
-  review date, published by). One published version per profile; published versions are
-  read-only, and corrections are new versions.
-- **Editor (D141, D142):** Madmin library screens for operators: create, edit drafts, send to
-  review, publish, retire, all audited. Two or three sample profiles in seeds for development
-  and tests.
-- **Linking (PL01, D144):** `plants.library_profile_id`; a name-match offer on the plant page
-  and a picker on the edit form; unlinking keeps reminders and history.
-- **Suggestions (GU03, D145):** the plant's Guidance section shows care notes and suggested
-  reminders for its context when the library switch is on; edit, accept, dismiss;
-  `care_schedules.origin = "library"` with the profile version kept; replacing an existing
-  reminder of the same kind after a comparison; dismissals per profile version; a Today
-  line for suggestions to review.
+- **Profiles (GU01, D141, D143, D149):** `library_profiles` belonging to the platform, a user
+  or (from B31) a seller: botanical name, synonyms, common names, family. Platform profiles
+  have numbered `library_profile_versions` (draft, in review, published, retired); one
+  published version at a time, published versions read-only. Personal profiles hold one
+  editable copy of the same content (per-context care notes and suggested reminders,
+  references) with an edited-at date.
+- **Platform editor (D141, D142):** Madmin library screens for operators: create, edit drafts,
+  send to review, publish, retire, all audited. Two or three sample profiles in seeds.
+- **Your library (D150, D153):** a Library page with Your library (search, context filter,
+  new blank profile, edit, delete when unlinked) and the Platform library (search, read,
+  "Copy to my library", an independent copy).
+- **Linking (PL01, D151):** `plants.library_profile_id` to the collector's own profiles only;
+  a name-match offer on the plant page (link yours, or copy the platform's and link); a
+  picker on the edit form; unlinking keeps reminders and history.
+- **Suggestions (GU03, D145, D151):** the plant's Guidance section shows care notes and
+  suggested reminders for its context when the library switch is on; edit, accept, dismiss;
+  `care_schedules.origin = "library"` with the profile and its edited-at time kept;
+  replacing an existing reminder of the same kind after a comparison; dismissals per profile
+  edit; a Today line for suggestions to review.
 - **Choosing the library (ST06, D146):** a Today card until the collector chooses; Yes saves
   defaults and offers to apply them to existing plants.
-- **Corrections (D147):** a notice and comparison on plants with reminders from an older
-  version.
-- **Library page (D148):** search and context filter, profile pages with linked plants.
-- **Flags and data:** `library.profiles` and `care.library_guidance` implemented; profile
-  link, accepted versions and dismissals in the export; help topics for the library and
-  suggestions.
+- **Edits (D147, D152):** editing your profile flags linked plants with reminders accepted
+  before the edit, with a comparison.
+- **Flags and data:** `library.profiles` and `care.library_guidance` implemented; personal
+  profiles, links, accepted sources and dismissals in the export and account deletion; help
+  topics for the library and suggestions.
 
-**Deferred:** the ~50 launch profiles (founder-written before the pilot, D142); library
-editor role; AI suggestions (B37); personal notes on profiles; care packs from profiles
-(B31).
+**Deferred:** the ~50 launch platform profiles (founder-written before the pilot, D142);
+seller libraries (B31, D154); library editor role; AI suggestions (B37); care packs (B31).
 
-**Acceptance:** a suggestion names its profile and version; a plant with no profile, or none
-for its context, says so; accepting a suggested reminder creates it, and nothing changes
-before acceptance; accepting over an existing reminder shows the comparison first; turning
-the library off for a plant hides suggestions and keeps accepted reminders; publishing a new
-version changes no accepted reminder and flags affected plants for review; drafts and
-retired versions are never shown to collectors; the Today choice card disappears after Yes
-or No.
+**Acceptance:** copying a platform profile makes an editable profile in your library, and a
+later platform correction leaves it unchanged; a blank profile can be created and linked; a
+plant links only to your own profiles, and a platform-only match offers copy-and-link; a
+suggestion names its profile; a plant with no profile, or none for its context, says so;
+nothing changes before acceptance; accepting over an existing reminder shows the comparison
+first; turning the library off for a plant hides suggestions and keeps accepted reminders;
+editing your profile changes no accepted reminder and flags affected plants; platform drafts
+and retired versions are never shown to collectors; another user's profiles are never
+visible; the Today choice card disappears after Yes or No.
