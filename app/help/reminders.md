@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.reminders]
 prerequisites: []
 keywords: [reminder, schedule, repeat, recurring, every, weekly, monthly, fixed, after, due, overdue, pause, end, change date, several plants, timezone]
+reviewed: 2026-11-13
+reviewed_digest: cf58d6d53e172a929f218ef9d09e8c63abf29b049ddc14ef2f0f96145f0590c0
 ---
 
 Reminders tell you when a plant needs something. They show up on **Today**.
