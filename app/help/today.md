@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.reminders]
 prerequisites: []
 keywords: [today, due, overdue, done, complete, skip, snooze, later, tomorrow, upcoming, reminders, inbox, offline]
+reviewed: 2026-11-13
+reviewed_digest: 472dd9259cc70593ba520408ecd9562af836b4b35bdd8e8fd94fe7d8d7ce04ec
 ---
 
 **Today** is the first page you see after signing in. It lists the reminders
