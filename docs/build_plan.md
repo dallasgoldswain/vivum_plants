@@ -690,3 +690,33 @@ established, each plantlet's page links to its own review. Splitting keeps at le
 source. Dev-server pages weren't clicked through, because the only development account has
 two-step sign-in; tests cover the flows, and the purchase and plantlet pages were checked at
 phone size. Help topics `tissue-culture` and `splitting` need review.
+
+### B17 Guidance settings and new-plant defaults — discussed 2026-11-13
+
+**Scope**
+- **Defaults (ST01, ST03, D135, D137):** `guidance_revisions` (user, number, library, ai,
+  created_at), append-only; the latest is the account's current defaults. Settings → Guidance
+  shows the library switch (the AI switch is hidden until B37), saves through the ST03 warning
+  dialog with its exact copy, and lists past revisions with the number of plants on each.
+  Existing accounts get revision 1 with both off.
+- **Plant snapshot (ST02, D138):** `plants.guidance_library`, `plants.guidance_ai`,
+  `plants.guidance_revision_id`, and a customised marker. New plants and TC plantlets
+  snapshot the current revision; splits copy the source. Existing plants backfill to revision
+  1, both off.
+- **Plant view and edit (ST01, D139):** a Guidance section on the plant page with the switch
+  and one status (matches your defaults, from older defaults, changed for this plant); edit
+  changes only that plant.
+- **Apply current defaults (ST04, D140):** per plant with a before/after comparison, and for
+  selected plants from the collection with one summary. Changes only switches and revision.
+- **Data:** guidance revisions and plant switches in the export; a help topic for guidance
+  settings; flag for the settings page marked implemented.
+
+**Deferred:** onboarding guidance step (B18, D136); library suggestions (B18); AI switch, AI
+consent and the account-wide AI stop (B37); units (after the pilot); notification
+preferences (B34).
+
+**Acceptance:** plant A on revision 1 keeps its switches after revision 2 is saved, and plant
+B added afterwards gets revision 2; cancelling the defaults warning changes nothing; turning
+the library off for one plant changes no other plant or the defaults; applying current
+defaults to a plant changes its switches and status but leaves its reminders and history;
+a split keeps its source's switches.
