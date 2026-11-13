@@ -56,7 +56,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
 | B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Done |
-| B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
+| B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05, D127–D134 | B10, B14 | Planned |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
 | B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
 
@@ -641,3 +641,41 @@ before. Queued maintenance shows under the conditions card's "Waiting to send". 
 pages weren't clicked through, because the only development account has two-step sign-in; a
 headless Chrome test covers a water change offline, and the environment screenshot now shows
 maintenance. Help topic `environment-maintenance` needs review.
+
+### B16 Purchased tissue culture: groups, splits, stages — discussed 2026-11-13
+
+**Scope**
+- **Purchases (TC01, D127):** `purchase_groups` (user, name, supplier, arrival date, arrival
+  quantity, container condition, deflask date, notes, photos). "Record a TC purchase" creates
+  the group and one TC-origin plant per plantlet (up to 50), each with its own P-number and a
+  numbered name, the chosen starting stage, and optionally an environment and setup. The
+  group page lists records with stage and status, arrival vs remaining.
+- **Stages (TC02, D128):** `plants.tc_stage` (sealed, deflasked, acclimatising, established)
+  with a `stage` care event per change, carrying the effective date. Any order; context
+  separate.
+- **Checks (TC03, D129):** a `tc_check` care kind with ticks (new leaves, new roots, damage,
+  suspected contamination), humidity setup, note and photos. Losses set a record's status to
+  lost.
+- **Group actions (D130):** change stage or log a check for all or ticked records, one entry
+  each; a group check can mark ticked plantlets lost.
+- **Suggestions (TC04, D131):** a code-owned table of suggested reminders per stage and
+  context, offered after a stage change as ticked rows with editable cadence;
+  `care_schedules.origin = "tc_stage"`.
+- **Established (TC05, D132):** keep, end or replace for each open TC reminder.
+- **Splitting (PL06, D133):** split a record with quantity above 1 into new linked records
+  (`plants.split_from_id`, same purchase group), with reminders to copy.
+- **Offline and data (D134):** TC checks and stage changes queue offline; export sections;
+  deleting an empty group; help topics for TC purchases and splitting;
+  `collection.tissue_culture` marked implemented.
+
+**Deferred:** library-based suggestions (B18); TC laboratory use (excluded, C03); seller TC
+stock (seller domain).
+
+**Acceptance:** recording 5 plantlets makes a group with arrival quantity 5 and five records
+P-numbered in turn; a pre-deflasked purchase starts at acclimatising; deflasked →
+established in an aquarium works without an indoor stage, and both stages stay on the
+timeline; marking one plantlet lost shows 4 of 5 remaining; a TC check never changes the
+stage; changing to deflasked into a terrarium offers "Check readiness for repotting" and adds
+only what's ticked; marking established lists open TC reminders with keep, end or replace and
+removes none silently; splitting a planting of 5 into 2 and 3 leaves totals of 5, links both
+to the source, and copies only the ticked reminders.
