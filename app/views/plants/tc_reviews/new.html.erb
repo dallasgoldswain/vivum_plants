@@ -1,0 +1,45 @@
+<% content_for :title, "TC reminders · #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@plant.display_name}", plant_path(@plant, anchor: "reminders"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h1 class="vv-h2"><%= @plant.display_name %> is established</h1>
+
+  <p class="vv-caption">
+    Choose what happens to each reminder set up for its TC stages. Nothing goes
+    without your choice.
+  </p>
+</div>
+
+<div class="card max-w-2xl">
+  <section>
+    <%= form_with url: plant_tc_review_path(@plant), class: "form grid gap-4" do |form| %>
+      <% @schedules.each do |schedule| %>
+        <fieldset class="grid gap-1 rounded-[4px] border border-line bg-linen px-3 py-2">
+          <legend class="font-medium">
+            <%= care_task_title(schedule) %> · <%= schedule_cadence(schedule) %>
+          </legend>
+
+          <% if (task = schedule.open_task) %>
+            <p class="vv-caption"><%= task_due_label(task) %></p>
+          <% end %>
+
+          <div class="flex flex-wrap gap-4">
+            <% { "keep" => "Keep", "end" => "End", "replace" => "Replace with normal care" }.each do |value, label| %>
+              <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+                <%= radio_button_tag "choices[#{schedule.id}]", value, false, id: "choice_#{schedule.id}_#{value}", required: true %>
+                <%= label %>
+              </label>
+            <% end %>
+          </div>
+        </fieldset>
+      <% end %>
+
+      <p class="vv-caption">
+        Ending keeps its history. Replacing ends it and opens a new reminder.
+      </p>
+
+      <div><%= form.submit "Save", class: "btn" %></div>
+    <% end %>
+  </section>
+</div>

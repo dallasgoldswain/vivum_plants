@@ -32,6 +32,8 @@ class CareSchedule < ApplicationRecord
   validate :one_subject_of_ours
 
   scope :running, -> { where(status: "active") }
+  # Suggested for a TC stage (D131); reviewed when the plant is established (D132).
+  scope :tc_stage, -> { where(origin: "tc_stage") }
 
   def subject = plant || environment
   def custom? = kind == "custom"

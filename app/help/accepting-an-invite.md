@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.invites]
 prerequisites: [Sellers join by invitation during the pilot.]
 keywords: [invite, invitation, join, team, seller terms, start selling, link expired]
+reviewed: 2026-11-13
+reviewed_digest: bdf1ba9730a18a73d1a2c7bb8bcbc359f314934479fcb60fb8f5f779f6f5e501
 ---
 
 During the pilot, sellers join VIVUM by invitation. You might be invited to

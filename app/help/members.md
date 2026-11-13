@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.members]
 prerequisites: []
 keywords: [team, staff, member, role, owner, manager, host packer, invite, remove, access, seats]
+reviewed: 2026-11-13
+reviewed_digest: 7cb7800968872342f43e93c60124d50ec2141c318ae4905e502203d79ee56a09
 ---
 
 Open **Sell**, then **Members**, to see who works at your business. Owners can

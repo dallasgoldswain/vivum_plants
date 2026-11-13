@@ -5,7 +5,8 @@ class CareEvent < ApplicationRecord
   # What a collector logs from the care buttons (D103); every detail is optional.
   LOGGED_KINDS = %w[ watering feeding repotting pruning treatment inspection custom ].freeze
   # Written by moves and setup changes; they mirror that history, so they're never edited (D108).
-  PLACEMENT_KINDS = %w[ movement setup ].freeze
+  # Stage changes and splits mirror the plant's TC stage and split history the same way (D128, D133).
+  PLACEMENT_KINDS = %w[ movement setup stage splitting ].freeze
   KINDS = ([ "observation" ] + LOGGED_KINDS + PLACEMENT_KINDS).freeze
   # Kinds the "last care" summary reports (D109).
   SUMMARY_KINDS = %w[ watering feeding repotting treatment ].freeze
@@ -23,9 +24,12 @@ class CareEvent < ApplicationRecord
     "watering" => %i[ amount amount_unit watering_method ],
     "feeding" => %i[ product amount amount_unit strength ],
     "treatment" => %i[ product target amount amount_unit ],
-    "custom" => %i[ label ]
+    "custom" => %i[ label ],
+    # A TC check is an inspection with progress ticks; never a diagnosis (TC03, D129).
+    "inspection" => %i[ new_leaves new_roots damage suspected_contamination humidity_setup ]
   }.freeze
-  DETAIL_COLUMNS = %i[ amount amount_unit watering_method product strength target label ].freeze
+  TC_CHECK_TICKS = %i[ new_leaves new_roots damage suspected_contamination ].freeze
+  DETAIL_COLUMNS = (%i[ amount amount_unit watering_method product strength target label humidity_setup ] + TC_CHECK_TICKS).freeze
 
   belongs_to :user
   belongs_to :plant
@@ -37,7 +41,7 @@ class CareEvent < ApplicationRecord
 
   enum :kind, KINDS.index_by(&:itself), validate: true, default: "observation"
 
-  normalizes :product, :target, :label, with: ->(value) { value.squish.presence }
+  normalizes :product, :target, :label, :humidity_setup, with: ->(value) { value.squish.presence }
 
   before_validation :drop_unused_details
   after_create :complete_open_task, if: -> { care_task_id.nil? && kind.in?(LOGGED_KINDS) }
@@ -48,6 +52,8 @@ class CareEvent < ApplicationRecord
   validates :note, length: { maximum: 5000 }
   validates :product, :target, length: { maximum: 120 }
   validates :label, length: { maximum: 80 }
+  validates :humidity_setup, length: { maximum: 120 }
+  validates :stage, inclusion: { in: Plant::TC_STAGES }, if: -> { kind == "stage" }
   validates :label, presence: { message: "can't be blank for your own kind of care" }, if: :custom?
   validates :amount, numericality: { greater_than: 0, less_than: 10_000_000 }, allow_nil: true
   validates :amount_unit, inclusion: { in: ->(event) { AMOUNT_UNITS.fetch(event.kind, []) } }, allow_nil: true
@@ -100,7 +106,8 @@ class CareEvent < ApplicationRecord
 
     def drop_unused_details
       kept = DETAILS.fetch(kind, [])
-      (DETAIL_COLUMNS - kept).each { self[it] = nil }
+      (DETAIL_COLUMNS - kept).each { self[it] = TC_CHECK_TICKS.include?(it) ? false : nil }
+      TC_CHECK_TICKS.each { self[it] = false if self[it].nil? }
       self.amount_unit = nil if amount.nil?
     end
 

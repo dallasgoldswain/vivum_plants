@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.text "arrival_notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name"
+    t.boolean "tissue_culture", default: false, null: false
+    t.string "container_condition"
+    t.date "deflasked_on"
+    t.bigint "cover_photo_id"
     t.index ["user_id"], name: "index_acquisitions_on_user_id"
     t.check_constraint "cost_cents IS NULL OR cost_cents >= 0", name: "acquisitions_cost_not_negative"
     t.check_constraint "quantity IS NULL OR quantity >= 0", name: "acquisitions_quantity_not_negative"
@@ -107,6 +112,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.string "target"
     t.string "label"
     t.bigint "care_task_id"
+    t.string "stage"
+    t.boolean "new_leaves", default: false, null: false
+    t.boolean "new_roots", default: false, null: false
+    t.boolean "damage", default: false, null: false
+    t.boolean "suspected_contamination", default: false, null: false
+    t.string "humidity_setup"
     t.index ["care_task_id"], name: "index_care_events_on_care_task_id", unique: true
     t.index ["environment_id"], name: "index_care_events_on_environment_id"
     t.index ["from_environment_id"], name: "index_care_events_on_from_environment_id"
@@ -134,6 +145,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "environment_id"
+    t.string "origin"
     t.index ["environment_id"], name: "index_care_schedules_on_environment_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
@@ -407,13 +419,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.datetime "updated_at", null: false
     t.bigint "environment_id"
     t.bigint "environment_event_id"
+    t.bigint "acquisition_id"
+    t.index ["acquisition_id"], name: "index_photos_on_acquisition_id"
     t.index ["care_event_id"], name: "index_photos_on_care_event_id"
     t.index ["environment_event_id"], name: "index_photos_on_environment_event_id"
     t.index ["environment_id"], name: "index_photos_on_environment_id"
     t.index ["plant_id", "taken_on"], name: "index_photos_on_plant_id_and_taken_on"
     t.index ["plant_id"], name: "index_photos_on_plant_id"
     t.index ["user_id"], name: "index_photos_on_user_id"
-    t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "photos_one_subject"
+    t.check_constraint "num_nonnulls(plant_id, environment_id, acquisition_id) = 1", name: "photos_one_subject"
   end
 
   create_table "plans", force: :cascade do |t|
@@ -476,7 +490,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.bigint "cover_photo_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "tc_stage"
+    t.bigint "split_from_id"
     t.index ["acquisition_id"], name: "index_plants_on_acquisition_id"
+    t.index ["split_from_id"], name: "index_plants_on_split_from_id"
     t.index ["tags"], name: "index_plants_on_tags", using: :gin
     t.index ["user_id", "number"], name: "index_plants_on_user_id_and_number", unique: true
     t.index ["user_id", "status"], name: "index_plants_on_user_id_and_status"
@@ -598,6 +615,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "acquisitions", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "acquisitions", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
@@ -640,6 +658,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
+  add_foreign_key "photos", "acquisitions", on_delete: :cascade
   add_foreign_key "photos", "care_events", on_delete: :cascade
   add_foreign_key "photos", "environment_events", on_delete: :cascade
   add_foreign_key "photos", "environments", on_delete: :cascade
@@ -651,6 +670,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_090000) do
   add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
   add_foreign_key "plants", "acquisitions", on_delete: :nullify
   add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify
+  add_foreign_key "plants", "plants", column: "split_from_id", on_delete: :nullify
   add_foreign_key "plants", "users"
   add_foreign_key "recipe_components", "ingredients", on_delete: :restrict
   add_foreign_key "recipe_components", "recipe_versions", on_delete: :cascade

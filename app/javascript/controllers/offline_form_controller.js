@@ -37,7 +37,9 @@ export default class extends Controller {
     this.submitTarget.disabled = false
 
     if (outcome.result === "sent") {
-      window.Turbo.visit(this.afterSaveValue || window.location.pathname + window.location.hash, { action: this.afterSaveValue ? "advance" : "replace" })
+      // The server can say where to go next (a stage change offers its reminders, D131).
+      const next = outcome.data?.location || this.afterSaveValue
+      window.Turbo.visit(next || window.location.pathname + window.location.hash, { action: next ? "advance" : "replace" })
     } else if (outcome.result === "rejected") {
       this.say(outcome.errors.join(" "))
     } else {

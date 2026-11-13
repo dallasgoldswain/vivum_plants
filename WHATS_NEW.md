@@ -76,6 +76,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Logging care on a plant's page completes its reminder too.
 - Reminders pause when a plant is sold, gifted, lost or archived, and start again if it comes
   back.
+- Record a tissue culture purchase and each plantlet gets its own record. Follow their stages
+  from sealed to established, log checks and losses for one or all of them, and get
+  reminders suited to each stage.
+- Split a pot or planting that holds several plants into records of their own.
 - Log water changes, dosing, cleaning and checks for a tank, terrarium or cabinet once, and
   see them on the timeline of every plant that was in it. Set reminders for them too; they
   show on Today once for the tank, not once for each plant.

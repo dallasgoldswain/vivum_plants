@@ -1,0 +1,133 @@
+<% content_for :title, "Record a TC purchase · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Collection", plants_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <h1 class="vv-h2">Record a TC purchase</h1>
+    <%= help_link "tissue-culture" %>
+  </div>
+
+  <p class="vv-caption">
+    Each plantlet gets its own record and number. Only the name is needed.
+  </p>
+</div>
+
+<%= form_with model: @purchase, url: acquisitions_path, scope: :tissue_culture_purchase, class: "form grid gap-6" do |form| %>
+  <% if @purchase.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h2>Please check the details</h2>
+      <section><%= @purchase.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <header>
+      <h2>The plantlets</h2>
+    </header>
+
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :name %>
+        <%= form.text_field :name, required: true, maxlength: 100, placeholder: "e.g. Monstera Thai Con TC", autofocus: true %>
+
+        <p class="vv-caption">
+          Each record is named with a number after it: "Monstera Thai Con TC 1",
+          "… 2".
+        </p>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :quantity, "How many plantlets" %>
+        <%= form.number_field :quantity, min: 1, max: Acquisition::MAX_PLANTLETS, step: 1, required: true %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :stage, "Stage now" %>
+        <%= form.select :stage, tc_stage_options, {}, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :botanical_name, "Botanical name" %>
+        <%= form.text_field :botanical_name, maxlength: 120 %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :cultivar %>
+        <%= form.text_field :cultivar, maxlength: 120 %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :growing_context, "Where they'll grow" %>
+        <%= form.select :growing_context, growing_context_options, {}, class: "select" %>
+      </div>
+
+      <% if @environments&.any? %>
+        <div class="grid gap-2">
+          <%= form.label :environment_id, "Environment" %>
+          <%= form.select :environment_id, environment_options(@environments), { include_blank: "None yet" }, class: "select" %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+
+  <div class="card">
+    <header>
+      <h2>The purchase</h2>
+      <p>All optional.</p>
+    </header>
+
+    <section class="grid gap-4 sm:grid-cols-2">
+      <div class="grid gap-2">
+        <%= form.label :source, "Supplier" %>
+        <%= form.text_field :source, maxlength: 200 %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :acquired_on, "Arrived" %>
+        <%= form.date_field :acquired_on, max: Date.current %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :container_condition, "Container on arrival" %>
+        <%= form.select :container_condition, container_condition_options, { include_blank: "Not noted" }, class: "select" %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :deflasked_on, "Deflasked (if already)" %>
+        <%= form.date_field :deflasked_on, max: Date.current %>
+      </div>
+
+      <div class="grid grid-cols-[1fr_6rem] gap-2">
+        <div class="grid gap-2">
+          <%= form.label :cost, "Cost (whole purchase)" %>
+          <%= form.text_field :cost, inputmode: "decimal" %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :currency %>
+          <%= form.select :currency, Acquisition::CURRENCIES, {}, class: "select" %>
+        </div>
+      </div>
+
+      <div class="grid gap-2">
+        <%= form.label :order_reference, "Order" %>
+        <%= form.text_field :order_reference, maxlength: 200 %>
+      </div>
+
+      <div class="grid gap-2 sm:col-span-2">
+        <%= form.label :arrival_notes, "On arrival" %>
+        <%= form.text_area :arrival_notes, rows: 2, placeholder: "e.g. two plantlets look weaker" %>
+      </div>
+
+      <% if capability?("collection.media") %>
+        <div class="grid gap-2 sm:col-span-2">
+          <%= form.label :photos %>
+          <%= form.file_field :photos, multiple: true, include_hidden: false, accept: Photo::ACCEPTED_TYPES.join(",") %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+
+  <div><%= form.submit "Record purchase", class: "btn" %></div>
+<% end %>

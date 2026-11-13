@@ -1,0 +1,77 @@
+<%#
+  A purchased TC plantlet (TC02–TC05, D128–D132): its stage, purchase, a check, and a stage
+  change that offers suggested reminders.
+%>
+
+<div class="card" id="tissue-culture">
+  <header>
+    <h2>Tissue culture</h2>
+    <p><%= tc_stage_summary(plant) %>.</p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if (group = plant.acquisition)&.tissue_culture? %>
+      <p class="vv-caption">
+        From
+        <%= link_to group.name || "a TC purchase", acquisition_path(group), class: "underline underline-offset-4" %>:
+        <%= group.remaining %> of <%= group.quantity %> remain.
+      </p>
+    <% end %>
+
+    <% if plant.tc_established? && capability?("care.reminders") && plant.open_tc_reminders.exists? %>
+      <div class="alert" role="status">
+        <h3>TC reminders still open</h3>
+
+        <section>
+          <%= link_to "Review them", new_plant_tc_review_path(plant), class: "btn-sm-outline" %>
+        </section>
+      </div>
+    <% end %>
+
+    <% if capability?("care.logs") %>
+      <div>
+        <button
+          type="button"
+          class="btn-outline"
+          commandfor="care-inspection"
+          command="show-modal"
+        >
+          Log a check
+        </button>
+      </div>
+    <% end %>
+
+    <details>
+      <summary class="btn-sm-outline w-fit">Change stage</summary>
+
+      <%= form_with url: plant_stage_changes_path(plant), class: "form mt-3 grid gap-3 sm:grid-cols-2", data: { controller: "offline-form", offline_form_subject_value: "plant:#{plant.id}", offline_form_label_value: "Stage change", action: "submit->offline-form#submit" } do |form| %>
+        <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil, data: { offline_form_target: "key" } %>
+
+        <div class="grid gap-2">
+          <%= label_tag :stage, "New stage", for: "tc_stage_#{plant.id}" %>
+          <%= select_tag :stage, options_for_select(tc_stage_options, Plant::TC_STAGES[(Plant::TC_STAGES.index(plant.tc_stage) || -1) + 1] || "established"), id: "tc_stage_#{plant.id}", class: "select", data: { offline_form_target: "content" } %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= label_tag :on, "From", for: "tc_stage_on_#{plant.id}" %>
+          <%= date_field_tag :on, Date.current, id: "tc_stage_on_#{plant.id}", max: Date.current %>
+        </div>
+
+        <p class="vv-caption sm:col-span-2">
+          A check never changes the stage; you do. Any stage can follow any,
+          wherever the plant grows.
+        </p>
+
+        <p
+          class="vv-caption sm:col-span-2"
+          data-offline-form-target="status"
+          role="status"
+        ></p>
+
+        <div>
+          <%= form.button "Change stage", class: "btn-outline", data: { offline_form_target: "submit" } %>
+        </div>
+      <% end %>
+    </details>
+  </section>
+</div>

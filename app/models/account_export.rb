@@ -40,24 +40,26 @@ class AccountExport
       user.data_requests.order(:created_at).map { it.slice(:kind, :status, :message, :outcome, :due_on, :created_at, :completed_at) }
     },
     "plants" => ->(user) {
-      user.plants.includes(:acquisition, :status_changes).order(:number).map do |plant|
+      user.plants.includes(:acquisition, :status_changes, :split_from).order(:number).map do |plant|
         plant.slice(:number, :display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :origin_note, :quantity, :notes, :tags, :status, :status_on, :created_at, :updated_at).merge(
           record_id: plant.record_id,
-          acquisition: plant.acquisition&.slice(:acquired_on, :source, :cost_cents, :currency, :order_reference, :quantity, :arrival_notes),
+          acquisition: plant.acquisition&.slice(:name, :tissue_culture, :acquired_on, :source, :cost_cents, :currency, :order_reference, :quantity, :arrival_notes, :container_condition, :deflasked_on),
+          tc_stage: plant.tc_stage, split_from: plant.split_from&.record_id,
           status_history: plant.status_changes.map { it.slice(:status, :effective_on, :reason, :created_at) }
         )
       end
     },
     "care_events" => ->(user) {
       user.care_events.includes(:plant, :environment, :from_environment, :plant_setup, :care_task).order(:occurred_at).map do |event|
-        event.slice(:kind, :label, :note, :occurred_at, :created_at, :amount, :amount_unit, :watering_method, :product, :strength, :target).merge(
+        event.slice(:kind, :label, :note, :occurred_at, :created_at, :amount, :amount_unit, :watering_method, :product, :strength, :target, :stage, :humidity_setup).merge(
+          event.slice(*CareEvent::TC_CHECK_TICKS).select { |_, ticked| ticked }).merge(
           plant: event.plant.record_id, completed_reminder_due_on: event.care_task&.due_on, moved_to: event.environment&.name, moved_from: event.from_environment&.name, setup_from: event.plant_setup&.started_on
         ).compact
       end
     },
     "care_schedules" => ->(user) {
       user.care_schedules.includes(:plant, :environment, :tasks).order(:id).map do |schedule|
-        schedule.slice(:kind, :label, :note, :interval, :interval_unit, :mode, :starts_on, :status, :created_at).merge(
+        schedule.slice(:kind, :label, :note, :interval, :interval_unit, :mode, :starts_on, :status, :origin, :created_at).merge(
           plant: schedule.plant&.record_id, environment: schedule.environment&.name,
           tasks: schedule.tasks.sort_by(&:id).map { it.slice(:due_on, :state, :snoozed_until, :resolved_on).compact }
         ).compact

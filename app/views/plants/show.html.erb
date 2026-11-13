@@ -21,6 +21,11 @@
 
     <div class="flex items-center gap-2">
       <%= help_link "observations-and-photos" %>
+
+      <% if @plant.quantity.to_i > 1 %>
+        <%= link_to "Split…", new_plant_split_path(@plant), class: "btn-ghost" %>
+      <% end %>
+
       <%= link_to "Edit", edit_plant_path(@plant), class: "btn-outline" %>
     </div>
   </div>
@@ -42,6 +47,13 @@
           <% { "Common name" => @plant.common_name, "Nickname" => @plant.nickname, "Quantity" => @plant.quantity, "TC origin" => (@plant.tc_origin? ? "Yes" : nil), "Origin" => @plant.origin_note }.compact_blank.each do |label, value| %>
             <dt><%= label %></dt>
             <dd><%= value %></dd>
+          <% end %>
+
+          <% if @plant.split_from %>
+            <dt>Split from</dt>
+            <dd>
+              <%= link_to "#{@plant.split_from.display_name} (#{@plant.split_from.record_id})", @plant.split_from, class: "underline underline-offset-4" %>
+            </dd>
           <% end %>
 
           <% if @plant.tags.any? %>
@@ -107,6 +119,10 @@
   <div class="order-1 grid content-start gap-6 lg:order-2">
     <% if capability?("care.logs") %>
       <%= render "plants/care", plant: @plant, latest: @last_care, logged_event: @logged_event, setup: @plant.current_setup, recipes: @recipes, quota: @quota, suggestions: @care_suggestions %>
+    <% end %>
+
+    <% if @plant.tc_origin? && capability?("collection.tissue_culture") %>
+      <%= render "plants/tissue_culture", plant: @plant %>
     <% end %>
 
     <% if capability?("care.reminders") %>

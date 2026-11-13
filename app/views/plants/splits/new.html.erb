@@ -1,0 +1,64 @@
+<% content_for :title, "Split #{@plant.display_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← #{@plant.display_name}", @plant, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <h1 class="vv-h2">Split <%= @plant.display_name %></h1>
+    <%= help_link "splitting" %>
+  </div>
+
+  <p class="vv-caption">
+    <%= @plant.record_id %> holds <%= @plant.quantity %>. Move some into new
+    records with their own numbers; the rest stay here.
+  </p>
+</div>
+
+<div class="card max-w-2xl">
+  <section>
+    <%= form_with url: plant_split_path(@plant), class: "form grid gap-4" do |form| %>
+      <fieldset class="grid gap-2">
+        <legend class="mb-1 text-sm font-medium">
+          How many go into each new record
+        </legend>
+
+        <% 3.times do |index| %>
+          <div class="flex items-center gap-2">
+            <%= label_tag "split_quantity_#{index}", "New record #{index + 1}", class: "w-32 text-sm font-normal" %>
+            <%= number_field_tag "quantities[]", (index.zero? ? 1 : nil), id: "split_quantity_#{index}", min: 1, max: @plant.quantity - 1, class: "input w-24" %>
+          </div>
+        <% end %>
+
+        <p class="vv-caption">
+          Leave a row empty to skip it. The total never grows: what moves out
+          comes off this record.
+        </p>
+      </fieldset>
+
+      <% if @schedules&.any? %>
+        <fieldset class="grid gap-1">
+          <legend class="mb-1 text-sm font-medium">
+            Copy reminders to the new records
+          </legend>
+
+          <% @schedules.each do |schedule| %>
+            <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+              <%= check_box_tag "copy_schedule_ids[]", schedule.id, true, id: "copy_schedule_#{schedule.id}" %>
+              <%= care_task_title(schedule) %> ·
+              <%= schedule_cadence(schedule) %>
+            </label>
+          <% end %>
+
+          <p class="vv-caption">
+            Each new record gets its own copy, which you can change on its page.
+          </p>
+        </fieldset>
+      <% end %>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Split", class: "btn" %>
+        <%= link_to "Cancel", @plant, class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </section>
+</div>

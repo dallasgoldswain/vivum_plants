@@ -1,0 +1,68 @@
+<% content_for :title, "Suggested reminders · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <p class="vv-kicker"><%= tc_stage_label(@stage) %></p>
+
+  <h1 class="vv-h2">
+    Suggested reminders for
+    <%= @plants.one? ? @plants.first.display_name : "#{@plants.size} plantlets" %>
+  </h1>
+
+  <p class="vv-caption">
+    For <%= tc_stage_label(@stage).downcase %> plantlets growing
+    <%= growing_context_label(@plants.first.growing_context).downcase %>. Tick
+    the ones you want and change how often. Nothing is added unless you tick it.
+  </p>
+</div>
+
+<div class="card max-w-2xl">
+  <section>
+    <%= form_with url: tc_suggestions_path, class: "form grid gap-4" do |form| %>
+      <% @plants.each do |plant| %>
+        <%= hidden_field_tag "plant_ids[]", plant.id, id: nil %>
+      <% end %>
+
+      <% @suggestions.each_with_index do |suggestion, index| %>
+        <% field = "suggestions[#{index}]" %>
+
+        <fieldset class="grid gap-2 rounded-[4px] border border-line bg-linen px-3 py-2">
+          <legend class="sr-only">
+            <%= suggestion.label || care_button_label(suggestion.kind) %>
+          </legend>
+
+          <label class="flex min-h-11 items-center gap-2 font-medium">
+            <%= check_box_tag "#{field}[add]", "1", true, id: "suggestion_#{index}" %>
+            <%= suggestion.label || care_button_label(suggestion.kind) %>
+          </label>
+
+          <% if suggestion.note %>
+            <p class="vv-caption"><%= suggestion.note %></p>
+          <% end %>
+
+          <%= hidden_field_tag "#{field}[kind]", suggestion.kind, id: nil %>
+          <%= hidden_field_tag "#{field}[label]", suggestion.label, id: nil %>
+          <%= hidden_field_tag "#{field}[note]", suggestion.note, id: nil %>
+
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <% if suggestion.once? %>
+              <span>Once, on</span>
+              <%= hidden_field_tag "#{field}[interval]", "", id: nil %>
+            <% else %>
+              <span>Every</span>
+              <%= number_field_tag "#{field}[interval]", suggestion.interval, min: 1, max: 365, class: "input w-20", aria: { label: "How many" }, id: nil %>
+              <%= select_tag "#{field}[interval_unit]", options_for_select(interval_unit_options, suggestion.interval_unit), class: "select w-auto", aria: { label: "Days, weeks or months" }, id: nil %>
+              <span>from</span>
+            <% end %>
+
+            <%= date_field_tag "#{field}[starts_on]", Date.current + suggestion.starts_in_days, class: "input w-auto", aria: { label: "First date" }, id: nil %>
+          </div>
+        </fieldset>
+      <% end %>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Add ticked reminders", class: "btn" %>
+        <%= link_to "Skip", (@plants.one? ? plant_path(@plants.first) : acquisition_path(@plants.first.acquisition)), class: "btn-ghost" %>
+      </div>
+    <% end %>
+  </section>
+</div>

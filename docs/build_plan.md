@@ -56,7 +56,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
 | B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Done |
-| B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05, D127–D134 | B10, B14 | Planned |
+| B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05, D127–D134 | B10, B14 | Done |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
 | B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
 
@@ -642,7 +642,7 @@ pages weren't clicked through, because the only development account has two-step
 headless Chrome test covers a water change offline, and the environment screenshot now shows
 maintenance. Help topic `environment-maintenance` needs review.
 
-### B16 Purchased tissue culture: groups, splits, stages — discussed 2026-11-13
+### B16 Purchased tissue culture: groups, splits, stages — discussed and built 2026-11-13
 
 **Scope**
 - **Purchases (TC01, D127):** `purchase_groups` (user, name, supplier, arrival date, arrival
@@ -679,3 +679,14 @@ stage; changing to deflasked into a terrarium offers "Check readiness for repott
 only what's ticked; marking established lists open TC reminders with keep, end or replace and
 removes none silently; splitting a planting of 5 into 2 and 3 leaves totals of 5, links both
 to the source, and copies only the ticked reminders.
+
+**Built notes:** The purchase group reuses `acquisitions` (already shaped for several
+plants) rather than a new table, so a TC plantlet's acquisition is its purchase. A TC check
+is an `inspection` care event with tick columns, so it completes inspection reminders and
+never touches the stage. Stage and split events are read-only like moves (D108). Suggested
+reminders count after completion and are left out for a plant that already has the same
+one. The group's stage change offers suggestions for all ticked plantlets together; once
+established, each plantlet's page links to its own review. Splitting keeps at least 1 in the
+source. Dev-server pages weren't clicked through, because the only development account has
+two-step sign-in; tests cover the flows, and the purchase and plantlet pages were checked at
+phone size. Help topics `tissue-culture` and `splitting` need review.

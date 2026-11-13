@@ -41,7 +41,7 @@ collection.media: { domain: collector, state: core, implemented: true, depends_o
 collection.acquisition: { domain: collector, state: core, implemented: true, depends_on: [collection.plants], description: "Purchase and acquisition details (PL02)" }
 collection.environments: { domain: collector, state: core, implemented: true, depends_on: [collection.plants], description: "Growing environments and occupants (EN01, EN03)" }
 collection.measurements: { domain: collector, state: core, implemented: true, depends_on: [collection.environments], description: "Dated environment measurements (EN02)" }
-collection.tissue_culture: { domain: collector, state: core, depends_on: [collection.plants], description: "Purchased tissue culture tracking (TC01–TC05)" }
+collection.tissue_culture: { domain: collector, state: core, implemented: true, depends_on: [collection.plants], description: "Purchased tissue culture tracking (TC01–TC05)" }
 
 # --- Care and library ---
 care.logs: { domain: care, state: core, implemented: true, depends_on: [collection.plants], description: "Care events and quick care entry (CA01)" }

@@ -1,0 +1,166 @@
+<% content_for :title, "#{@acquisition.name || "TC purchase"} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Collection", plants_path(tc: "1"), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">TC purchase</p>
+      <h1 class="vv-h2"><%= @acquisition.name || "TC purchase" %></h1>
+
+      <p class="vv-caption mt-1">
+        <%= @acquisition.remaining %> of <%= @acquisition.quantity %> remain
+      </p>
+    </div>
+
+    <%= help_link "tissue-culture" %>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[2fr_3fr]">
+  <div class="order-2 grid content-start gap-6 lg:order-1">
+    <div class="card">
+      <header>
+        <h2>Purchase</h2>
+      </header>
+
+      <section>
+        <dl class="vv-details">
+          <% { "Supplier" => @acquisition.source, "Arrived" => @acquisition.acquired_on && l(@acquisition.acquired_on, format: :long), "Container" => TissueCultureHelper::CONTAINER_CONDITION_LABELS[@acquisition.container_condition], "Deflasked" => @acquisition.deflasked_on && l(@acquisition.deflasked_on, format: :long), "Cost" => acquisition_cost(@acquisition), "Order" => @acquisition.order_reference, "Plantlets" => @acquisition.quantity }.compact_blank.each do |label, value| %>
+            <dt><%= label %></dt>
+            <dd><%= value %></dd>
+          <% end %>
+        </dl>
+
+        <% if @acquisition.arrival_notes.present? %>
+          <p class="mt-4 whitespace-pre-line"><%= @acquisition.arrival_notes %></p>
+        <% end %>
+      </section>
+    </div>
+
+    <% if capability?("collection.media") %>
+      <%= render "photos/section", subject: @acquisition, photos: @photos, quota: @quota %>
+    <% end %>
+
+    <% if @plants.empty? %>
+      <div class="card">
+        <header>
+          <h2>Delete this purchase</h2>
+          <p>Its plantlets are gone; the purchase can go too.</p>
+        </header>
+
+        <footer>
+          <%= button_to "Delete purchase", acquisition_path(@acquisition), method: :delete, class: "btn-destructive", data: { turbo_confirm: "Delete this purchase and its photos?" } %>
+        </footer>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="order-1 grid content-start gap-6 lg:order-2">
+    <div class="card" id="plantlets">
+      <header>
+        <h2>Plantlets</h2>
+        <p>Tick some, or leave them all ticked, then choose what to do.</p>
+      </header>
+
+      <section class="grid gap-4">
+        <%= form_with url: acquisition_group_action_path(@acquisition), class: "form grid gap-4" do |_form| %>
+          <%= hidden_field_tag :idempotency_key, SecureRandom.uuid, id: nil %>
+
+          <ul class="grid gap-2">
+            <% @plants.each do |plant| %>
+              <li
+                class="
+                  flex items-center gap-3 rounded-[4px] border border-line
+                  bg-linen px-3 py-2
+                "
+              >
+                <% if plant.active? %>
+                  <%= check_box_tag "plant_ids[]", plant.id, true, id: "plantlet_#{plant.id}", aria: { label: "Include #{plant.display_name}" } %>
+                <% else %>
+                  <span class="w-4"></span>
+                <% end %>
+
+                <span class="grid min-w-0 flex-1 gap-0.5">
+                  <%= link_to plant.display_name, plant, class: "truncate font-medium underline-offset-4 hover:underline" %>
+
+                  <span class="vv-caption truncate">
+                    <%= [ plant.record_id, (tc_stage_label(plant.tc_stage) if plant.tc_stage), plant.current_environment&.name ].compact.join(" · ") %>
+                  </span>
+                </span>
+
+                <%= plant_status_badge(plant) %>
+              </li>
+            <% end %>
+          </ul>
+
+          <div class="grid gap-2 sm:w-1/2">
+            <%= label_tag :on, "On", for: "group_on" %>
+            <%= date_field_tag :on, Date.current, id: "group_on", max: Date.current %>
+          </div>
+
+          <details class="rounded-[4px] border border-line px-3 py-2">
+            <summary class="cursor-pointer font-medium">Change stage</summary>
+
+            <div class="mt-3 flex flex-wrap items-end gap-2">
+              <div class="grid gap-2">
+                <%= label_tag :stage, "New stage", for: "group_stage" %>
+                <%= select_tag :stage, options_for_select(tc_stage_options, "deflasked"), id: "group_stage", class: "select w-auto" %>
+              </div>
+
+              <%= button_tag "Change stage of ticked", name: "group_action", value: "stage", class: "btn-outline" %>
+            </div>
+          </details>
+
+          <details class="rounded-[4px] border border-line px-3 py-2">
+            <summary class="cursor-pointer font-medium">Log a check</summary>
+
+            <div class="mt-3 grid gap-3">
+              <fieldset class="grid gap-1">
+                <legend class="mb-1 text-sm font-medium">
+                  What you noticed
+                </legend>
+
+                <% TissueCultureHelper::TC_CHECK_LABELS.each do |column, label| %>
+                  <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+                    <%= check_box_tag "check[#{column}]", "1", false, id: "group_check_#{column}" %>
+                    <%= label %>
+                  </label>
+                <% end %>
+              </fieldset>
+
+              <div class="grid gap-2">
+                <%= label_tag "check[humidity_setup]", "Humidity setup", for: "group_check_humidity" %>
+                <%= text_field_tag "check[humidity_setup]", nil, id: "group_check_humidity", maxlength: 120 %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= label_tag "check[note]", "Note", for: "group_check_note" %>
+                <%= text_area_tag "check[note]", nil, id: "group_check_note", rows: 2 %>
+              </div>
+
+              <div>
+                <%= button_tag "Log check for ticked", name: "group_action", value: "check", class: "btn-outline" %>
+              </div>
+            </div>
+          </details>
+
+          <details class="rounded-[4px] border border-line px-3 py-2">
+            <summary class="cursor-pointer font-medium">Mark as lost</summary>
+
+            <div class="mt-3 grid gap-2">
+              <p class="vv-caption">
+                Their records stay, set to lost, so the purchase keeps its
+                count.
+              </p>
+
+              <div>
+                <%= button_tag "Mark ticked as lost", name: "group_action", value: "lost", class: "btn-outline", data: { turbo_confirm: "Mark the ticked plantlets as lost?" } %>
+              </div>
+            </div>
+          </details>
+        <% end %>
+      </section>
+    </div>
+  </div>
+</div>

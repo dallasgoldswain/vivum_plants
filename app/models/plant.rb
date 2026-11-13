@@ -5,9 +5,12 @@ class Plant < ApplicationRecord
   STATUSES = %w[ active quarantined lost sold gifted archived ].freeze
   ACTIVE_STATUSES = %w[ active quarantined ].freeze
   TAG_LIMIT = 20
+  # Purchased tissue culture stages, in their usual order; any can follow any (TC02, D128).
+  TC_STAGES = %w[ sealed deflasked acclimatising established ].freeze
 
   include Searchable
   include Placement
+  include TissueCulture
 
   belongs_to :user
   belongs_to :acquisition, optional: true
@@ -113,8 +116,9 @@ class Plant < ApplicationRecord
       status_changes.create!(status: status, effective_on: status_on || created_at.to_date, reason: "Added to collection")
     end
 
+    # A TC purchase group stays when its records are gone, until it's deleted itself (D134).
     def remove_orphaned_acquisition
-      acquisition.destroy! if acquisition && !acquisition.plants.exists?
+      acquisition.destroy! if acquisition && !acquisition.tissue_culture? && !acquisition.plants.exists?
     end
 
     def acquisition_blank?(attributes)

@@ -9,14 +9,14 @@ module CareHelper
   CARE_TITLES = {
     "observation" => "Observation", "watering" => "Watered", "feeding" => "Fed", "repotting" => "Repotted",
     "pruning" => "Pruned", "treatment" => "Treated", "inspection" => "Inspected", "custom" => "Other care",
-    "movement" => "Moved", "setup" => "Setup"
+    "movement" => "Moved", "setup" => "Setup", "stage" => "Stage", "splitting" => "Split"
   }.freeze
 
   # The timeline's kind filter (D109).
   CARE_FILTERS = {
     "observation" => "Observations", "watering" => "Watering", "feeding" => "Feeding", "repotting" => "Repotting",
     "pruning" => "Pruning", "treatment" => "Treatments", "inspection" => "Inspections", "custom" => "Other care",
-    "movement" => "Moves", "setup" => "Setup changes", "maintenance" => "Environment care"
+    "movement" => "Moves", "setup" => "Setup changes", "stage" => "Stages", "splitting" => "Splits", "maintenance" => "Environment care"
   }.freeze
 
   WATERING_METHOD_LABELS = { "top" => "From the top", "bottom" => "Bottom watered", "soak" => "Soaked", "mist" => "Misted" }.freeze
@@ -35,6 +35,7 @@ module CareHelper
     when "feeding" then [ event.product, amount, STRENGTH_LABELS[event.strength] ]
     when "treatment" then [ [ event.product, ("for #{event.target}" if event.target) ].compact.join(" "), amount ]
     when "repotting" then [ ("Into #{setup_summary(event.plant_setup)}" if event.plant_setup) ]
+    when "inspection" then [ tc_check_details(event) ]
     else []
     end.compact_blank.join(" · ").presence
   end

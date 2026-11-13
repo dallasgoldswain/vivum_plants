@@ -203,6 +203,22 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   section `environment_maintenance`; deletion warning counts maintenance and reminders. Help
   topic `environment-maintenance`; `care.shared_maintenance` marked implemented. Browser test
   for a water change saved offline.
+- Purchased tissue culture (B16): a TC purchase is an `Acquisition` with `tissue_culture`,
+  `name`, `container_condition`, `deflasked_on` and photos (`photos.acquisition_id`, cover);
+  `TissueCulture::Purchase` records it with one TC-origin plant per plantlet (up to 50),
+  numbered names and the starting stage, at `/purchases` (TC01, D127). `plants.tc_stage` with
+  `stage` care events from `Plant#change_stage!`, any order (TC02, D128). TC checks are
+  inspections with `new_leaves`, `new_roots`, `damage`, `suspected_contamination` and
+  `humidity_setup`; losses are the lost status, and the group shows arrival vs remaining
+  (TC03, D129). Group actions change stage, log a check or mark ticked plantlets lost (D130).
+  `TissueCulture::Suggestions` offers stage reminders by context after a stage change,
+  created with `care_schedules.origin = "tc_stage"` only when ticked (TC04, D131); once
+  established, `Plants::TcReviewsController` asks keep, end or replace for each (TC05, D132).
+  `Plant#split!` moves part of a record's quantity into linked records (`plants.split_from_id`,
+  `splitting` events), copying ticked reminders (PL06, D133). Stage changes queue offline and
+  `offline-form` follows a `location` the server returns. Export includes purchase, stage,
+  split and check details. Help topics `tissue-culture` and `splitting`;
+  `collection.tissue_culture` marked implemented.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

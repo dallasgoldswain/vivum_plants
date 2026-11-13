@@ -6,6 +6,8 @@ audience: everyone
 capabilities: [account.export, account.deletion]
 prerequisites: []
 keywords: [download, export, copy of my data, zip, json, delete, close account, remove account, cancel deletion]
+reviewed: 2026-11-13
+reviewed_digest: caed77ad00811d562975abdf2b879876e3a6c02db4646706e9fe3ac895a8aae8
 ---
 
 ![The Account page](account)

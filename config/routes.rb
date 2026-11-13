@@ -30,8 +30,22 @@ Rails.application.routes.draw do
       resources :moves, only: :create
       resources :setups, only: :create
       resource :context_offer, only: :update
+      resources :stage_changes, only: :create
+      resource :split, only: %i[ new create ]
+      resource :tc_review, only: %i[ new create ]
     end
   end
+
+  # Purchased tissue culture groups (TC01, D127), at /purchases.
+  resources :acquisitions, path: "purchases", only: %i[ new create show destroy ] do
+    scope module: :acquisitions do
+      resources :photos, only: %i[ create update destroy ] do
+        post :cover, on: :member
+      end
+      resource :group_action, only: :create
+    end
+  end
+  resources :tc_suggestions, only: %i[ new create ]
 
   resources :care_logs, only: %i[ new create ]
   resources :care_schedules, only: %i[ new create ]

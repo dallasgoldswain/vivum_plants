@@ -6,6 +6,8 @@ audience: everyone
 capabilities: []
 prerequisites: []
 keywords: [2fa, two factor, authenticator, totp, code, backup codes, security, lost phone, mfa]
+reviewed: 2026-11-13
+reviewed_digest: ea64be0866439a86b9d83141e99f9ccd9c273d0c48c9570753630657f34169c9
 ---
 
 Two-step sign-in asks for a 6-digit code from an authenticator app on your phone

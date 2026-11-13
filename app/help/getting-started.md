@@ -6,6 +6,8 @@ audience: everyone
 capabilities: []
 prerequisites: []
 keywords: [sign up, register, create account, verify, confirm email, sign in, log in, password, forgot password, reset]
+reviewed: 2026-11-13
+reviewed_digest: 0fcc50c1dc915c3ff91211b03cc94b0df5f90603d481f8e56dddaae4f27609c6
 ---
 
 ## Creating your account

@@ -16,6 +16,7 @@ class Photo < ApplicationRecord
   belongs_to :environment, optional: true
   belongs_to :care_event, optional: true
   belongs_to :environment_event, optional: true
+  belongs_to :acquisition, optional: true
 
   has_one_attached :image do |attachable|
     attachable.variant :thumb, resize_to_fill: [ 480, 480 ], format: :jpeg, saver: { quality: 80, strip: true }, preprocessed: true
@@ -45,13 +46,13 @@ class Photo < ApplicationRecord
 
   # Builds a processed photo from an uploaded file, or raises Rejected with a reason the
   # collector can read. Never stores the original.
-  def self.build_from_upload(upload, user:, plant: nil, environment: nil, care_event: nil, environment_event: nil, caption: nil, taken_on: nil)
+  def self.build_from_upload(upload, user:, plant: nil, environment: nil, acquisition: nil, care_event: nil, environment_event: nil, caption: nil, taken_on: nil)
     raise Rejected, "You've reached your #{COLLECTOR_LIMIT} photos. Delete some to add more." if quota_for(user).full?
     raise Rejected, "Choose a JPEG, PNG or WebP photo." unless ACCEPTED_TYPES.include?(Marcel::MimeType.for(upload.tempfile))
     raise Rejected, "That photo is over #{MAX_UPLOAD_SIZE / 1.megabyte} MB." if upload.size > MAX_UPLOAD_SIZE
 
     processed = process(upload.tempfile.path)
-    new(user: user, plant: plant, environment: environment, care_event: care_event, environment_event: environment_event, caption: caption.presence, taken_on: taken_on.presence || (care_event || environment_event)&.occurred_at&.to_date || Date.current).tap do |photo|
+    new(user: user, plant: plant, environment: environment, acquisition: acquisition, care_event: care_event, environment_event: environment_event, caption: caption.presence, taken_on: taken_on.presence || (care_event || environment_event)&.occurred_at&.to_date || Date.current).tap do |photo|
       photo.image.attach(io: File.open(processed.path), filename: "#{File.basename(upload.original_filename.to_s, '.*').parameterize.presence || 'photo'}.jpg", content_type: "image/jpeg")
     end
   rescue Vips::Error
@@ -68,7 +69,7 @@ class Photo < ApplicationRecord
       .call
   end
 
-  def subject = plant || environment
+  def subject = plant || environment || acquisition
   def cover? = subject.cover_photo_id == id
 
   private
@@ -81,9 +82,10 @@ class Photo < ApplicationRecord
     end
 
     def same_owner
-      errors.add(:base, "A photo belongs to one plant or one environment") unless [ plant, environment ].compact.one?
+      errors.add(:base, "A photo belongs to one plant, environment or purchase") unless [ plant, environment, acquisition ].compact.one?
       errors.add(:plant, "must be yours") if plant && plant.user_id != user_id
       errors.add(:environment, "must be yours") if environment && environment.user_id != user_id
+      errors.add(:acquisition, "must be yours") if acquisition && acquisition.user_id != user_id
       errors.add(:care_event, "must be on this plant") if care_event && care_event.plant_id != plant_id
     end
 end

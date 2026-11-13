@@ -85,6 +85,24 @@
   <% end %>
 <% end %>
 
+<% if kind == "inspection" && (form.object.plant&.tc_origin? || local_assigns[:tc]) && capability?("collection.tissue_culture") %>
+  <fieldset class="grid gap-1">
+    <legend class="mb-1 text-sm font-medium">What you noticed</legend>
+
+    <% TissueCultureHelper::TC_CHECK_LABELS.each do |column, label| %>
+      <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+        <%= form.check_box column, id: "#{prefix}_#{column}" %>
+        <%= label %>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <div class="grid gap-2">
+    <%= form.label :humidity_setup, "Humidity setup", for: "#{prefix}_humidity_setup" %>
+    <%= form.text_field :humidity_setup, id: "#{prefix}_humidity_setup", maxlength: 120, placeholder: "e.g. lid cracked open, dome off for an hour" %>
+  </div>
+<% end %>
+
 <div class="grid gap-2">
   <%= form.label :note, (kind == "inspection" ? "What you found" : "Note"), for: "#{prefix}_note" %>
   <%= form.text_area :note, id: "#{prefix}_note", rows: 2, data: { offline_form_target: "content" } %>

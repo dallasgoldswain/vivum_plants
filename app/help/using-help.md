@@ -6,6 +6,8 @@ audience: everyone
 capabilities: [help.manual, help.contextual]
 prerequisites: []
 keywords: [help, manual, guide, search, support, whats new, release notes, updates]
+reviewed: 2026-11-13
+reviewed_digest: 07776518cccff3433ef877b27f940ae48d2433a062b764b68e802a6039988d93
 ---
 
 ## Searching

@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.workspace]
 prerequisites: []
 keywords: [sell, seller, business, workspace, plan, starter, pro, pilot, free, price, limits, switch business]
+reviewed: 2026-11-13
+reviewed_digest: 03d5540368128b694bbe57c0f0f7e8ebbdc388d22e206ea945e832a5afa3a71c
 ---
 
 **Sell** is where you run your business on VIVUM. It appears in the menu once you
