@@ -129,6 +129,10 @@
       <%= render "schedules/reminders", subject: @plant, schedules: @schedules %>
     <% end %>
 
+    <% if capability?("care.guidance_settings") %>
+      <%= render "plants/guidance", plant: @plant %>
+    <% end %>
+
     <div class="card" id="observe">
       <header>
         <h2>Add an observation</h2>

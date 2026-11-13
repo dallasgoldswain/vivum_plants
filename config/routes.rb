@@ -33,6 +33,8 @@ Rails.application.routes.draw do
       resources :stage_changes, only: :create
       resource :split, only: %i[ new create ]
       resource :tc_review, only: %i[ new create ]
+      resource :guidance, only: :update
+      resource :guidance_application, only: :create
     end
   end
 
@@ -46,6 +48,7 @@ Rails.application.routes.draw do
     end
   end
   resources :tc_suggestions, only: %i[ new create ]
+  resources :guidance_applications, only: %i[ new create ]
 
   resources :care_logs, only: %i[ new create ]
   resources :care_schedules, only: %i[ new create ]
@@ -108,6 +111,7 @@ Rails.application.routes.draw do
     resources :privacy_requests, only: :create
     resource :account, only: :show, controller: "account"
     resource :time_zone, only: :update
+    resource :guidance, only: %i[ show update ], controller: "guidance"
     resources :exports, only: %i[ create show ], param: :token
     resource :account_deletion, only: %i[ new create ]
   end

@@ -57,7 +57,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
 | B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Done |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05, D127–D134 | B10, B14 | Done |
-| B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
+| B17 | Guidance settings and new-plant defaults | ST01–ST05, D135–D140 | B10, B05 | Done (units, notification preferences and AI stop deferred) |
 | B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
 
 ## Phase 4 — Clients and notifications
@@ -414,7 +414,7 @@ now Africa/Johannesburg until accounts get their own. Help topics: `collection`,
   `collection.environments` and `collection.measurements` marked implemented.
 
 **Deferred:** recipe version on setups (B12); environment maintenance tasks and events
-(B15, EN04); measurements in AI guidance (B37, EN05); imperial units (B17); charts of
+(B15, EN04); measurements in AI guidance (B37, EN05); imperial units (after the pilot, D135); charts of
 measurements over time; nested environments.
 
 **Acceptance:** a tank saves with only name and type; a moved plant shows only in the new
@@ -691,7 +691,7 @@ source. Dev-server pages weren't clicked through, because the only development a
 two-step sign-in; tests cover the flows, and the purchase and plantlet pages were checked at
 phone size. Help topics `tissue-culture` and `splitting` need review.
 
-### B17 Guidance settings and new-plant defaults — discussed 2026-11-13
+### B17 Guidance settings and new-plant defaults — discussed and built 2026-11-13
 
 **Scope**
 - **Defaults (ST01, ST03, D135, D137):** `guidance_revisions` (user, number, library, ai,
@@ -720,3 +720,10 @@ B added afterwards gets revision 2; cancelling the defaults warning changes noth
 the library off for one plant changes no other plant or the defaults; applying current
 defaults to a plant changes its switches and status but leaves its reminders and history;
 a split keeps its source's switches.
+
+**Built notes:** The customised state isn't stored: a plant is "changed" when its switches
+differ from the revision it copied. Saving unchanged defaults adds no revision. A new flag,
+`care.guidance_settings`, gates the pages; Settings → Guidance is reached from the Account
+page and the plant's Guidance section rather than a new nav item. Tests cover the PRD
+acceptance cases; the settings, warning, plant comparison and phone-size bulk pages were
+checked in a browser. Help topic `guidance-settings` needs review.

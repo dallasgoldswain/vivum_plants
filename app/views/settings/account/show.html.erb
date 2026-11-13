@@ -29,6 +29,19 @@
   </section>
 </div>
 
+<% if capability?("care.guidance_settings") %>
+  <div class="card">
+    <header>
+      <h2>Guidance</h2>
+      <p>Defaults for plants you add, and earlier versions of them.</p>
+    </header>
+
+    <section>
+      <%= link_to "Guidance settings", settings_guidance_path, class: "btn-outline" %>
+    </section>
+  </div>
+<% end %>
+
 <div class="card">
   <header>
     <h2>Export your data</h2>

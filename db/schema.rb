@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -149,7 +149,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
     t.index ["environment_id"], name: "index_care_schedules_on_environment_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
-    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying::text, 'week'::character varying::text, 'month'::character varying::text]))", name: "care_schedules_interval_valid"
+    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
     t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "care_schedules_one_subject"
   end
 
@@ -292,6 +292,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
     t.index ["feature_key", "key", "value"], name: "index_flipper_gates_on_feature_key_and_key_and_value", unique: true
   end
 
+  create_table "guidance_revisions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "number", null: false
+    t.boolean "library", default: false, null: false
+    t.boolean "ai", default: false, null: false
+    t.datetime "created_at", null: false
+    t.index ["user_id", "number"], name: "index_guidance_revisions_on_user_id_and_number", unique: true
+  end
+
   create_table "ingredients", force: :cascade do |t|
     t.bigint "user_id"
     t.string "key"
@@ -373,7 +382,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -492,7 +501,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
     t.datetime "updated_at", null: false
     t.string "tc_stage"
     t.bigint "split_from_id"
+    t.boolean "guidance_library", default: false, null: false
+    t.boolean "guidance_ai", default: false, null: false
+    t.bigint "guidance_revision_id", null: false
     t.index ["acquisition_id"], name: "index_plants_on_acquisition_id"
+    t.index ["guidance_revision_id"], name: "index_plants_on_guidance_revision_id"
     t.index ["split_from_id"], name: "index_plants_on_split_from_id"
     t.index ["tags"], name: "index_plants_on_tags", using: :gin
     t.index ["user_id", "number"], name: "index_plants_on_user_id_and_number", unique: true
@@ -646,6 +659,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
   add_foreign_key "environment_events", "users"
   add_foreign_key "environments", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "environments", "users"
+  add_foreign_key "guidance_revisions", "users"
   add_foreign_key "ingredients", "ingredients", column: "copied_from_id", on_delete: :nullify
   add_foreign_key "ingredients", "users"
   add_foreign_key "invitations", "sellers", on_delete: :cascade
@@ -669,6 +683,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_150000) do
   add_foreign_key "plant_setups", "users"
   add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
   add_foreign_key "plants", "acquisitions", on_delete: :nullify
+  add_foreign_key "plants", "guidance_revisions"
   add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "plants", "plants", column: "split_from_id", on_delete: :nullify
   add_foreign_key "plants", "users"

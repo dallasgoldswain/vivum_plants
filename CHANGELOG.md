@@ -219,6 +219,19 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   `offline-form` follows a `location` the server returns. Export includes purchase, stage,
   split and check details. Help topics `tissue-culture` and `splitting`;
   `collection.tissue_culture` marked implemented.
+- Guidance settings (B17): `guidance_revisions` (append-only, numbered per user) hold the
+  account's defaults; `User#guidance_defaults` is the newest, made as revision 1 with both
+  off when first needed, and `#save_guidance_defaults!` adds a revision only when a value
+  changes (ST02, ST03, D137). `plants.guidance_library`, `guidance_ai` and
+  `guidance_revision_id` (backfilled to revision 1); `Plant::Guidance` copies the defaults
+  on create, `guidance_status` gives matches, older or changed, and
+  `apply_guidance_defaults!` changes only the switches (ST01, ST04, D138–D140). Splits copy
+  the source's switches. Settings → Guidance (`/settings/guidance`) with the ST03 warning
+  dialog and revision list; a Guidance section on the plant page with a comparison dialog;
+  `GuidanceApplicationsController` applies defaults to plants chosen from the collection.
+  The AI switch stays hidden until `care.ai_guidance` (D135). Export section
+  `guidance_defaults` and plant guidance; help topic `guidance-settings`; new flag
+  `care.guidance_settings` marked implemented.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

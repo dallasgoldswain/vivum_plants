@@ -40,14 +40,18 @@ class AccountExport
       user.data_requests.order(:created_at).map { it.slice(:kind, :status, :message, :outcome, :due_on, :created_at, :completed_at) }
     },
     "plants" => ->(user) {
-      user.plants.includes(:acquisition, :status_changes, :split_from).order(:number).map do |plant|
+      user.plants.includes(:acquisition, :status_changes, :split_from, :guidance_revision).order(:number).map do |plant|
         plant.slice(:number, :display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :origin_note, :quantity, :notes, :tags, :status, :status_on, :created_at, :updated_at).merge(
           record_id: plant.record_id,
           acquisition: plant.acquisition&.slice(:name, :tissue_culture, :acquired_on, :source, :cost_cents, :currency, :order_reference, :quantity, :arrival_notes, :container_condition, :deflasked_on),
           tc_stage: plant.tc_stage, split_from: plant.split_from&.record_id,
+          guidance: { library: plant.guidance_library, ai: plant.guidance_ai, defaults_revision: plant.guidance_revision.number },
           status_history: plant.status_changes.map { it.slice(:status, :effective_on, :reason, :created_at) }
         )
       end
+    },
+    "guidance_defaults" => ->(user) {
+      user.guidance_revisions.order(:number).map { it.slice(:number, :library, :ai, :created_at) }
     },
     "care_events" => ->(user) {
       user.care_events.includes(:plant, :environment, :from_environment, :plant_setup, :care_task).order(:occurred_at).map do |event|

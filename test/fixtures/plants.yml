@@ -1,6 +1,7 @@
 # Two of the same cultivar stay separate records (UX01).
 monstera_one:
   user: collector
+  guidance_revision: collector_first
   number: 1
   display_name: Monstera
   botanical_name: Monstera deliciosa
@@ -11,6 +12,7 @@ monstera_one:
 
 monstera_two:
   user: collector
+  guidance_revision: collector_first
   number: 2
   display_name: Monstera
   botanical_name: Monstera deliciosa
@@ -21,6 +23,7 @@ monstera_two:
 
 anubias:
   user: collector
+  guidance_revision: collector_first
   number: 3
   display_name: Anubias
   botanical_name: Anubias barteri
@@ -31,6 +34,7 @@ anubias:
 
 old_fern:
   user: collector
+  guidance_revision: collector_first
   number: 4
   display_name: Bird's nest fern
   growing_context: terrarium
@@ -39,6 +43,7 @@ old_fern:
 
 owner_philodendron:
   user: owner
+  guidance_revision: owner_first
   number: 1
   display_name: Philodendron
   botanical_name: Philodendron gloriosum

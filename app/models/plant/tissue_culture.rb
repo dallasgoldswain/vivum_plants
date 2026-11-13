@@ -34,8 +34,8 @@ module Plant::TissueCulture
 
   # Moves part of this record's quantity into new records with their own numbers (PL06,
   # D133). The total never grows: 5 split as [3] keeps 2 here and makes one record of 3.
-  # Each new record copies identity, stage, environment, setup and purchase, and the ticked
-  # reminders.
+  # Each new record copies identity, stage, environment, setup, purchase and guidance switches
+  # (D138), and the ticked reminders.
   def split!(quantities, copy_schedules: [], on: Date.current)
     quantities = quantities.map(&:to_i).select(&:positive?)
     raise SplitRefused, "Enter how many go into each new record." if quantities.empty?
@@ -45,7 +45,7 @@ module Plant::TissueCulture
       environment = current_environment
       setup = current_setup
       created = quantities.map do |count|
-        user.plants.create!(slice(:display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :tc_stage, :origin_note, :tags, :acquisition_id)
+        user.plants.create!(slice(:display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :tc_stage, :origin_note, :tags, :acquisition_id, :guidance_library, :guidance_ai, :guidance_revision_id)
           .merge(quantity: count, split_from: self, status: active? ? status : "active")).tap do |part|
           part.move_to!(environment, on: on) if environment
           part.change_setup!(setup.slice(:container, :size, :size_unit, :watering_method, :recipe_version_id).symbolize_keys, on: on) if setup

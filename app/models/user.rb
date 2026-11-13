@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :otp_backup_codes, dependent: :delete_all
   has_many :notifications, as: :recipient, class_name: "Noticed::Notification", dependent: :destroy
   has_many :plants, dependent: :destroy
+  has_many :guidance_revisions, dependent: :delete_all
   has_many :acquisitions, dependent: :destroy
   has_many :care_events, dependent: :destroy
   has_many :photos, dependent: :destroy
@@ -71,6 +72,23 @@ class User < ApplicationRecord
     self.class.connection.select_value(
       self.class.sanitize_sql_array([ "UPDATE users SET last_plant_number = last_plant_number + 1 WHERE id = ? RETURNING last_plant_number", id ])
     ).to_i
+  end
+
+  # The current guidance defaults: the newest revision, made as revision 1 with both
+  # switches off the first time it's needed (D15, D137).
+  def guidance_defaults
+    @guidance_defaults ||= guidance_revisions.order(:number).last || guidance_revisions.create!(number: 1)
+  rescue ActiveRecord::RecordNotUnique
+    @guidance_defaults = guidance_revisions.order(:number).last
+  end
+
+  # Saves new defaults as the next revision; unchanged values add none (ST03, D137). Plants
+  # keep the revision they copied (ST02).
+  def save_guidance_defaults!(library:, ai: guidance_defaults.ai)
+    current = guidance_defaults
+    return current if current.library == library && current.ai == ai
+
+    @guidance_defaults = guidance_revisions.create!(number: current.number + 1, library: library, ai: ai)
   end
 
   # Tags this collector has used, for suggestions (D85).

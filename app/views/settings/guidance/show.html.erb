@@ -1,0 +1,97 @@
+<% content_for :title, "Guidance · VIVUM Plants" %>
+
+<div>
+  <p class="vv-kicker mb-2">Settings</p>
+
+  <div class="flex items-start justify-between gap-3">
+    <h1 class="vv-h2">Guidance</h1>
+    <%= help_link "guidance-settings" %>
+  </div>
+
+  <p class="vv-caption mt-1">
+    Defaults for plants you add. Each plant keeps its own settings, which you can
+    change on its page.
+  </p>
+</div>
+
+<div class="card max-w-2xl">
+  <header>
+    <h2>Defaults for new plants</h2>
+    <% if (note = guidance_pending_note) %>
+      <p><%= note %></p>
+    <% end %>
+  </header>
+
+  <section>
+    <%= form_with url: settings_guidance_path, method: :patch, id: "guidance-defaults", class: "form grid gap-3" do |form| %>
+      <% guidance_switches.each do |key, label| %>
+        <label class="flex min-h-11 items-center gap-3 text-sm font-normal">
+          <%= form.check_box key, { checked: @defaults.public_send(key), role: "switch", class: "input", id: "defaults_#{key}" }, "1", "0" %>
+          <%= label %>
+        </label>
+      <% end %>
+
+      <div>
+        <button type="button" class="btn" commandfor="guidance-defaults-warning" command="show-modal">
+          Save defaults
+        </button>
+      </div>
+    <% end %>
+
+    <%# The warning before saving (ST03); Cancel closes it and changes nothing. %>
+    <dialog id="guidance-defaults-warning" class="dialog" aria-labelledby="guidance-defaults-warning-title" closedby="any">
+      <div>
+        <header>
+          <h2 id="guidance-defaults-warning-title">Save new defaults?</h2>
+
+          <p>
+            These settings will apply to plants you add from now on. Existing plants
+            will keep their current settings. You can edit each plant's settings at
+            any time.
+          </p>
+        </header>
+
+        <footer>
+          <button type="button" class="btn-outline" commandfor="guidance-defaults-warning" command="close">
+            Cancel
+          </button>
+
+          <button type="submit" class="btn" form="guidance-defaults">Save defaults</button>
+        </footer>
+      </div>
+    </dialog>
+  </section>
+</div>
+
+<div class="card max-w-2xl">
+  <header>
+    <h2>Earlier defaults</h2>
+    <p>Each save is kept. Plants keep the defaults they were added with until you apply newer ones.</p>
+  </header>
+
+  <section>
+    <ul class="grid gap-2">
+      <% @revisions.each do |revision| %>
+        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2 last:border-0">
+          <span>
+            <%= guidance_switches.map { |key, label| "#{label} #{on_off(revision.public_send(key)).downcase}" }.join(" · ") %>
+            <% if revision == @defaults %>
+              <span class="badge-secondary">Current</span>
+            <% end %>
+          </span>
+
+          <span class="vv-caption">
+            <%= revision.number == 1 ? "Starting defaults" : "Saved #{l(revision.created_at.to_date, format: :long)}" %>
+            · <%= pluralize(@plant_counts.fetch(revision.id, 0), "plant") %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+
+    <% if Current.user.plants.where.not(guidance_revision: @defaults).exists? %>
+      <p class="mt-3">
+        <%= link_to "Apply current defaults to existing plants", new_guidance_application_path(status: "all"), class: "underline underline-offset-4" %>
+      </p>
+    <% end %>
+  </section>
+</div>

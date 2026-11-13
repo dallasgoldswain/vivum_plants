@@ -11,6 +11,7 @@ class Plant < ApplicationRecord
   include Searchable
   include Placement
   include TissueCulture
+  include Guidance
 
   belongs_to :user
   belongs_to :acquisition, optional: true

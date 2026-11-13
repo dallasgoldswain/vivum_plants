@@ -1,0 +1,86 @@
+<%#
+  A plant's guidance switches and where they came from (ST01, ST04, D139, D140). Changing
+  them affects this plant only.
+%>
+<% defaults = Current.user.guidance_defaults %>
+<% status = plant.guidance_status(defaults) %>
+<% changes = guidance_changes(plant, defaults) %>
+
+<div class="card" id="guidance">
+  <header>
+    <h2>Guidance</h2>
+    <p><%= guidance_status_label(status) %>.</p>
+  </header>
+
+  <section class="grid gap-3">
+    <%= form_with url: plant_guidance_path(plant), method: :patch, class: "form grid gap-3" do |form| %>
+      <% guidance_switches.each do |key, label| %>
+        <label class="flex min-h-11 items-center gap-3 text-sm font-normal">
+          <%= form.check_box key, { checked: plant.public_send(:"guidance_#{key}"), role: "switch", class: "input", id: "plant_guidance_#{key}" }, "1", "0" %>
+          <%= label %>
+        </label>
+      <% end %>
+
+      <% if (note = guidance_pending_note) %>
+        <p class="vv-caption"><%= note %></p>
+      <% end %>
+
+      <div class="flex flex-wrap gap-2">
+        <%= form.submit "Save for this plant", class: "btn-outline" %>
+
+        <% unless status == :matches %>
+          <button type="button" class="btn-ghost" commandfor="guidance-apply" command="show-modal">
+            Apply current defaults
+          </button>
+        <% end %>
+      </div>
+    <% end %>
+
+    <p class="vv-caption">
+      <%= link_to "Change your defaults", settings_guidance_path, class: "underline underline-offset-4" %>
+      for plants you add.
+    </p>
+  </section>
+
+  <% unless status == :matches %>
+    <dialog id="guidance-apply" class="dialog" aria-labelledby="guidance-apply-title" closedby="any">
+      <div>
+        <header>
+          <h2 id="guidance-apply-title">Apply current defaults?</h2>
+          <p>Only these switches change. Reminders and history stay as they are.</p>
+        </header>
+
+        <section>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Switch</th>
+                <th scope="col">Now</th>
+                <th scope="col">After</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% guidance_switches.each do |key, label| %>
+                <tr>
+                  <th scope="row" class="font-normal"><%= label %></th>
+                  <td><%= on_off(plant.public_send(:"guidance_#{key}")) %></td>
+                  <td><%= on_off(defaults.public_send(key)) %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+
+          <% if changes.empty? %>
+            <p class="vv-caption mt-2">The switches are already the same; this marks the plant as matching your defaults.</p>
+          <% end %>
+        </section>
+
+        <footer>
+          <button type="button" class="btn-outline" commandfor="guidance-apply" command="close">Cancel</button>
+          <%= button_to "Apply defaults", plant_guidance_application_path(plant), class: "btn", form: { class: "contents" } %>
+        </footer>
+      </div>
+    </dialog>
+  <% end %>
+</div>

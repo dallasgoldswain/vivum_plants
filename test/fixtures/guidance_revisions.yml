@@ -1,0 +1,7 @@
+collector_first:
+  user: collector
+  number: 1
+
+owner_first:
+  user: owner
+  number: 1
