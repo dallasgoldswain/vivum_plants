@@ -55,7 +55,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B12 | Substrate ingredients and versioned recipes, scaling | SU01–SU05, D96–D102 | B10 | Done |
 | B13 | Care events and quick care entry | CA01, UX02, PL04, D103–D110 | B10 | Done |
 | B14 | Reminders, schedules and Today inbox | CA02–CA05, PL03, D111–D120 | B13 | Done |
-| B15 | Shared environment maintenance | EN04 | B11, B14 | Planned |
+| B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Planned |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05 | B10, B14 | Planned |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05 | B10, B05 | Planned |
 | B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
@@ -600,3 +600,34 @@ signed-in request and changed under Account. Dev-server pages weren't clicked th
 because the only development account has two-step sign-in; headless Chrome tests cover Today
 offline and the date preview, and there's a Today screenshot. Help topics `reminders` and
 `today` need review.
+
+### B15 Shared environment maintenance — discussed 2026-11-13
+
+**Scope**
+- **Maintenance events (EN04, D121–D123):** `environment_events` (user, environment, kind or
+  custom label, when, note, optional amount with unit and product, idempotency key, photos),
+  with `environment_event_plants` linking the plants present at that time. Kinds: water
+  change, top-up, filter clean, dosing, substrate vacuum, glass clean, misting check,
+  ventilation check, equipment check, light check, custom. The environment type decides which
+  kinds show first.
+- **Logging (D122):** a Log maintenance card on the environment page with buttons opening
+  short `<dialog>` forms, all fields optional; Undo and "Add details" after saving; "Add a
+  reading" after a water change. Edit and delete.
+- **Plant timelines (D124):** each plant's timeline includes the maintenance it was present
+  for, labelled with the environment; the kind filter gains "Environment care".
+- **Reminders (D125):** `care_schedules` and `care_tasks` belong to a plant or an environment
+  (exactly one); Done on an environment task logs one environment event. Today shows an
+  Environments group above plant care. Archiving pauses, restoring resumes.
+- **Offline, history and data (D126):** the environment page lists maintenance with a kind
+  filter; logging and Today actions queue offline; export section and deletion warnings;
+  help topic `environment-maintenance`; `care.shared_maintenance` marked implemented.
+
+**Deferred:** maintenance for several environments at once; equipment records and their
+service history; dosing schedules calculated from tank volume.
+
+**Acceptance (EN04):** one water change in a tank with three plants creates one environment
+event linked to those three plants, and no plant care events; a plant moved out last week
+isn't linked; each linked plant's timeline shows "Water change in 60 cm tank"; deleting the
+event removes it from those timelines; a weekly water-change reminder shows on Today once,
+not per plant, and Done logs one event; archiving the environment pauses its reminder; a
+water change saved offline and synced twice creates one event.
