@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.reservations]
 prerequisites: [stock]
 keywords: [hold, reserve, reservation, expiry, release, fulfil, sold, buyer, available]
+reviewed: 2026-11-14
+reviewed_digest: 2fddae4b834611a92bac997ab48aa91f865fee815538030d72f9e18b4056b91f
 ---
 
 A hold keeps stock aside for someone, so it isn't available to anyone else.
