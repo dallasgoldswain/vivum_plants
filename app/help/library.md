@@ -6,6 +6,8 @@ audience: collector
 capabilities: [library.profiles]
 prerequisites: [adding-a-plant]
 keywords: [library, profile, species, care notes, copy, platform, codex, botanical name, synonym, link]
+reviewed: 2026-11-14
+reviewed_digest: 324fb7ee3cd78ab0500d21ee0c2e958f34e04c91c11f52e93d47b02e90e1b026
 ---
 
 A profile holds what you know about growing one kind of plant: care notes for
