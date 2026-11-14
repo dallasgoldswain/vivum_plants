@@ -783,3 +783,38 @@ the acceptance cases; Today's choice card, the platform library, a plant's sugge
 before and after a profile edit, the profile form and the phone-size library and Today were
 checked in a browser. Help topics `library` and `library-suggestions` need review.
 
+
+### B19 Stock items, locations, holds and the ledger — discussed 2026-11-14
+
+**Scope**
+- **Items (SE01, D155, D156):** `stock_items` (seller, kind specimen or batch, code from a
+  per-seller counter or the seller's own, name, cultivar, botanical name, size or pot,
+  price and cost in cents, notes, photos, optional linked plant). Sell → Stock lists items
+  with search, location and availability filters.
+- **Locations and ledger (SE02, D157, D158):** `stock_locations` per seller;
+  `stock_movements` (item, kind, quantity, location, to-location for moves, reason, member,
+  occurred at, optional hold) are append-only. Balances per item and location: saleable,
+  unavailable, held, available. Receive, move, mark unavailable or available, loss.
+- **Holds (D159):** `stock_holds` (item, location, quantity, for whom, expiry, member,
+  state active, released, fulfilled, expired). Each change locks the item and checks
+  availability in one transaction; a specimen has at most one active hold; a recurring
+  job expires holds.
+- **Counting (D160):** counted quantity per location records an adjustment for the
+  difference, never below what's held.
+- **Roles (D161):** owners and managers do everything; host/packers move, mark
+  unavailable or available and record losses, and never see prices or costs.
+- **Collection link (SE04, D162):** "Move to stock" from a member's plant and "Move to my
+  collection" from a linked specimen; fulfilling a linked specimen writes a sale entry on
+  the plant's timeline; a "moved to stock" plant status.
+- **Photos and data (D163):** item photos against the seller's photo limit; seller export
+  of stock, locations, movements and holds; help topics; `seller.stock` implemented.
+
+**Deferred:** listings and sale cards (B20); buyers on holds (B21); orders and
+reservations from orders (B22); CSV import (B24); live sale lots (B25); stocktake sessions.
+
+**Acceptance:** receive 5, hold 2, mark 1 unavailable → 2 available; fulfilling the hold
+removes 2 from on hand and clears it; two holds for the last specimen → one succeeds;
+an expired hold releases once; a count can't go below what's held; a packer can move stock
+but never sees a price or cost; moving a plant to stock creates a linked specimen and keeps
+the plant's history, and fulfilling it records the sale on the plant's timeline; another
+seller's stock is never visible.
