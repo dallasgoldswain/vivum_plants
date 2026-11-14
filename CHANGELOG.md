@@ -268,6 +268,23 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   seller's plan (`Photo.quota_for_seller`); CSV downloads of stock and movements (D163).
   Sell → Stock and Locations pages; help topics `stock` and `stock-holds`; `seller.stock`
   and `seller.reservations` marked implemented.
+- Listings and sale cards (B20): `listings` (per-seller `L-0001` references from
+  `sellers.last_listing_number`, own title and price, optional shown-quantity cap, chosen
+  item photos, details and caption; draft, active, paused, ended; one live listing per
+  item by partial unique index). A listing never holds stock: it shows the item's
+  available stock, reads as sold out at 0, and ends when its specimen is fulfilled (SE03,
+  SE04, D164, D165). `sellers.listing_details` defaults collection and delivery details;
+  captions follow a template until written (D168). `SaleCard::Renderer` draws square and
+  Status cards with libvips (photo, name sized or shortened so the price always shows,
+  price, size and business name); `sale_cards` store the title, price and photo shown,
+  so `#stale_reason` flags changes (SE07, D166, D167). `share_controller.js` uses the Web
+  Share API with the card file, with Download, Copy caption and a wa.me link (SE08, D169).
+  Cards count against the seller's photo limit and `DeleteOldSaleCardsJob` removes them
+  after 90 days (D170). The Docker image installs `fonts-dejavu-core` for card text. Help
+  topics `listings` and `sale-cards`; `seller.listings`, `seller.sale_cards` and
+  `whatsapp.share` marked implemented. On macOS, forked test workers draw a stand-in for
+  card text, since CoreText crashes after fork; CI on Linux renders real text. Views
+  added in B17–B19 are now formatted with `herb format`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

@@ -1,0 +1,176 @@
+<% content_for :title, "#{@listing.reference} #{@listing.title} · VIVUM Plants" %>
+<% caption = @listing.caption_text %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <%= link_to "← Listings", sell_listings_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+    <h2 class="vv-h3 mt-2"><%= @listing.title %></h2>
+
+    <p class="vv-caption mt-1">
+      <%= @listing.reference %> · from
+      <%= link_to @listing.stock_item.code, sell_stock_item_path(@listing.stock_item), class: "underline underline-offset-4" %>
+      ·
+      <span class="font-medium"><%= @listing.display_state.capitalize %></span>
+    </p>
+
+    <p class="mt-1">
+      <%= rands(@listing.price_cents) %><%= " · #{@listing.size}" if @listing.size %>
+      · <%= @listing.available %>
+      available<%= " (showing at most #{@listing.listed_quantity})" if @listing.listed_quantity %>
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <% unless @listing.ended? %>
+      <%= link_to "Edit", edit_sell_listing_path(@listing), class: "btn-outline" %>
+    <% end %>
+
+    <% if @listing.draft? || @listing.paused? %>
+      <%= button_to (@listing.draft? ? "List it" : "Resume"), sell_listing_state_path(@listing), method: :patch, params: { state: "active" }, class: "btn" %>
+    <% end %>
+
+    <% if @listing.active? %>
+      <%= button_to "Pause", sell_listing_state_path(@listing), method: :patch, params: { state: "paused" }, class: "btn-outline" %>
+    <% end %>
+
+    <% unless @listing.ended? %>
+      <%= button_to "End", sell_listing_state_path(@listing), method: :patch, params: { state: "ended" }, class: "btn-ghost", data: { turbo_confirm: "End #{@listing.reference}? Stock doesn't change." } %>
+    <% end %>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[2fr_3fr]">
+  <div class="grid content-start gap-6">
+    <div class="card">
+      <header>
+        <h2>Caption</h2>
+
+        <p>
+          <%= @listing.caption.present? ? "Your own caption." : "From the template; edit the listing to write your own." %>
+        </p>
+      </header>
+
+      <section>
+        <p class="whitespace-pre-line rounded-md border border-border p-3 text-sm"><%= caption %></p>
+      </section>
+    </div>
+
+    <% if @listing.details.present? %>
+      <div class="card">
+        <header>
+          <h2>Collection and delivery</h2>
+        </header>
+
+        <section>
+          <p class="whitespace-pre-line"><%= @listing.details %></p>
+        </section>
+      </div>
+    <% end %>
+  </div>
+
+  <% if capability?("seller.sale_cards") %>
+    <div class="card" id="cards">
+      <header>
+        <h2>Sale cards</h2>
+
+        <p>
+          Images to share in groups and on Status. Sharing never holds stock or
+          creates an order.
+        </p>
+      </header>
+
+      <section class="grid gap-4">
+        <% if @listing.sellable? %>
+          <%= form_with url: sell_listing_sale_cards_path(@listing), class: "form flex flex-wrap items-end gap-2" do |form| %>
+            <div class="grid gap-2">
+              <%= label_tag :format_name, "Shape" %>
+              <%= select_tag :format_name, options_for_select([ [ "Square (groups)", "square" ], [ "Tall (Status)", "status" ] ]), class: "select w-auto" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag :file_type, "File" %>
+              <%= select_tag :file_type, options_for_select([ [ "JPEG", "jpeg" ], [ "PNG", "png" ] ]), class: "select w-auto" %>
+            </div>
+
+            <%= form.submit "Make a card", class: "btn" %>
+          <% end %>
+        <% else %>
+          <p class="vv-caption">
+            Cards can be made while the listing is live and has stock.
+          </p>
+        <% end %>
+
+        <% @cards.each do |card| %>
+          <% image_url = sell_listing_sale_card_path(@listing, card) %>
+          <% stale = card.stale_reason %>
+
+          <div
+            class="
+              grid gap-3 rounded-md border border-border p-3
+              sm:grid-cols-[10rem_1fr]
+            "
+            id="card-<%= card.id %>"
+            data-controller="share"
+            data-share-url-value="<%= image_url %>"
+            data-share-filename-value="<%= card.filename %>"
+            data-share-type-value="<%= card.image.content_type %>"
+            data-share-caption-value="<%= caption %>"
+          >
+            <%= image_tag image_url, alt: "Sale card for #{card.title} at #{rands(card.price_cents)}", class: "w-40 rounded border border-border", loading: "lazy" %>
+
+            <div class="grid content-start gap-2">
+              <p class="vv-caption">
+                <%= card.format == "status" ? "Tall" : "Square" %>
+                <%= card.file_type.upcase %> · made
+                <%= l(card.created_at, format: :short) %>
+              </p>
+
+              <% if stale %>
+                <div class="alert" role="status">
+                  <h3>Out of date</h3>
+
+                  <section>
+                    <%= stale %> Make a new card before sharing.
+                  </section>
+                </div>
+              <% end %>
+
+              <div class="flex flex-wrap gap-2">
+                <% if capability?("whatsapp.share") %>
+                  <button
+                    type="button"
+                    class="btn-sm"
+                    data-share-target="share"
+                    data-action="share#share"
+                    hidden
+                  >
+                    Share
+                  </button>
+                <% end %>
+
+                <%= link_to "Download", sell_listing_sale_card_path(@listing, card, download: 1), class: "btn-sm-outline" %>
+
+                <button
+                  type="button"
+                  class="btn-sm-ghost"
+                  data-action="share#copy"
+                >
+                  Copy caption
+                </button>
+
+                <% if capability?("whatsapp.share") %>
+                  <%= link_to "Send on WhatsApp", "https://wa.me/?text=#{ERB::Util.url_encode(caption)}", class: "btn-sm-ghost", target: "_blank", rel: "noopener" %>
+                <% end %>
+              </div>
+
+              <p class="vv-caption" data-share-target="status" role="status"></p>
+            </div>
+          </div>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
+</div>

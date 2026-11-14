@@ -157,6 +157,8 @@ Sell → Stock (B19, SE01, SE02, SE04, D155–D163). Everything belongs to a sel
 - **Roles** live in `StockItemPolicy` (`manage_stock?` for owners and managers; `handle?` for any member; `see_prices?`).
 - **Collection link:** `Stock::Transfer.from_plant!` creates a linked specimen and sets the plant to `moved_to_stock`; `Stock::Ledger#fulfil!` marks a linked plant sold; `#to_collection!` reverses a transfer for the member who made it.
 
+- **Listings** (B20) never hold stock: `Listing#available` reads the item's availability. `SaleCard::Renderer` draws cards with libvips text (Pango); the Docker image needs `fonts-dejavu-core`. On macOS, libvips text uses CoreText, which crashes in forked processes, so `test/test_helper.rb` swaps in a stand-in for text inside forked test workers; CI on Linux renders real text.
+
 ## Collection
 
 Collectors' plant records, environments, substrates, care, reminders, environment maintenance, tissue culture, guidance settings and the library (B10–B18, PL01–PL06, EN01–EN04, SU01–SU05, TC01–TC05, CA01–CA05, UX01, UX02, OF02, OF03, ST01–ST04, GU01, GU03, D80–D154). Plants, environments and recipes belong to one user only; controllers load them through `Current.user.plants`, `Current.user.environments` and `Current.user.recipes`, so another user's record is a 404.

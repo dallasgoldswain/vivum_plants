@@ -19,9 +19,9 @@
       <h2>Use library care suggestions?</h2>
 
       <p>
-        Plants linked to a profile in your library can suggest reminders and show care
-        notes. Nothing is added until you accept it. You can change this any time in
-        Account → Guidance settings.
+        Plants linked to a profile in your library can suggest reminders and
+        show care notes. Nothing is added until you accept it. You can change
+        this any time in Account → Guidance settings.
       </p>
     </header>
 
@@ -33,7 +33,11 @@
 <% end %>
 
 <% if @suggestion_plants&.any? %>
-  <section class="grid gap-2" id="library-suggestions" aria-labelledby="library-suggestions-title">
+  <section
+    class="grid gap-2"
+    id="library-suggestions"
+    aria-labelledby="library-suggestions-title"
+  >
     <h2 class="vv-h4" id="library-suggestions-title">Suggestions to review</h2>
 
     <p>

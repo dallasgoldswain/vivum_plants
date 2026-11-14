@@ -80,7 +80,10 @@ class Stock::Ledger
       hold.update!(state: "fulfilled", resolved_at: Time.current)
       change(hold.stock_location, saleable: -hold.quantity)
       record(:fulfil, hold.quantity, hold.stock_location, stock_hold: hold, reason: hold.held_for)
-      item.plant&.change_status!("sold", reason: "Sold by #{item.seller.name} (#{item.code})") if item.specimen?
+      if item.specimen?
+        item.plant&.change_status!("sold", reason: "Sold by #{item.seller.name} (#{item.code})")
+        item.listings.where.not(state: "ended").find_each(&:end!)
+      end
       hold
     end
   end

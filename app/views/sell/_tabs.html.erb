@@ -16,6 +16,10 @@
     <%= nav_link_to "Stock", sell_stock_items_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>
 
+  <% if capability?("seller.listings") && Current.membership.manager_or_owner? %>
+    <%= nav_link_to "Listings", sell_listings_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
+  <% end %>
+
   <% if capability?("seller.members") %>
     <%= nav_link_to "Members", sell_members_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>

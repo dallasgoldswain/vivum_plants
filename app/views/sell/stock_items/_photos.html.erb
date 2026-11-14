@@ -2,8 +2,13 @@
 <div class="card" id="photos">
   <header>
     <h2>Photos</h2>
+
     <% if manage %>
-      <p><%= quota.used %> of <%= number_with_delimiter quota.limit, delimiter: " " %> business photos used.</p>
+      <p>
+        <%= quota.used %> of
+        <%= number_with_delimiter quota.limit, delimiter: " " %> business photos
+        used.
+      </p>
     <% end %>
   </header>
 

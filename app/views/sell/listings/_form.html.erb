@@ -1,0 +1,91 @@
+<%= form_with model: [ :sell, listing ], class: "form grid gap-4" do |form| %>
+  <% if listing.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h3>Couldn't save</h3>
+      <section><%= listing.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <% if listing.new_record? %>
+    <%= hidden_field_tag :stock_item_id, listing.stock_item_id, id: nil %>
+  <% end %>
+
+  <div class="grid gap-2">
+    <%= form.label :title, "Name on the listing" %>
+    <%= form.text_field :title, required: true, maxlength: 120 %>
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-3">
+    <div class="grid gap-2">
+      <%= form.label :price, "Price (R)" %>
+      <%= form.number_field :price, required: true, min: 0, step: "0.01", inputmode: "decimal" %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :size, "Size or pot" %>
+      <%= form.text_field :size, maxlength: 60 %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :listed_quantity, "Show at most" %>
+      <%= form.number_field :listed_quantity, min: 1, step: 1, placeholder: "All available" %>
+    </div>
+  </div>
+
+  <% photos = listing.stock_item.photos.with_attached_image.newest_first %>
+
+  <% if photos.any? %>
+    <fieldset class="grid gap-2">
+      <legend class="mb-1 text-sm font-medium">
+        Photos (the first ticked one goes on cards)
+      </legend>
+
+      <ul class="vv-photo-grid">
+        <% photos.each do |photo| %>
+          <li>
+            <label class="grid gap-1 text-sm font-normal">
+              <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo of #{listing.stock_item.name}", class: "vv-photo-thumb" %>
+
+              <span class="flex items-center gap-2">
+                <%= check_box_tag "listing[photo_ids][]", photo.id, listing.photo_ids.include?(photo.id), id: "listing_photo_#{photo.id}" %>
+                Use
+              </span>
+            </label>
+          </li>
+        <% end %>
+      </ul>
+
+      <%= hidden_field_tag "listing[photo_ids][]", "", id: nil %>
+    </fieldset>
+  <% else %>
+    <p class="vv-caption">
+      No photos of <%= listing.stock_item.code %> yet.
+      <%= link_to "Add some on the item", sell_stock_item_path(listing.stock_item, anchor: "photos"), class: "underline underline-offset-4" %>
+      for cards with a picture.
+    </p>
+  <% end %>
+
+  <div class="grid gap-2">
+    <%= form.label :details, "Collection and delivery" %>
+    <%= form.text_area :details, rows: 2, maxlength: 500, placeholder: "e.g. Collect in Pretoria East · Courier nationwide" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= form.label :caption %>
+    <%= form.text_area :caption, rows: 5, maxlength: 1000, placeholder: listing.default_caption %>
+
+    <p class="vv-caption">
+      Leave blank to use the template shown, which follows the name, price and
+      details.
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <% if listing.new_record? %>
+      <%= button_tag "List it now", name: "activate", value: "1", class: "btn" %>
+      <%= button_tag "Save as draft", name: "activate", value: "0", class: "btn-outline" %>
+    <% else %>
+      <%= form.submit "Save", class: "btn" %>
+    <% end %>
+  </div>
+<% end %>

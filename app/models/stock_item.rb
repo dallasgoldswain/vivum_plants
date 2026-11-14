@@ -12,6 +12,7 @@ class StockItem < ApplicationRecord
   has_many :holds, class_name: "StockHold", dependent: :destroy
   has_many :movements, class_name: "StockMovement", dependent: :delete_all
   has_many :photos, dependent: :destroy
+  has_many :listings, dependent: :destroy
 
   enum :kind, KINDS.index_by(&:itself), validate: true
 

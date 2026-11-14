@@ -1,0 +1,25 @@
+<% content_for :title, "Listing settings · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="card max-w-2xl">
+  <header>
+    <h2>Listing settings</h2>
+
+    <p>
+      New listings start with these details; you can change them on each
+      listing.
+    </p>
+  </header>
+
+  <section>
+    <%= form_with url: sell_stock_settings_path, method: :patch, class: "form grid gap-3" do |form| %>
+      <div class="grid gap-2">
+        <%= form.label :listing_details, "Collection and delivery" %>
+        <%= form.text_area :listing_details, value: Current.seller.listing_details, rows: 3, maxlength: 500, placeholder: "e.g. Collect in Pretoria East · Courier nationwide" %>
+      </div>
+
+      <div><%= form.submit "Save", class: "btn" %></div>
+    <% end %>
+  </section>
+</div>

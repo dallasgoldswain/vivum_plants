@@ -11,13 +11,12 @@
       <legend class="mb-1 text-sm font-medium">What is it?</legend>
 
       <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
-        <%= form.radio_button :kind, "batch" %>
-        A batch of identical plants (e.g. 10 pots of the same cultivar)
+        <%= form.radio_button :kind, "batch" %> A batch of identical plants
+        (e.g. 10 pots of the same cultivar)
       </label>
 
       <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
-        <%= form.radio_button :kind, "specimen" %>
-        One unique plant (a specimen)
+        <%= form.radio_button :kind, "specimen" %> One unique plant (a specimen)
       </label>
     </fieldset>
   <% end %>

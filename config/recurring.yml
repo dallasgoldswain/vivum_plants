@@ -10,6 +10,9 @@
 #     schedule: at 5am every day
 
 development:
+  delete_old_sale_cards:
+    class: DeleteOldSaleCardsJob
+    schedule: every day at 4am
   expire_stock_holds:
     class: ExpireStockHoldsJob
     schedule: every 5 minutes
@@ -21,6 +24,9 @@ development:
     schedule: every day at 3am
 
 production:
+  delete_old_sale_cards:
+    class: DeleteOldSaleCardsJob
+    schedule: every day at 4am
   expire_stock_holds:
     class: ExpireStockHoldsJob
     schedule: every 5 minutes

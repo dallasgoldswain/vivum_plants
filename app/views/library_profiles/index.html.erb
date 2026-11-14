@@ -31,7 +31,8 @@
         <% else %>
           Your library is empty. Copy a profile from the
           <%= link_to "platform library", platform_profiles_path, class: "underline underline-offset-4" %>
-          (<%= pluralize(@platform_count, "profile") %>) or start a new one, then link your plants to it.
+          (<%= pluralize(@platform_count, "profile") %>) or start a new one,
+          then link your plants to it.
         <% end %>
       </p>
     </section>

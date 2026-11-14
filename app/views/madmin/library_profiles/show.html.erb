@@ -2,8 +2,8 @@
 
 <header class="header">
   <h1>
-    <%= link_to "Platform library", madmin_library_profiles_path %>
-    / <%= @profile.botanical_name %>
+    <%= link_to "Platform library", madmin_library_profiles_path %> /
+    <%= @profile.botanical_name %>
   </h1>
 
   <div class="actions">
@@ -11,7 +11,10 @@
   </div>
 </header>
 
-<p>Key: <code><%= @profile.key %></code>. Collectors see only the published version; their copies never change.</p>
+<p>
+  Key: <code><%= @profile.key %></code>. Collectors see only the published
+  version; their copies never change.
+</p>
 
 <div class="table-scroll">
   <table>
@@ -33,7 +36,10 @@
           <td><%= version.status.humanize %></td>
           <td><%= version.botanical_name %></td>
           <td><%= version.reviewed_on %></td>
-          <td><%= version.published_at && "#{l(version.published_at, format: :short)} by #{version.published_by&.email_address}" %></td>
+
+          <td>
+            <%= version.published_at && "#{l(version.published_at, format: :short)} by #{version.published_by&.email_address}" %>
+          </td>
 
           <td class="actions">
             <% if version.editable? %>

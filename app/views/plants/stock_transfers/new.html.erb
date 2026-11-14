@@ -12,9 +12,10 @@
 <div class="card max-w-2xl">
   <header>
     <p>
-      <%= @plant.display_name %> (<%= @plant.record_id %>) becomes a specimen in the
-      business's stock, linked to this plant. Its history stays here, and its status
-      changes to moved to stock. You can move it back while nothing is held.
+      <%= @plant.display_name %> (<%= @plant.record_id %>) becomes a specimen in
+      the business's stock, linked to this plant. Its history stays here, and
+      its status changes to moved to stock. You can move it back while nothing
+      is held.
     </p>
   </header>
 
@@ -22,7 +23,8 @@
     <% if @locations.empty? %>
       <p>
         <%= Current.seller.name %> has no stock locations yet.
-        <%= link_to "Add one", sell_stock_locations_path, class: "underline underline-offset-4" %> first.
+        <%= link_to "Add one", sell_stock_locations_path, class: "underline underline-offset-4" %>
+        first.
       </p>
     <% else %>
       <%= form_with url: plant_stock_transfer_path(@plant), class: "form grid gap-3 sm:grid-cols-2" do |form| %>

@@ -11,13 +11,17 @@
       <dl class="vv-details">
         <% notes.each do |field, text| %>
           <dt><%= LibraryHelper::NOTE_LABELS[field] %></dt>
+
           <dd class="whitespace-pre-line"><%= text %></dd>
         <% end %>
       </dl>
     <% end %>
 
     <% if (reminders = profile.suggestions_for(context)).any? %>
-      <p class="vv-caption">Suggested reminders: <%= reminders.map { suggestion_title(it) }.join(" · ") %></p>
+      <p class="vv-caption">
+        Suggested reminders:
+        <%= reminders.map { suggestion_title(it) }.join(" · ") %>
+      </p>
     <% end %>
   </section>
 <% end %>

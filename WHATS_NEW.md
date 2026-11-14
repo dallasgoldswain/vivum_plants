@@ -96,6 +96,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Sellers can keep stock in VIVUM: unique specimens and batches with their own codes,
   by location, with every delivery, move, loss and count in the history. Hold plants for
   someone until a time you choose. Host/packers can move stock but never see prices.
+- List stock for sale with its own name, price, photos and collection details, and make
+  sale card images for groups and Status. Share them straight to WhatsApp with a ready
+  caption. Cards that no longer match the price are marked out of date.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

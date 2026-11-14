@@ -31,7 +31,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
 | B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
-| B20 | Listings and sale cards (share/download) | SE03, SE07, SE08 | B19 | Planned |
+| B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
 | B21 | Buyers, aliases and phone verification | BY01–BY03 | B02 | Planned |
 | B22 | Orders, holds, cancellations, returns | SE05, SE06 | B19, B21 | Planned |
 | B23 | Manual payments and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
@@ -831,7 +831,7 @@ locations) were checked in a browser, also at phone size. Help topics `stock` an
 `stock-holds` need review.
 
 
-### B20 Listings, sale cards and sharing — discussed 2026-11-14
+### B20 Listings, sale cards and sharing — discussed and built 2026-11-14
 
 **Scope**
 - **Listings (SE03, D164, D165):** `listings` (seller, stock item, reference L-0001 from a
@@ -860,3 +860,15 @@ stock; an R450 listing's card shows R450 and the chosen photo; a very long name 
 the price; a card shows no cost, holds or notes; changing the price flags earlier cards as
 stale; sharing never holds stock or creates an order; fulfilling a listed specimen ends its
 listing; a host/packer can't open listings.
+
+**Built notes:** Card text is drawn with libvips and Pango. The price is drawn on its own,
+and the name tries smaller sizes and then shortens with an ellipsis until it fits, so the
+price always shows. The Docker image now installs `fonts-dejavu-core`. On macOS, CoreText
+crashes inside forked processes, so forked test workers draw a stand-in block the size of
+the text; CI on Linux and production render real text, and the browser check rendered
+real cards. Card images are served through the seller's own route, not public links.
+`herb format` had not been run on the views added in B17–B19; they're formatted now, as
+CI checks. Tests cover the acceptance cases; listing an item, making a Status card, the
+stale flag after a price change and the listings page at phone size were checked in a
+browser. Help topics `listings` and `sale-cards` need review.
+

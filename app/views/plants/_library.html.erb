@@ -3,6 +3,7 @@
   and suggested reminders for this plant's context (GU03, D145). Nothing changes until a
   suggestion is accepted; edits to the profile come back here for review (D152).
 %>
+
 <section class="grid gap-3" id="library">
   <% if (profile = plant.library_profile) %>
     <div class="flex flex-wrap items-center justify-between gap-2">
@@ -17,9 +18,14 @@
 
     <% if capability?("care.library_guidance") %>
       <% if !plant.guidance_library? %>
-        <p class="vv-caption">Turn on library suggestions below to see what this profile suggests.</p>
+        <p class="vv-caption">
+          Turn on library suggestions below to see what this profile suggests.
+        </p>
       <% elsif !plant.active? %>
-        <p class="vv-caption">Suggestions pause while the plant is <%= plant_status_label(plant.status).downcase %>.</p>
+        <p class="vv-caption">
+          Suggestions pause while the plant is
+          <%= plant_status_label(plant.status).downcase %>.
+        </p>
       <% else %>
         <% suggestions = plant.library_suggestions %>
         <p class="vv-caption">Library · <%= library_source_label(profile) %></p>
@@ -27,7 +33,8 @@
         <% if !suggestions.covered? %>
           <p>
             Your <%= profile.botanical_name %> profile has nothing for
-            <%= growing_context_label(plant.growing_context).downcase %> plants yet.
+            <%= growing_context_label(plant.growing_context).downcase %> plants
+            yet.
             <%= link_to "Add some", edit_library_profile_path(profile), class: "underline underline-offset-4" %>.
           </p>
         <% else %>
@@ -35,6 +42,7 @@
             <dl class="vv-details">
               <% suggestions.notes.each do |field, text| %>
                 <dt><%= LibraryHelper::NOTE_LABELS[field] %></dt>
+
                 <dd class="whitespace-pre-line"><%= text %></dd>
               <% end %>
             </dl>
@@ -43,7 +51,11 @@
           <% if suggestions.updated? %>
             <div class="alert" role="status">
               <h3>The <%= profile.botanical_name %> profile was edited</h3>
-              <section>Your reminders stay as they are. Compare them with the new suggestions below.</section>
+
+              <section>
+                Your reminders stay as they are. Compare them with the new
+                suggestions below.
+              </section>
             </div>
           <% end %>
 
@@ -54,14 +66,18 @@
               <% suggestions.pending.each_with_index do |item, index| %>
                 <% suggestion = item.suggestion %>
 
-                <li class="grid gap-2 rounded-md border border-border p-3" id="suggestion-<%= index %>">
+                <li
+                  class="grid gap-2 rounded-md border border-border p-3"
+                  id="suggestion-<%= index %>"
+                >
                   <p class="font-medium"><%= suggestion_title(suggestion) %></p>
 
                   <% if item.replaces? %>
                     <p class="vv-caption">
                       <%= item.updated? ? "Changed in your profile." : "You already have this reminder." %>
                       Now: <%= schedule_cadence(item.existing).downcase %>.
-                      Suggested: every <%= suggestion.interval %> <%= CareHelper::INTERVAL_UNIT_LABELS[suggestion.interval_unit] %>.
+                      Suggested: every <%= suggestion.interval %>
+                      <%= CareHelper::INTERVAL_UNIT_LABELS[suggestion.interval_unit] %>.
                     </p>
                   <% end %>
 
@@ -89,18 +105,30 @@
               <% end %>
             </ul>
           <% elsif suggestions.suggestions.any? %>
-            <p class="vv-caption">You've dealt with every suggested reminder.</p>
+            <p class="vv-caption">
+              You've dealt with every suggested reminder.
+            </p>
           <% end %>
         <% end %>
       <% end %>
     <% end %>
   <% elsif (match = plant.library_match) %>
     <% if match.platform? %>
-      <p>The platform library has a <span class="italic"><%= match.botanical_name %></span> profile.</p>
-      <div><%= button_to "Copy it to your library and link it", plant_library_link_path(plant), params: { platform_profile_id: match.id }, class: "btn-sm-outline" %></div>
+      <p>
+        The platform library has a
+        <span class="italic"><%= match.botanical_name %></span> profile.
+      </p>
+      <div>
+        <%= button_to "Copy it to your library and link it", plant_library_link_path(plant), params: { platform_profile_id: match.id }, class: "btn-sm-outline" %>
+      </div>
     <% else %>
-      <p>Your library has a <span class="italic"><%= match.botanical_name %></span> profile.</p>
-      <div><%= button_to "Link this plant to it", plant_library_link_path(plant), params: { library_profile_id: match.id }, class: "btn-sm-outline" %></div>
+      <p>
+        Your library has a
+        <span class="italic"><%= match.botanical_name %></span> profile.
+      </p>
+      <div>
+        <%= button_to "Link this plant to it", plant_library_link_path(plant), params: { library_profile_id: match.id }, class: "btn-sm-outline" %>
+      </div>
     <% end %>
   <% else %>
     <p class="vv-caption">

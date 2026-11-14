@@ -5,6 +5,7 @@
 
 <div>
   <%= link_to "← Stock", sell_stock_items_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
   <h2 class="vv-h3 mt-2">Locations</h2>
 </div>
 
@@ -13,7 +14,12 @@
     <% if @locations.any? %>
       <ul class="grid gap-2">
         <% @locations.each do |location| %>
-          <li class="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-2 last:border-0">
+          <li
+            class="
+              flex flex-wrap items-end justify-between gap-2 border-b
+              border-border pb-2 last:border-0
+            "
+          >
             <% if manage && !location.archived? %>
               <%= form_with url: sell_stock_location_path(location), method: :patch, class: "form flex flex-wrap items-end gap-2" do |form| %>
                 <%= label_tag "location_#{location.id}_name", "Name of #{location.name}", class: "sr-only" %>

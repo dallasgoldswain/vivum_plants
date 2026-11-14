@@ -1,0 +1,17 @@
+<% content_for :title, "Edit listing · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="card max-w-3xl">
+  <header>
+    <h2>Edit listing</h2>
+
+    <p>
+      From
+      <%= link_to @listing.stock_item.code, sell_stock_item_path(@listing.stock_item), class: "underline underline-offset-4" %>.
+      A listing never holds stock: it shows what's available.
+    </p>
+  </header>
+
+  <section><%= render "sell/listings/form", listing: @listing %></section>
+</div>

@@ -1,6 +1,8 @@
 <%= form_with model: version, url: url, method: method, local: true do |form| %>
   <% if version.errors.any? %>
-    <div class="alert alert-danger"><%= version.errors.full_messages.to_sentence %>.</div>
+    <div class="alert alert-danger">
+      <%= version.errors.full_messages.to_sentence %>.
+    </div>
   <% end %>
 
   <% if local_assigns[:key_field] %>

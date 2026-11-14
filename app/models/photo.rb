@@ -41,7 +41,8 @@ class Photo < ApplicationRecord
 
   # Stock photos count against the seller's plan, not the member who added them (D163).
   def self.quota_for_seller(seller)
-    Quota.new(used: joins(:stock_item).where(stock_items: { seller_id: seller.id }).count, limit: seller.plan.photo_limit)
+    cards = SaleCard.joins(:listing).where(listings: { seller_id: seller.id }).count
+    Quota.new(used: joins(:stock_item).where(stock_items: { seller_id: seller.id }).count + cards, limit: seller.plan.photo_limit)
   end
 
   Quota = Data.define(:used, :limit) do

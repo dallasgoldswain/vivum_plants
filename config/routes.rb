@@ -129,6 +129,14 @@ Rails.application.routes.draw do
     end
     resources :stock_locations, path: "locations", only: %i[ index create update ]
     resource :stock_export, only: :show
+    resource :stock_settings, only: %i[ edit update ]
+    # Listings and sale cards (SE03, SE07, SE08, D164–D170).
+    resources :listings, except: :destroy do
+      scope module: :listings do
+        resource :state, only: :update
+        resources :sale_cards, only: %i[ create show ]
+      end
+    end
     resources :members, only: %i[ index update destroy ], controller: "memberships"
     resources :invitations, only: %i[ create destroy ] do
       post :resend, on: :member

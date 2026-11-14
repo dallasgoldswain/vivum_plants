@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -400,6 +400,30 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
     t.check_constraint "num_nonnulls(user_id, seller_id) <= 1", name: "library_profiles_one_owner"
   end
 
+  create_table "listings", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.bigint "stock_item_id", null: false
+    t.integer "number", null: false
+    t.string "reference", null: false
+    t.string "title", null: false
+    t.integer "price_cents", null: false
+    t.integer "listed_quantity"
+    t.bigint "photo_ids", default: [], null: false, array: true
+    t.string "size"
+    t.text "details"
+    t.text "caption"
+    t.string "state", default: "draft", null: false
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["seller_id", "reference"], name: "index_listings_on_seller_id_and_reference", unique: true
+    t.index ["seller_id"], name: "index_listings_on_seller_id"
+    t.index ["stock_item_id"], name: "index_listings_on_stock_item_id"
+    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY ((ARRAY['active'::character varying, 'paused'::character varying])::text[]))"
+    t.check_constraint "listed_quantity IS NULL OR listed_quantity > 0", name: "listings_listed_quantity_positive"
+    t.check_constraint "price_cents >= 0", name: "listings_price_not_negative"
+  end
+
   create_table "measurement_values", force: :cascade do |t|
     t.bigint "measurement_id", null: false
     t.string "metric", null: false
@@ -646,6 +670,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
     t.index ["referral_code_id"], name: "index_refer_visits_on_referral_code_id"
   end
 
+  create_table "sale_cards", force: :cascade do |t|
+    t.bigint "listing_id", null: false
+    t.string "format", null: false
+    t.string "file_type", null: false
+    t.integer "price_cents", null: false
+    t.string "title", null: false
+    t.bigint "photo_id"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_sale_cards_on_created_by_id"
+    t.index ["listing_id"], name: "index_sale_cards_on_listing_id"
+  end
+
   create_table "sellers", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -654,6 +692,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
     t.bigint "plan_id", null: false
     t.date "free_until"
     t.integer "last_stock_number", default: 0, null: false
+    t.integer "last_listing_number", default: 0, null: false
+    t.text "listing_details"
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
@@ -824,6 +864,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
   add_foreign_key "library_profile_versions", "users", column: "published_by_id", on_delete: :nullify
   add_foreign_key "library_profiles", "sellers"
   add_foreign_key "library_profiles", "users"
+  add_foreign_key "listings", "sellers"
+  add_foreign_key "listings", "stock_items"
   add_foreign_key "measurement_values", "custom_metrics", on_delete: :cascade
   add_foreign_key "measurement_values", "measurements", on_delete: :cascade
   add_foreign_key "measurements", "environments", on_delete: :cascade
@@ -853,6 +895,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
   add_foreign_key "recipe_versions", "recipes", on_delete: :cascade
   add_foreign_key "recipes", "users"
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
+  add_foreign_key "sale_cards", "listings", on_delete: :cascade
+  add_foreign_key "sale_cards", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify
   add_foreign_key "sessions", "users"

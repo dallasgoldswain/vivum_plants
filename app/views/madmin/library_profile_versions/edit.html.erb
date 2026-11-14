@@ -1,7 +1,10 @@
 <%= content_for :title, "Edit v#{@version.number}" %>
 
 <header class="header">
-  <h1><%= link_to @profile.botanical_name, madmin_library_profile_path(@profile) %> / Edit v<%= @version.number %> (<%= @version.status.humanize.downcase %>)</h1>
+  <h1>
+    <%= link_to @profile.botanical_name, madmin_library_profile_path(@profile) %>
+    / Edit v<%= @version.number %> (<%= @version.status.humanize.downcase %>)
+  </h1>
 </header>
 
 <%= render "madmin/library_profile_versions/form", version: @version, url: madmin_library_profile_version_path(@profile, @version), method: :patch %>

@@ -6,6 +6,7 @@ class Seller < ApplicationRecord
   has_many :stock_items, dependent: :destroy
   has_many :stock_locations, dependent: :destroy
   has_many :stock_movements, dependent: :delete_all
+  has_many :listings, dependent: :destroy
 
   # Pilot and comp are free and never charged; paid needs a Paystack subscription, which
   # isn't built yet, so it can't be chosen (SB03, D64).
@@ -17,6 +18,7 @@ class Seller < ApplicationRecord
   attribute :audit_reason, :string
 
   validates :name, presence: true
+  validates :listing_details, length: { maximum: 500 }
   validate :paid_needs_paystack
   validates :audit_reason, presence: { message: "is required when changing billing" }, on: :update, if: :billing_changed?
 

@@ -9,14 +9,15 @@
   </div>
 
   <p class="vv-caption mt-1">
-    Defaults for plants you add. Each plant keeps its own settings, which you can
-    change on its page.
+    Defaults for plants you add. Each plant keeps its own settings, which you
+    can change on its page.
   </p>
 </div>
 
 <div class="card max-w-2xl">
   <header>
     <h2>Defaults for new plants</h2>
+
     <% if (note = guidance_pending_note) %>
       <p><%= note %></p>
     <% end %>
@@ -32,27 +33,42 @@
       <% end %>
 
       <div>
-        <button type="button" class="btn" commandfor="guidance-defaults-warning" command="show-modal">
+        <button
+          type="button"
+          class="btn"
+          commandfor="guidance-defaults-warning"
+          command="show-modal"
+        >
           Save defaults
         </button>
       </div>
     <% end %>
 
     <%# The warning before saving (ST03); Cancel closes it and changes nothing. %>
-    <dialog id="guidance-defaults-warning" class="dialog" aria-labelledby="guidance-defaults-warning-title" closedby="any">
+    <dialog
+      id="guidance-defaults-warning"
+      class="dialog"
+      aria-labelledby="guidance-defaults-warning-title"
+      closedby="any"
+    >
       <div>
         <header>
           <h2 id="guidance-defaults-warning-title">Save new defaults?</h2>
 
           <p>
-            These settings will apply to plants you add from now on. Existing plants
-            will keep their current settings. You can edit each plant's settings at
-            any time.
+            These settings will apply to plants you add from now on. Existing
+            plants will keep their current settings. You can edit each plant's
+            settings at any time.
           </p>
         </header>
 
         <footer>
-          <button type="button" class="btn-outline" commandfor="guidance-defaults-warning" command="close">
+          <button
+            type="button"
+            class="btn-outline"
+            commandfor="guidance-defaults-warning"
+            command="close"
+          >
             Cancel
           </button>
 
@@ -66,15 +82,25 @@
 <div class="card max-w-2xl">
   <header>
     <h2>Earlier defaults</h2>
-    <p>Each save is kept. Plants keep the defaults they were added with until you apply newer ones.</p>
+
+    <p>
+      Each save is kept. Plants keep the defaults they were added with until you
+      apply newer ones.
+    </p>
   </header>
 
   <section>
     <ul class="grid gap-2">
       <% @revisions.each do |revision| %>
-        <li class="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-2 last:border-0">
+        <li
+          class="
+            flex flex-wrap items-baseline justify-between gap-2 border-b
+            border-border pb-2 last:border-0
+          "
+        >
           <span>
             <%= guidance_switches.map { |key, label| "#{label} #{on_off(revision.public_send(key)).downcase}" }.join(" · ") %>
+
             <% if revision == @defaults %>
               <span class="badge-secondary">Current</span>
             <% end %>

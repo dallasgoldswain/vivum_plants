@@ -1,0 +1,54 @@
+<% content_for :title, "Listings · #{Current.seller.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <h2 class="vv-h3">Listings</h2>
+
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Settings", edit_sell_stock_settings_path, class: "btn-ghost" %>
+    <%= link_to "Download CSV", sell_stock_export_path(format: :csv, kind: "listings"), class: "btn-ghost" %>
+    <%= link_to "List from stock", sell_stock_items_path(available: "1"), class: "btn" %>
+  </div>
+</div>
+
+<%= form_with url: sell_listings_path, method: :get, class: "flex flex-wrap gap-2", role: "search" do |form| %>
+  <%= form.label :q, "Search listings", class: "sr-only" %>
+  <%= form.search_field :q, value: params[:q], placeholder: "Name or L- reference", class: "input min-w-48 flex-1" %>
+  <%= form.label :filter, "Show", class: "sr-only" %>
+  <%= form.select :filter, [ [ "Live", "live" ], [ "Sold out", "sold_out" ], [ "Drafts", "draft" ], [ "Ended", "ended" ] ], { selected: @filter }, class: "select w-auto" %>
+  <%= form.submit "Filter", name: nil, class: "btn-outline" %>
+<% end %>
+
+<% if @listings.any? %>
+  <ul class="grid gap-2">
+    <% @listings.each do |listing| %>
+      <li>
+        <%= link_to sell_listing_path(listing), class: "vv-plant-row" do %>
+          <span class="grid min-w-0 flex-1 gap-0.5">
+            <span class="truncate font-medium"><%= listing.title %></span>
+            <span class="vv-caption truncate"><%= [ listing.reference, listing.stock_item.code, rands(listing.price_cents) ].join(" · ") %></span>
+          </span>
+
+          <span class="text-right text-sm">
+            <span class="<%= listing.sold_out? || !listing.active? ? 'badge-outline' : 'badge-secondary' %>"><%= listing.display_state.capitalize %></span>
+
+            <% if listing.live? %>
+              <span class="vv-caption block"><%= listing.available %> available</span>
+            <% end %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <div class="card">
+    <section>
+      <p>
+        No listings here. Open an item in
+        <%= link_to "Stock", sell_stock_items_path, class: "underline underline-offset-4" %>
+        and choose List it.
+      </p>
+    </section>
+  </div>
+<% end %>

@@ -4,7 +4,9 @@
 <%= render "sell/stock_items/header" %>
 
 <div class="flex flex-wrap items-center justify-between gap-2">
-  <h2 class="vv-h3"><%= params[:archived] == "1" ? "Archived stock" : "Stock" %></h2>
+  <h2 class="vv-h3">
+    <%= params[:archived] == "1" ? "Archived stock" : "Stock" %>
+  </h2>
 
   <div class="flex flex-wrap gap-2">
     <%= link_to "Locations", sell_stock_locations_path, class: "btn-outline" %>
@@ -20,7 +22,11 @@
   <div class="card max-w-2xl">
     <header>
       <h2>Add your first location</h2>
-      <p>Where you keep stock: a greenhouse, a shelf, the shop. You can add more later.</p>
+
+      <p>
+        Where you keep stock: a greenhouse, a shelf, the shop. You can add more
+        later.
+      </p>
     </header>
 
     <% if allowed_to?(:create?, StockItem) %>
@@ -88,7 +94,9 @@
     </ul>
   <% else %>
     <div class="card">
-      <section><p>No stock matches.</p></section>
+      <section>
+        <p>No stock matches.</p>
+      </section>
     </div>
   <% end %>
 <% end %>

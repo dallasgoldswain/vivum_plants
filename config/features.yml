@@ -82,8 +82,8 @@ seller.paid_branding: { domain: seller, state: pilot, depends_on: [seller.profil
 
 # --- Seller foundation ---
 seller.stock: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Stock items, lots and the stock ledger (SE01, SE02)" }
-seller.listings: { domain: seller, state: core, depends_on: [seller.stock], description: "Listings (SE03)" }
-seller.sale_cards: { domain: seller, state: core, depends_on: [seller.listings], description: "Sale card images and captions (SE07)" }
+seller.listings: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Listings (SE03)" }
+seller.sale_cards: { domain: seller, state: core, implemented: true, depends_on: [seller.listings], description: "Sale card images and captions (SE07)" }
 seller.csv_import: { domain: seller, state: core, depends_on: [seller.stock], description: "CSV stock import with preview (IM01, IM02)" }
 seller.orders: { domain: seller, state: core, depends_on: [seller.reservations, seller.buyers], description: "Orders (SE05)" }
 seller.reservations: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Holds and reservations (SE06)", off: "No new holds; existing holds can still be released and expire" }
@@ -101,7 +101,7 @@ sales.quick_claim: { domain: sales, state: core, depends_on: [sales.sessions], d
 sales.waitlist: { domain: sales, state: core, depends_on: [sales.quick_claim], description: "Waitlist when stock runs out (LS04)" }
 
 # --- WhatsApp ---
-whatsapp.share: { domain: whatsapp, state: core, depends_on: [seller.sale_cards], description: "Share and download sale cards (SE08)" }
+whatsapp.share: { domain: whatsapp, state: core, implemented: true, depends_on: [seller.sale_cards], description: "Share and download sale cards (SE08)" }
 whatsapp.connection: { domain: whatsapp, state: pilot, depends_on: [seller.workspace], description: "Business number connection (WA01)", off: "Manual sharing and orders keep working" }
 whatsapp.dm_claims: { domain: whatsapp, state: pilot, depends_on: [whatsapp.connection, sales.quick_claim], description: "Claims from direct messages (WA02)" }
 whatsapp.auto_reserve: { domain: whatsapp, state: pilot, depends_on: [whatsapp.dm_claims, ai.dm_extraction, seller.reservations], description: "Auto-reserve on unambiguous DM claims (WA02)", off: "Queued claims stop reserving; claims go to review" }

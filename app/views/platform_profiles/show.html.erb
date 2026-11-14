@@ -6,7 +6,10 @@
 
   <div class="flex items-start justify-between gap-3">
     <div>
-      <p class="vv-kicker mb-2">Platform profile · version <%= version.number %></p>
+      <p class="vv-kicker mb-2">
+        Platform profile · version <%= version.number %>
+      </p>
+
       <h1 class="vv-h2 italic"><%= @profile.botanical_name %></h1>
 
       <p class="vv-caption mt-1">
@@ -30,6 +33,11 @@
 </div>
 
 <div class="card max-w-3xl">
-  <header><h2>Care notes</h2></header>
-  <section class="grid gap-4"><%= render "library_profiles/content", profile: @profile %></section>
+  <header>
+    <h2>Care notes</h2>
+  </header>
+
+  <section class="grid gap-4">
+    <%= render "library_profiles/content", profile: @profile %>
+  </section>
 </div>

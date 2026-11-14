@@ -29,10 +29,11 @@
     <% else %>
       <p role="status">
         <% if @behind.empty? %>
-          All <%= pluralize(@plants.size, "plant") %> already match your defaults.
+          All <%= pluralize(@plants.size, "plant") %> already match your
+          defaults.
         <% else %>
-          <%= @behind.size %> of <%= pluralize(@plants.size, "plant") %> don't match your
-          defaults and are ticked.
+          <%= @behind.size %> of <%= pluralize(@plants.size, "plant") %> don't
+          match your defaults and are ticked.
         <% end %>
       </p>
 

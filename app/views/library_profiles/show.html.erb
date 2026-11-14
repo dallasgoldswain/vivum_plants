@@ -22,15 +22,23 @@
 
 <div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
   <div class="card">
-    <header><h2>Care notes</h2></header>
-    <section class="grid gap-4"><%= render "library_profiles/content", profile: @profile %></section>
+    <header>
+      <h2>Care notes</h2>
+    </header>
+
+    <section class="grid gap-4">
+      <%= render "library_profiles/content", profile: @profile %>
+    </section>
   </div>
 
   <div class="grid content-start gap-6">
     <div class="card" id="plants">
       <header>
         <h2>Plants</h2>
-        <p><%= @plants.any? ? "Linked to this profile." : "No plants linked yet. Link one from its page." %></p>
+
+        <p>
+          <%= @plants.any? ? "Linked to this profile." : "No plants linked yet. Link one from its page." %>
+        </p>
       </header>
 
       <% if @plants.any? %>
