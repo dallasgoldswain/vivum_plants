@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.stock]
 prerequisites: [selling]
 keywords: [stock, inventory, specimen, batch, sku, code, location, receive, move, unavailable, quarantine, damaged, loss, count, adjust, history, csv]
+reviewed: 2026-11-14
+reviewed_digest: b0ca2519074ca8b793b6aa4168d257217d9a5046092eebd1b7156ccf3206e3cd
 ---
 
 **Sell → Stock** lists everything your business sells, with how many are
