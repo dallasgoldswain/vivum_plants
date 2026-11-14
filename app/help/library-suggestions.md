@@ -6,6 +6,8 @@ audience: collector
 capabilities: [care.library_guidance]
 prerequisites: [library, guidance-settings, reminders]
 keywords: [suggestions, library, reminders, accept, dismiss, replace, profile, care notes]
+reviewed: 2026-11-14
+reviewed_digest: fb573caef59370df2fc3f0d6d0b05fc00b97e8fae8317c598c34b1588fb046f2
 ---
 
 When a plant is linked to a profile in your library and its library suggestions
