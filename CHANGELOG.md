@@ -232,6 +232,26 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   The AI switch stays hidden until `care.ai_guidance` (D135). Export section
   `guidance_defaults` and plant guidance; help topic `guidance-settings`; new flag
   `care.guidance_settings` marked implemented.
+- Library profiles (B18): `library_profiles` belong to the platform (no owner), a user, or
+  (from B31) a seller (check constraint); names, synonyms, common names, family, per-context
+  notes and suggested reminders (`content` jsonb) and references, shared with
+  `library_profile_versions` through `LibraryProfile::Contents` (GU01, D143). Platform
+  profiles publish through versions (draft, in review, published, retired; one published,
+  published read-only); `#publish!` retires the previous one and mirrors the content onto
+  the profile row (D141). Operators edit them at `/madmin/library_profiles`, every step
+  audited (`library.*`). Collectors copy published profiles into their own library
+  (independent copies) or start blank ones at `/library` (D149, D150, D153).
+  `plants.library_profile_id` links to the owner's profiles only, with a name or synonym
+  match offer and a picker (D151). `LibraryProfile::PlantSuggestions` gives care notes and
+  pending reminders for the plant's context; accepting creates a `CareSchedule` with
+  `origin: "library"`, `library_profile_id` and `library_synced_at`, replacing a reminder
+  of the same kind after a comparison; `library_dismissals` hide one until the profile is
+  next edited; editing a profile (`content_edited_at`) flags plants with older accepted
+  reminders (D145, D152). Today asks once whether to use library suggestions
+  (`users.library_choice_at`) and lists plants with suggestions to review (D146). Sample
+  platform profiles seeded in development only. Export sections `library_profiles` and
+  `library_dismissals`; help topics `library` and `library-suggestions`;
+  `library.profiles` and `care.library_guidance` marked implemented.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

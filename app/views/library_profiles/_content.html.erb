@@ -1,0 +1,41 @@
+<%# A profile's care notes per context and its references, read-only (D143, D153). %>
+<% if profile.contexts.empty? %>
+  <p class="vv-caption">No care notes yet.</p>
+<% end %>
+
+<% profile.contexts.each do |context| %>
+  <section class="grid gap-2" id="context-<%= context %>">
+    <h3 class="vv-h4"><%= growing_context_label(context) %></h3>
+
+    <% if (notes = profile.notes_for(context)).any? %>
+      <dl class="vv-details">
+        <% notes.each do |field, text| %>
+          <dt><%= LibraryHelper::NOTE_LABELS[field] %></dt>
+          <dd class="whitespace-pre-line"><%= text %></dd>
+        <% end %>
+      </dl>
+    <% end %>
+
+    <% if (reminders = profile.suggestions_for(context)).any? %>
+      <p class="vv-caption">Suggested reminders: <%= reminders.map { suggestion_title(it) }.join(" · ") %></p>
+    <% end %>
+  </section>
+<% end %>
+
+<% if profile.reference_list.any? %>
+  <section class="grid gap-2">
+    <h3 class="vv-h4">References</h3>
+
+    <ul class="grid gap-1">
+      <% profile.reference_list.each do |reference| %>
+        <li>
+          <% if reference.url %>
+            <%= link_to reference.title, reference.url, rel: "noopener noreferrer", target: "_blank", class: "underline underline-offset-4" %>
+          <% else %>
+            <%= reference.title %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

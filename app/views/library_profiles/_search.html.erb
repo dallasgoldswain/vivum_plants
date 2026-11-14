@@ -1,0 +1,9 @@
+<%= form_with url: url, method: :get, class: "grid gap-2", role: "search" do |form| %>
+  <div class="flex flex-wrap gap-2">
+    <%= form.label :q, "Search profiles", class: "sr-only" %>
+    <%= form.search_field :q, value: params[:q], placeholder: "Name, synonym or family", class: "input min-w-48 flex-1" %>
+    <%= form.label :context, "Context", class: "sr-only" %>
+    <%= form.select :context, library_context_options, { include_blank: "All contexts", selected: params[:context] }, class: "select w-auto" %>
+    <%= form.submit "Search", name: nil, class: "btn-outline" %>
+  </div>
+<% end %>

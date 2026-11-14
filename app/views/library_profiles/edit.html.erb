@@ -1,0 +1,33 @@
+<% content_for :title, "Edit profile · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Your library", library_profiles_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <h1 class="vv-h2">Edit profile</h1>
+    <%= help_link "library" %>
+  </div>
+</div>
+
+<div class="card max-w-3xl">
+  <% if @profile.persisted? %>
+    <header>
+      <p>Reminders already accepted from this profile won't change. Linked plants are offered the changes to review.</p>
+    </header>
+  <% end %>
+
+  <section>
+    <%= form_with model: @profile, url: (@profile.persisted? ? library_profile_path(@profile) : library_profiles_path), class: "form grid gap-4" do |form| %>
+      <% if @profile.errors.any? %>
+        <div class="alert-destructive" role="alert">
+          <h3>Couldn't save</h3>
+          <section><%= @profile.errors.full_messages.to_sentence %>.</section>
+        </div>
+      <% end %>
+
+      <%= render "library_profiles/content_fields", form: form, record: @profile %>
+
+      <div><%= form.submit "Save profile", class: "btn" %></div>
+    <% end %>
+  </section>
+</div>

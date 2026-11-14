@@ -34,6 +34,13 @@
         <%= form.text_field :botanical_name, maxlength: 120, placeholder: "Leave blank if unsure" %>
       </div>
 
+      <% if capability?("library.profiles") && (profiles = Current.user.library_profiles.by_name).any? %>
+        <div class="grid gap-2">
+          <%= form.label :library_profile_id, "Profile in your library" %>
+          <%= form.collection_select :library_profile_id, profiles, :id, :botanical_name, { include_blank: "None" }, class: "select" %>
+        </div>
+      <% end %>
+
       <div class="grid gap-2">
         <%= form.label :cultivar %>
         <%= form.text_field :cultivar, maxlength: 120 %>

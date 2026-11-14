@@ -12,6 +12,7 @@ class CareSchedule < ApplicationRecord
   belongs_to :user
   belongs_to :plant, optional: true
   belongs_to :environment, optional: true
+  belongs_to :library_profile, optional: true
   has_many :tasks, class_name: "CareTask", dependent: :destroy
   has_one :open_task, -> { open }, class_name: "CareTask"
 

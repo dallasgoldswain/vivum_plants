@@ -1,0 +1,32 @@
+# A published platform profile (its row mirrors version 1).
+monstera_platform:
+  key: monstera_deliciosa
+  botanical_name: Monstera deliciosa
+  synonyms: [Philodendron pertusum]
+  common_names: [Swiss cheese plant]
+  family: Araceae
+  content: {"indoor": {"notes": {"light": "Bright, indirect light."}, "reminders": [{"kind": "watering", "label": null, "interval": 7, "interval_unit": "day"}, {"kind": "feeding", "label": null, "interval": 1, "interval_unit": "month"}]}}
+  references: [{"title": "Platform reference", "url": "https://example.com/monstera"}]
+
+# A platform profile still in draft: never shown to collectors.
+fern_draft:
+  key: asplenium_nidus
+  botanical_name: Asplenium nidus
+  content: {}
+  references: []
+
+# The collector's own profile.
+collector_anubias:
+  user: collector
+  botanical_name: Anubias barteri
+  synonyms: [Anubias barteri var. nana]
+  content: {"aquatic": {"notes": {"light": "Low light."}, "reminders": [{"kind": "inspection", "label": null, "interval": 2, "interval_unit": "week"}]}}
+  references: []
+  content_edited_at: <%= 2.days.ago.to_fs(:db) %>
+
+owner_philodendron:
+  user: owner
+  botanical_name: Philodendron gloriosum
+  content: {}
+  references: []
+  content_edited_at: <%= 2.days.ago.to_fs(:db) %>

@@ -1,7 +1,9 @@
 <%#
-  A plant's guidance switches and where they came from (ST01, ST04, D139, D140). Changing
-  them affects this plant only.
+  A plant's guidance switches and where they came from (ST01, ST04, D139, D140), its library
+  profile link (D151) and the suggestions it brings (D145, D152). Changing the switches
+  affects this plant only.
 %>
+<% settings = capability?("care.guidance_settings") %>
 <% defaults = Current.user.guidance_defaults %>
 <% status = plant.guidance_status(defaults) %>
 <% changes = guidance_changes(plant, defaults) %>
@@ -9,9 +11,16 @@
 <div class="card" id="guidance">
   <header>
     <h2>Guidance</h2>
-    <p><%= guidance_status_label(status) %>.</p>
+    <% if settings %>
+      <p><%= guidance_status_label(status) %>.</p>
+    <% end %>
   </header>
 
+  <% if capability?("library.profiles") %>
+    <%= render "plants/library", plant: plant %>
+  <% end %>
+
+  <% if settings %>
   <section class="grid gap-3">
     <%= form_with url: plant_guidance_path(plant), method: :patch, class: "form grid gap-3" do |form| %>
       <% guidance_switches.each do |key, label| %>
@@ -41,8 +50,9 @@
       for plants you add.
     </p>
   </section>
+  <% end %>
 
-  <% unless status == :matches %>
+  <% if settings && status != :matches %>
     <dialog id="guidance-apply" class="dialog" aria-labelledby="guidance-apply-title" closedby="any">
       <div>
         <header>

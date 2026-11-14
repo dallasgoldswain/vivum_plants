@@ -1,0 +1,21 @@
+<%= form_with model: version, url: url, method: method, local: true do |form| %>
+  <% if version.errors.any? %>
+    <div class="alert alert-danger"><%= version.errors.full_messages.to_sentence %>.</div>
+  <% end %>
+
+  <% if local_assigns[:key_field] %>
+    <div class="form-group">
+      <%= label_tag :key, "Key (lower case letters, numbers and underscores; never changes)" %>
+      <%= text_field_tag :key, params[:key], required: true, pattern: "[a-z0-9_]+" %>
+    </div>
+  <% end %>
+
+  <%= render "library_profiles/content_fields", form: form, record: version %>
+
+  <div class="form-group">
+    <%= form.label :reviewed_on, "Review date" %>
+    <%= form.date_field :reviewed_on %>
+  </div>
+
+  <%= form.submit "Save draft", class: "btn btn-primary" %>
+<% end %>

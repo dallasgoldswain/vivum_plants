@@ -1,0 +1,9 @@
+<%= content_for :title, "New platform profile" %>
+
+<header class="header">
+  <h1><%= link_to "Platform library", madmin_library_profiles_path %> / New profile</h1>
+</header>
+
+<p>It starts as draft version 1. Collectors see nothing until a version is reviewed and published.</p>
+
+<%= render "madmin/library_profile_versions/form", version: @version, url: madmin_library_profiles_path, method: :post, key_field: true %>

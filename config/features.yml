@@ -48,9 +48,9 @@ care.logs: { domain: care, state: core, implemented: true, depends_on: [collecti
 care.shared_maintenance: { domain: care, state: core, implemented: true, depends_on: [collection.environments, care.reminders], description: "Environment maintenance tasks (EN04)" }
 care.reminders: { domain: care, state: core, implemented: true, depends_on: [care.logs], description: "Schedules, reminders and the Today inbox (CA02–CA05)" }
 care.guidance_settings: { domain: care, state: core, implemented: true, depends_on: [collection.plants], description: "Guidance switches, new-plant defaults and their revisions (ST01–ST04)" }
-care.library_guidance: { domain: care, state: core, depends_on: [library.profiles, care.reminders], description: "Suggestions from built-in profiles" }
+care.library_guidance: { domain: care, state: core, implemented: true, depends_on: [library.profiles, care.reminders, care.guidance_settings], description: "Suggestions from built-in profiles" }
 care.ai_guidance: { domain: care, state: pilot, depends_on: [ai.care_suggestions, care.reminders], description: "AI care suggestions in the care plan" }
-library.profiles: { domain: care, state: core, description: "Built-in species reference profiles (GU01)" }
+library.profiles: { domain: care, state: core, implemented: true, depends_on: [collection.plants], description: "Platform and personal species profiles (GU01, D149)" }
 substrate.ingredients: { domain: care, state: core, implemented: true, description: "Ingredient library (SU01)" }
 substrate.recipes: { domain: care, state: core, implemented: true, depends_on: [substrate.ingredients], description: "Versioned substrate recipes (SU02, SU04)" }
 substrate.scaling: { domain: care, state: core, implemented: true, depends_on: [substrate.recipes], description: "Scale a mix to a target volume (SU03)" }

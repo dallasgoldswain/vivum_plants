@@ -129,7 +129,7 @@
       <%= render "schedules/reminders", subject: @plant, schedules: @schedules %>
     <% end %>
 
-    <% if capability?("care.guidance_settings") %>
+    <% if capability?("care.guidance_settings") || capability?("library.profiles") %>
       <%= render "plants/guidance", plant: @plant %>
     <% end %>
 

@@ -92,6 +92,7 @@ module User::Deletable
       referral&.destroy!
       plants.destroy_all
       guidance_revisions.delete_all
+      library_profiles.destroy_all
       acquisitions.destroy_all
       environments.destroy_all
       custom_metrics.destroy_all

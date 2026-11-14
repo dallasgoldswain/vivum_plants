@@ -1,0 +1,39 @@
+<% content_for :title, "Library · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Collection", plants_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Library</p>
+      <h1 class="vv-h2">Your library</h1>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "library" %>
+      <%= link_to "New profile", new_library_profile_path, class: "btn" %>
+    </div>
+  </div>
+
+  <%= render "library_profiles/tabs", current: :mine %>
+</div>
+
+<%= render "library_profiles/search", url: library_profiles_path %>
+
+<% if @profiles.any? %>
+  <%= render "library_profiles/list", profiles: @profiles, path: ->(profile) { library_profile_path(profile) } %>
+<% else %>
+  <div class="card">
+    <section>
+      <p>
+        <% if params[:q].present? || params[:context].present? %>
+          None of your profiles match.
+        <% else %>
+          Your library is empty. Copy a profile from the
+          <%= link_to "platform library", platform_profiles_path, class: "underline underline-offset-4" %>
+          (<%= pluralize(@platform_count, "profile") %>) or start a new one, then link your plants to it.
+        <% end %>
+      </p>
+    </section>
+  </div>
+<% end %>

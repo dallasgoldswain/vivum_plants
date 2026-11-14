@@ -1,0 +1,63 @@
+<% content_for :title, "#{@profile.botanical_name} · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Your library", library_profiles_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Your profile</p>
+      <h1 class="vv-h2 italic"><%= @profile.botanical_name %></h1>
+
+      <p class="vv-caption mt-1">
+        <%= [ library_profile_names(@profile), ("Also #{@profile.synonyms.join(', ')}" if @profile.synonyms.any?), "Edited #{l(@profile.content_edited_at.to_date, format: :long)}" ].compact.join(" · ") %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "library" %>
+      <%= link_to "Edit", edit_library_profile_path(@profile), class: "btn-outline" %>
+    </div>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+  <div class="card">
+    <header><h2>Care notes</h2></header>
+    <section class="grid gap-4"><%= render "library_profiles/content", profile: @profile %></section>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <div class="card" id="plants">
+      <header>
+        <h2>Plants</h2>
+        <p><%= @plants.any? ? "Linked to this profile." : "No plants linked yet. Link one from its page." %></p>
+      </header>
+
+      <% if @plants.any? %>
+        <section>
+          <ul class="grid gap-1">
+            <% @plants.each do |plant| %>
+              <li>
+                <%= link_to plant.display_name, plant_path(plant, anchor: "guidance"), class: "underline underline-offset-4" %>
+                <span class="vv-caption"><%= plant.record_id %></span>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+
+    <% if @plants.empty? %>
+      <div class="card">
+        <header>
+          <h2>Delete</h2>
+          <p>Removes it from your library. Reminders made from it stay.</p>
+        </header>
+
+        <section>
+          <%= button_to "Delete profile", library_profile_path(@profile), method: :delete, class: "btn-destructive", form: { data: { turbo_confirm: "Delete #{@profile.botanical_name} from your library?" } } %>
+        </section>
+      </div>
+    <% end %>
+  </div>
+</div>

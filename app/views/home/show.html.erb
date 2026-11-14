@@ -13,6 +13,35 @@
 
 <hr class="vv-rule-organic my-0">
 
+<% if @library_choice %>
+  <div class="card max-w-2xl" id="library-choice">
+    <header>
+      <h2>Use library care suggestions?</h2>
+
+      <p>
+        Plants linked to a profile in your library can suggest reminders and show care
+        notes. Nothing is added until you accept it. You can change this any time in
+        Account → Guidance settings.
+      </p>
+    </header>
+
+    <footer class="flex flex-wrap gap-2">
+      <%= button_to "Yes, use them", library_choice_path, params: { use_library: "1" }, class: "btn" %>
+      <%= button_to "Not now", library_choice_path, params: { use_library: "0" }, class: "btn-outline" %>
+    </footer>
+  </div>
+<% end %>
+
+<% if @suggestion_plants&.any? %>
+  <section class="grid gap-2" id="library-suggestions" aria-labelledby="library-suggestions-title">
+    <h2 class="vv-h4" id="library-suggestions-title">Suggestions to review</h2>
+
+    <p>
+      <%= safe_join(@suggestion_plants.map { link_to(it.display_name, plant_path(it, anchor: "guidance"), class: "underline underline-offset-4") }, ", ") %>
+    </p>
+  </section>
+<% end %>
+
 <% if today %>
   <section class="grid gap-4" id="today" aria-labelledby="today-due">
     <h2 class="vv-h3" id="today-due">Due now</h2>

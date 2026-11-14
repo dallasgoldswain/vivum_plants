@@ -1,0 +1,61 @@
+<%= content_for :title, @profile.botanical_name %>
+
+<header class="header">
+  <h1>
+    <%= link_to "Platform library", madmin_library_profiles_path %>
+    / <%= @profile.botanical_name %>
+  </h1>
+
+  <div class="actions">
+    <%= link_to "New version", new_madmin_library_profile_version_path(@profile), class: "btn btn-primary" %>
+  </div>
+</header>
+
+<p>Key: <code><%= @profile.key %></code>. Collectors see only the published version; their copies never change.</p>
+
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>Version</th>
+        <th>Status</th>
+        <th>Botanical name</th>
+        <th>Reviewed</th>
+        <th>Published</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @profile.versions.reverse_each do |version| %>
+        <tr>
+          <td>v<%= version.number %></td>
+          <td><%= version.status.humanize %></td>
+          <td><%= version.botanical_name %></td>
+          <td><%= version.reviewed_on %></td>
+          <td><%= version.published_at && "#{l(version.published_at, format: :short)} by #{version.published_by&.email_address}" %></td>
+
+          <td class="actions">
+            <% if version.editable? %>
+              <%= link_to "Edit", edit_madmin_library_profile_version_path(@profile, version), class: "btn btn-secondary" %>
+            <% end %>
+
+            <% if version.draft? %>
+              <%= button_to "Send to review", submit_madmin_library_profile_version_path(@profile, version), class: "btn btn-secondary" %>
+            <% elsif version.in_review? %>
+              <%= button_to "Back to draft", back_to_draft_madmin_library_profile_version_path(@profile, version), class: "btn btn-secondary" %>
+              <%= button_to "Publish", publish_madmin_library_profile_version_path(@profile, version), class: "btn btn-primary", data: { turbo_confirm: "Publish v#{version.number}? It replaces the published version for collectors." } %>
+            <% elsif version.published? %>
+              <%= button_to "Retire", retire_madmin_library_profile_version_path(@profile, version), class: "btn btn-danger", data: { turbo_confirm: "Retire v#{version.number}? Collectors won't see this profile until another version is published." } %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<% if (published = @profile.published_version) %>
+  <h2>Published content (v<%= published.number %>)</h2>
+  <%= render "library_profiles/content", profile: published %>
+<% end %>

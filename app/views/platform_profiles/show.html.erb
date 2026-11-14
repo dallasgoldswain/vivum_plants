@@ -1,0 +1,35 @@
+<% content_for :title, "#{@profile.botanical_name} · VIVUM Plants" %>
+<% version = @profile.published_version %>
+
+<div class="grid gap-3">
+  <%= link_to "← Platform library", platform_profiles_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Platform profile · version <%= version.number %></p>
+      <h1 class="vv-h2 italic"><%= @profile.botanical_name %></h1>
+
+      <p class="vv-caption mt-1">
+        <%= [ library_profile_names(@profile), ("Also #{@profile.synonyms.join(', ')}" if @profile.synonyms.any?), "Reviewed #{l(version.reviewed_on, format: :long)}" ].compact.join(" · ") %>
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= help_link "library" %>
+      <%= button_to "Copy to my library", platform_profile_copy_path(@profile), class: "btn" %>
+    </div>
+  </div>
+
+  <% if @copies.any? %>
+    <p class="vv-caption">
+      You already have
+      <%= safe_join(@copies.map { link_to(it.botanical_name, library_profile_path(it), class: "underline underline-offset-4") }, ", ") %>
+      in your library. A new copy is separate from it.
+    </p>
+  <% end %>
+</div>
+
+<div class="card max-w-3xl">
+  <header><h2>Care notes</h2></header>
+  <section class="grid gap-4"><%= render "library_profiles/content", profile: @profile %></section>
+</div>

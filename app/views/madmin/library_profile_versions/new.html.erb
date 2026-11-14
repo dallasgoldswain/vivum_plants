@@ -1,0 +1,9 @@
+<%= content_for :title, "New version" %>
+
+<header class="header">
+  <h1><%= link_to @profile.botanical_name, madmin_library_profile_path(@profile) %> / New version</h1>
+</header>
+
+<p>Starts from the latest version. Saving makes a draft; the published version stays until this one is published.</p>
+
+<%= render "madmin/library_profile_versions/form", version: @version, url: madmin_library_profile_versions_path(@profile), method: :post %>

@@ -14,6 +14,8 @@ class User < ApplicationRecord
   has_many :notifications, as: :recipient, class_name: "Noticed::Notification", dependent: :destroy
   has_many :plants, dependent: :destroy
   has_many :guidance_revisions, dependent: :delete_all
+  has_many :library_profiles, dependent: :destroy
+  has_many :library_dismissals, dependent: :delete_all
   has_many :acquisitions, dependent: :destroy
   has_many :care_events, dependent: :destroy
   has_many :photos, dependent: :destroy

@@ -1,0 +1,37 @@
+<%= content_for :title, "Platform library" %>
+
+<header class="header">
+  <h1>Platform library</h1>
+
+  <div class="actions">
+    <form class="search"><%= search_field_tag :q, params[:q], placeholder: "Search" %></form>
+    <%= link_to "New profile", new_madmin_library_profile_path, class: "btn btn-primary" %>
+  </div>
+</header>
+
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>Botanical name</th>
+        <th>Key</th>
+        <th>Published</th>
+        <th>Latest version</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% @profiles.each do |profile| %>
+        <% published = profile.versions.find(&:published?) %>
+        <% latest = profile.versions.max_by(&:number) %>
+
+        <tr>
+          <td><%= link_to profile.botanical_name, madmin_library_profile_path(profile) %></td>
+          <td><%= profile.key %></td>
+          <td><%= published ? "v#{published.number}, #{published.reviewed_on}" : "Not published" %></td>
+          <td><%= latest && "v#{latest.number} · #{latest.status.humanize}" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

@@ -77,6 +77,7 @@ class PlantsController < ApplicationController
 
     def plant_params
       permitted = %i[ display_name botanical_name cultivar common_name nickname growing_context tc_origin origin_note quantity notes tag_list ]
+      permitted << :library_profile_id if capability?("library.profiles")
       if capability?("collection.acquisition")
         permitted << { acquisition_attributes: %i[ id acquired_on source cost currency order_reference quantity arrival_notes ] }
       end

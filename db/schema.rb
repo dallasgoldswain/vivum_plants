@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -146,7 +146,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
     t.datetime "updated_at", null: false
     t.bigint "environment_id"
     t.string "origin"
+    t.bigint "library_profile_id"
+    t.datetime "library_synced_at"
     t.index ["environment_id"], name: "index_care_schedules_on_environment_id"
+    t.index ["library_profile_id"], name: "index_care_schedules_on_library_profile_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
     t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
@@ -345,6 +348,58 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
     t.index ["seller_id"], name: "index_invitations_on_seller_id"
   end
 
+  create_table "library_dismissals", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "plant_id", null: false
+    t.bigint "library_profile_id", null: false
+    t.string "kind", null: false
+    t.string "label"
+    t.datetime "created_at", null: false
+    t.index ["library_profile_id"], name: "index_library_dismissals_on_library_profile_id"
+    t.index ["plant_id"], name: "index_library_dismissals_on_plant_id"
+    t.index ["user_id"], name: "index_library_dismissals_on_user_id"
+  end
+
+  create_table "library_profile_versions", force: :cascade do |t|
+    t.bigint "library_profile_id", null: false
+    t.integer "number", null: false
+    t.string "status", default: "draft", null: false
+    t.string "botanical_name", null: false
+    t.string "synonyms", default: [], null: false, array: true
+    t.string "common_names", default: [], null: false, array: true
+    t.string "family"
+    t.jsonb "content", default: {}, null: false
+    t.jsonb "references", default: [], null: false
+    t.date "reviewed_on"
+    t.datetime "published_at"
+    t.bigint "published_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["library_profile_id", "number"], name: "idx_on_library_profile_id_number_4ab0113fd0", unique: true
+    t.index ["library_profile_id"], name: "index_library_profile_versions_one_published", unique: true, where: "((status)::text = 'published'::text)"
+    t.index ["published_by_id"], name: "index_library_profile_versions_on_published_by_id"
+  end
+
+  create_table "library_profiles", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "seller_id"
+    t.string "key"
+    t.string "botanical_name", null: false
+    t.string "synonyms", default: [], null: false, array: true
+    t.string "common_names", default: [], null: false, array: true
+    t.string "family"
+    t.jsonb "content", default: {}, null: false
+    t.jsonb "references", default: [], null: false
+    t.datetime "content_edited_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_library_profiles_on_key", unique: true, where: "(key IS NOT NULL)"
+    t.index ["seller_id"], name: "index_library_profiles_on_seller_id"
+    t.index ["user_id"], name: "index_library_profiles_on_user_id"
+    t.check_constraint "key IS NULL OR user_id IS NULL AND seller_id IS NULL", name: "library_profiles_key_platform_only"
+    t.check_constraint "num_nonnulls(user_id, seller_id) <= 1", name: "library_profiles_one_owner"
+  end
+
   create_table "measurement_values", force: :cascade do |t|
     t.bigint "measurement_id", null: false
     t.string "metric", null: false
@@ -504,8 +559,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
     t.boolean "guidance_library", default: false, null: false
     t.boolean "guidance_ai", default: false, null: false
     t.bigint "guidance_revision_id", null: false
+    t.bigint "library_profile_id"
     t.index ["acquisition_id"], name: "index_plants_on_acquisition_id"
     t.index ["guidance_revision_id"], name: "index_plants_on_guidance_revision_id"
+    t.index ["library_profile_id"], name: "index_plants_on_library_profile_id"
     t.index ["split_from_id"], name: "index_plants_on_split_from_id"
     t.index ["tags"], name: "index_plants_on_tags", using: :gin
     t.index ["user_id", "number"], name: "index_plants_on_user_id_and_number", unique: true
@@ -623,6 +680,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
     t.datetime "whats_new_seen_at"
     t.integer "last_plant_number", default: 0, null: false
     t.string "time_zone"
+    t.datetime "library_choice_at"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["deletion_requested_at"], name: "index_users_on_deletion_requested_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
@@ -639,6 +697,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
   add_foreign_key "care_events", "plants", on_delete: :cascade
   add_foreign_key "care_events", "users"
   add_foreign_key "care_schedules", "environments"
+  add_foreign_key "care_schedules", "library_profiles", on_delete: :nullify
   add_foreign_key "care_schedules", "plants"
   add_foreign_key "care_schedules", "users"
   add_foreign_key "care_tasks", "care_schedules"
@@ -665,6 +724,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
   add_foreign_key "invitations", "sellers", on_delete: :cascade
   add_foreign_key "invitations", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "invitations", "users", column: "invited_by_id", on_delete: :nullify
+  add_foreign_key "library_dismissals", "library_profiles", on_delete: :cascade
+  add_foreign_key "library_dismissals", "plants", on_delete: :cascade
+  add_foreign_key "library_dismissals", "users"
+  add_foreign_key "library_profile_versions", "library_profiles", on_delete: :cascade
+  add_foreign_key "library_profile_versions", "users", column: "published_by_id", on_delete: :nullify
+  add_foreign_key "library_profiles", "sellers"
+  add_foreign_key "library_profiles", "users"
   add_foreign_key "measurement_values", "custom_metrics", on_delete: :cascade
   add_foreign_key "measurement_values", "measurements", on_delete: :cascade
   add_foreign_key "measurements", "environments", on_delete: :cascade
@@ -684,6 +750,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_13_180000) do
   add_foreign_key "plant_status_changes", "plants", on_delete: :cascade
   add_foreign_key "plants", "acquisitions", on_delete: :nullify
   add_foreign_key "plants", "guidance_revisions"
+  add_foreign_key "plants", "library_profiles", on_delete: :nullify
   add_foreign_key "plants", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "plants", "plants", column: "split_from_id", on_delete: :nullify
   add_foreign_key "plants", "users"

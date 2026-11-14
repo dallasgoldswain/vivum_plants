@@ -1,0 +1,27 @@
+<% content_for :title, "Platform library · VIVUM Plants" %>
+
+<div class="grid gap-3">
+  <%= link_to "← Collection", plants_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <p class="vv-kicker mb-2">Library</p>
+      <h1 class="vv-h2">Platform library</h1>
+      <p class="vv-caption mt-1">Reviewed profiles from VIVUM. Copy one to your library to use it and make it your own.</p>
+    </div>
+
+    <%= help_link "library" %>
+  </div>
+
+  <%= render "library_profiles/tabs", current: :platform %>
+</div>
+
+<%= render "library_profiles/search", url: platform_profiles_path %>
+
+<% if @profiles.any? %>
+  <%= render "library_profiles/list", profiles: @profiles, path: ->(profile) { platform_profile_path(profile) } %>
+<% else %>
+  <div class="card">
+    <section><p>No profiles match.</p></section>
+  </div>
+<% end %>

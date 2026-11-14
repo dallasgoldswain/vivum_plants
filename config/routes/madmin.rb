@@ -13,6 +13,17 @@ namespace :madmin do
   resources :data_requests, except: :destroy
   resources :sessions
   resources :audit_events, only: %i[ index show ]
+  # The platform library (D141): profiles and their versions, draft → in review → published → retired.
+  resources :library_profiles, only: %i[ index show new create ] do
+    resources :versions, only: %i[ new create edit update ], controller: "library_profile_versions" do
+      member do
+        post :submit
+        post :back_to_draft
+        post :publish
+        post :retire
+      end
+    end
+  end
   namespace :noticed do
     resources :events
     resources :notifications

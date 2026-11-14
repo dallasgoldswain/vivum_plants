@@ -18,6 +18,10 @@
         <%= link_to "Substrates", recipes_path, class: "btn-outline" %>
       <% end %>
 
+      <% if capability?("library.profiles") %>
+        <%= link_to "Library", library_profiles_path, class: "btn-outline" %>
+      <% end %>
+
       <% if capability?("collection.tissue_culture") %>
         <%= link_to "Record a TC purchase", new_acquisition_path, class: "btn-outline" %>
       <% end %>

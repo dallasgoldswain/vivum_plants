@@ -29,6 +29,9 @@ end
 # edits to the file update them; removed entries are archived.
 Ingredient.sync_built_ins!
 
+# Sample platform library profiles, in development only (D142).
+load Rails.root.join("db/seeds/library_samples.rb") if Rails.env.development?
+
 # Feature flags: add every registered capability to Flipper so the console lists them.
 # In development, implemented core capabilities are switched on (PRD FF02).
 Capabilities.sync!

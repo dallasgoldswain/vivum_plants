@@ -35,6 +35,9 @@ Rails.application.routes.draw do
       resource :tc_review, only: %i[ new create ]
       resource :guidance, only: :update
       resource :guidance_application, only: :create
+      resource :library_link, only: %i[ create destroy ]
+      resources :library_suggestions, only: :create
+      resources :library_dismissals, only: :create
     end
   end
 
@@ -49,6 +52,13 @@ Rails.application.routes.draw do
   end
   resources :tc_suggestions, only: %i[ new create ]
   resources :guidance_applications, only: %i[ new create ]
+  resource :library_choice, only: :create
+
+  # The library (D149–D153): the platform's published profiles, and your own at /library.
+  resources :platform_profiles, path: "library/platform", only: %i[ index show ] do
+    resource :copy, only: :create, module: :platform_profiles
+  end
+  resources :library_profiles, path: "library"
 
   resources :care_logs, only: %i[ new create ]
   resources :care_schedules, only: %i[ new create ]

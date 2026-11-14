@@ -12,6 +12,7 @@ class Plant < ApplicationRecord
   include Placement
   include TissueCulture
   include Guidance
+  include LibraryLink
 
   belongs_to :user
   belongs_to :acquisition, optional: true

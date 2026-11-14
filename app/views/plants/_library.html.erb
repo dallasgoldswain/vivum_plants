@@ -1,0 +1,112 @@
+<%#
+  The plant's profile in your library (D151) and, with the library switch on, its care notes
+  and suggested reminders for this plant's context (GU03, D145). Nothing changes until a
+  suggestion is accepted; edits to the profile come back here for review (D152).
+%>
+<section class="grid gap-3" id="library">
+  <% if (profile = plant.library_profile) %>
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <p>
+        Linked to your
+        <%= link_to profile.botanical_name, library_profile_path(profile), class: "italic underline underline-offset-4" %>
+        profile.
+      </p>
+
+      <%= button_to "Unlink", plant_library_link_path(plant), method: :delete, class: "btn-sm-ghost" %>
+    </div>
+
+    <% if capability?("care.library_guidance") %>
+      <% if !plant.guidance_library? %>
+        <p class="vv-caption">Turn on library suggestions below to see what this profile suggests.</p>
+      <% elsif !plant.active? %>
+        <p class="vv-caption">Suggestions pause while the plant is <%= plant_status_label(plant.status).downcase %>.</p>
+      <% else %>
+        <% suggestions = plant.library_suggestions %>
+        <p class="vv-caption">Library · <%= library_source_label(profile) %></p>
+
+        <% if !suggestions.covered? %>
+          <p>
+            Your <%= profile.botanical_name %> profile has nothing for
+            <%= growing_context_label(plant.growing_context).downcase %> plants yet.
+            <%= link_to "Add some", edit_library_profile_path(profile), class: "underline underline-offset-4" %>.
+          </p>
+        <% else %>
+          <% if suggestions.notes.any? %>
+            <dl class="vv-details">
+              <% suggestions.notes.each do |field, text| %>
+                <dt><%= LibraryHelper::NOTE_LABELS[field] %></dt>
+                <dd class="whitespace-pre-line"><%= text %></dd>
+              <% end %>
+            </dl>
+          <% end %>
+
+          <% if suggestions.updated? %>
+            <div class="alert" role="status">
+              <h3>The <%= profile.botanical_name %> profile was edited</h3>
+              <section>Your reminders stay as they are. Compare them with the new suggestions below.</section>
+            </div>
+          <% end %>
+
+          <% if suggestions.pending.any? %>
+            <h3 class="vv-h4">Suggested reminders</h3>
+
+            <ul class="grid gap-3">
+              <% suggestions.pending.each_with_index do |item, index| %>
+                <% suggestion = item.suggestion %>
+
+                <li class="grid gap-2 rounded-md border border-border p-3" id="suggestion-<%= index %>">
+                  <p class="font-medium"><%= suggestion_title(suggestion) %></p>
+
+                  <% if item.replaces? %>
+                    <p class="vv-caption">
+                      <%= item.updated? ? "Changed in your profile." : "You already have this reminder." %>
+                      Now: <%= schedule_cadence(item.existing).downcase %>.
+                      Suggested: every <%= suggestion.interval %> <%= CareHelper::INTERVAL_UNIT_LABELS[suggestion.interval_unit] %>.
+                    </p>
+                  <% end %>
+
+                  <div class="flex flex-wrap items-end gap-2">
+                    <%= form_with url: plant_library_suggestions_path(plant), class: "form flex flex-wrap items-end gap-2" do |form| %>
+                      <%= hidden_field_tag :kind, suggestion.kind, id: nil %>
+                      <%= hidden_field_tag :label, suggestion.label, id: nil %>
+
+                      <div class="grid gap-1">
+                        <%= label_tag "suggestion_#{index}_interval", "Every", class: "text-sm" %>
+                        <%= number_field_tag :interval, suggestion.interval, id: "suggestion_#{index}_interval", min: 1, max: 365, class: "w-20" %>
+                      </div>
+
+                      <div class="grid gap-1">
+                        <%= label_tag "suggestion_#{index}_unit", "Unit", class: "sr-only" %>
+                        <%= select_tag :interval_unit, options_for_select(interval_unit_options, suggestion.interval_unit), id: "suggestion_#{index}_unit", class: "select w-auto" %>
+                      </div>
+
+                      <%= form.submit (item.replaces? ? "Replace reminder" : "Accept"), class: "btn-sm" %>
+                    <% end %>
+
+                    <%= button_to "Dismiss", plant_library_dismissals_path(plant), params: { kind: suggestion.kind, label: suggestion.label }, class: "btn-sm-ghost" %>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
+          <% elsif suggestions.suggestions.any? %>
+            <p class="vv-caption">You've dealt with every suggested reminder.</p>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% elsif (match = plant.library_match) %>
+    <% if match.platform? %>
+      <p>The platform library has a <span class="italic"><%= match.botanical_name %></span> profile.</p>
+      <div><%= button_to "Copy it to your library and link it", plant_library_link_path(plant), params: { platform_profile_id: match.id }, class: "btn-sm-outline" %></div>
+    <% else %>
+      <p>Your library has a <span class="italic"><%= match.botanical_name %></span> profile.</p>
+      <div><%= button_to "Link this plant to it", plant_library_link_path(plant), params: { library_profile_id: match.id }, class: "btn-sm-outline" %></div>
+    <% end %>
+  <% else %>
+    <p class="vv-caption">
+      Not linked to a profile.
+      <%= link_to "Browse the library", library_profiles_path, class: "underline underline-offset-4" %>,
+      or choose one when you edit the plant.
+    </p>
+  <% end %>
+</section>

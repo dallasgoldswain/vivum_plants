@@ -1,0 +1,4 @@
+<nav class="flex gap-1" aria-label="Library">
+  <%= link_to "Your library", library_profiles_path, class: (current == :mine ? "badge" : "badge-outline"), aria: { current: (current == :mine ? "page" : nil) } %>
+  <%= link_to "Platform library", platform_profiles_path, class: (current == :platform ? "badge" : "badge-outline"), aria: { current: (current == :platform ? "page" : nil) } %>
+</nav>

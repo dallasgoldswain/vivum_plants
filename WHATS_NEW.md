@@ -82,8 +82,11 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Split a pot or planting that holds several plants into records of their own.
 - Choose whether new plants use library care suggestions, under Account → Guidance settings.
   Each plant keeps its own setting, which you can change on its page, and you can bring
-  older plants up to date with your current defaults. The suggestions themselves arrive
-  soon.
+  older plants up to date with your current defaults.
+- Keep your own library of care profiles. Copy a reviewed profile from the platform library
+  and make it yours, or write one for a plant nobody covers. Link a plant to a profile and
+  it suggests care notes and reminders for where the plant grows; nothing is added until
+  you accept it.
 - Log water changes, dosing, cleaning and checks for a tank, terrarium or cabinet once, and
   see them on the timeline of every plant that was in it. Set reminders for them too; they
   show on Today once for the tank, not once for each plant.

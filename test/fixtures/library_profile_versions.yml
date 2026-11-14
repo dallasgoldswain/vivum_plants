@@ -1,0 +1,20 @@
+monstera_v1:
+  library_profile: monstera_platform
+  number: 1
+  status: published
+  botanical_name: Monstera deliciosa
+  synonyms: [Philodendron pertusum]
+  common_names: [Swiss cheese plant]
+  family: Araceae
+  content: {"indoor": {"notes": {"light": "Bright, indirect light."}, "reminders": [{"kind": "watering", "label": null, "interval": 7, "interval_unit": "day"}, {"kind": "feeding", "label": null, "interval": 1, "interval_unit": "month"}]}}
+  references: [{"title": "Platform reference", "url": "https://example.com/monstera"}]
+  reviewed_on: <%= Date.current - 10 %>
+  published_at: <%= 10.days.ago.to_fs(:db) %>
+
+fern_v1:
+  library_profile: fern_draft
+  number: 1
+  status: draft
+  botanical_name: Asplenium nidus
+  content: {}
+  references: []

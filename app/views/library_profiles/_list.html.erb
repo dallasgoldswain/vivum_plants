@@ -1,0 +1,15 @@
+<ul class="grid gap-2">
+  <% profiles.each do |profile| %>
+    <li>
+      <%= link_to path.call(profile), class: "vv-plant-row" do %>
+        <span class="grid min-w-0 flex-1 gap-0.5">
+          <span class="truncate font-medium italic"><%= profile.botanical_name %></span>
+
+          <span class="vv-caption truncate">
+            <%= [ library_profile_names(profile), profile.contexts.map { growing_context_label(it) }.join(", ").presence ].compact.join(" · ") %>
+          </span>
+        </span>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

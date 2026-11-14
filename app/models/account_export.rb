@@ -40,15 +40,22 @@ class AccountExport
       user.data_requests.order(:created_at).map { it.slice(:kind, :status, :message, :outcome, :due_on, :created_at, :completed_at) }
     },
     "plants" => ->(user) {
-      user.plants.includes(:acquisition, :status_changes, :split_from, :guidance_revision).order(:number).map do |plant|
+      user.plants.includes(:acquisition, :status_changes, :split_from, :guidance_revision, :library_profile).order(:number).map do |plant|
         plant.slice(:number, :display_name, :botanical_name, :cultivar, :common_name, :nickname, :growing_context, :tc_origin, :origin_note, :quantity, :notes, :tags, :status, :status_on, :created_at, :updated_at).merge(
           record_id: plant.record_id,
           acquisition: plant.acquisition&.slice(:name, :tissue_culture, :acquired_on, :source, :cost_cents, :currency, :order_reference, :quantity, :arrival_notes, :container_condition, :deflasked_on),
           tc_stage: plant.tc_stage, split_from: plant.split_from&.record_id,
           guidance: { library: plant.guidance_library, ai: plant.guidance_ai, defaults_revision: plant.guidance_revision.number },
+          library_profile: plant.library_profile&.botanical_name,
           status_history: plant.status_changes.map { it.slice(:status, :effective_on, :reason, :created_at) }
         )
       end
+    },
+    "library_profiles" => ->(user) {
+      user.library_profiles.order(:id).map { it.slice(:botanical_name, :synonyms, :common_names, :family, :content, :references, :content_edited_at, :created_at) }
+    },
+    "library_dismissals" => ->(user) {
+      user.library_dismissals.includes(:plant, :library_profile).order(:id).map { { plant: it.plant.record_id, profile: it.library_profile.botanical_name, kind: it.kind, label: it.label, dismissed_at: it.created_at }.compact }
     },
     "guidance_defaults" => ->(user) {
       user.guidance_revisions.order(:number).map { it.slice(:number, :library, :ai, :created_at) }
@@ -62,9 +69,9 @@ class AccountExport
       end
     },
     "care_schedules" => ->(user) {
-      user.care_schedules.includes(:plant, :environment, :tasks).order(:id).map do |schedule|
+      user.care_schedules.includes(:plant, :environment, :tasks, :library_profile).order(:id).map do |schedule|
         schedule.slice(:kind, :label, :note, :interval, :interval_unit, :mode, :starts_on, :status, :origin, :created_at).merge(
-          plant: schedule.plant&.record_id, environment: schedule.environment&.name,
+          plant: schedule.plant&.record_id, environment: schedule.environment&.name, library_profile: schedule.library_profile&.botanical_name,
           tasks: schedule.tasks.sort_by(&:id).map { it.slice(:due_on, :state, :snoozed_until, :resolved_on).compact }
         ).compact
       end

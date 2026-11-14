@@ -1,0 +1,80 @@
+<%#
+  The editable content of a profile or platform version (D143): names, care notes and
+  suggested reminders per growing context, and references. Used by your library and the
+  platform editor in Madmin.
+%>
+<% name = form.object_name %>
+
+<div class="grid gap-2">
+  <%= form.label :botanical_name %>
+  <%= form.text_field :botanical_name, required: true, maxlength: 120, placeholder: "e.g. Monstera deliciosa" %>
+</div>
+
+<div class="grid gap-2">
+  <%= form.label :synonym_list, "Synonyms" %>
+  <%= form.text_field :synonym_list, placeholder: "Separate with commas" %>
+</div>
+
+<div class="grid gap-2 sm:grid-cols-2">
+  <div class="grid gap-2">
+    <%= form.label :common_name_list, "Common names" %>
+    <%= form.text_field :common_name_list, placeholder: "e.g. Swiss cheese plant" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= form.label :family %>
+    <%= form.text_field :family, maxlength: 80, placeholder: "e.g. Araceae" %>
+  </div>
+</div>
+
+<% Plant::GROWING_CONTEXTS.each do |context| %>
+  <% notes = record.notes_for(context) %>
+  <% reminders = record.suggestions_for(context) %>
+
+  <%= tag.details class: "grid gap-3 rounded-md border border-border p-3", open: (notes.any? || reminders.any?) do %>
+    <summary class="cursor-pointer font-medium"><%= growing_context_label(context) %></summary>
+
+    <div class="mt-3 grid gap-3">
+      <% LibraryProfile::Contents::NOTE_FIELDS.each do |field| %>
+        <div class="grid gap-2">
+          <%= label_tag "#{context}_#{field}", LibraryHelper::NOTE_LABELS[field] %>
+          <%= text_area_tag "#{name}[content_params][#{context}][notes][#{field}]", notes[field], id: "#{context}_#{field}", rows: 2, maxlength: 500 %>
+        </div>
+      <% end %>
+
+      <fieldset class="grid gap-2">
+        <legend class="mb-1 text-sm font-medium">Suggested reminders</legend>
+
+        <% LibraryProfile::Contents::REMINDER_ROWS.times do |index| %>
+          <% row = reminders[index] %>
+          <% prefix = "#{name}[content_params][#{context}][reminders][#{index}]" %>
+
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_1fr_5rem_7rem]">
+            <%= label_tag "#{context}_reminder_#{index}_kind", "Kind #{index + 1}", class: "sr-only" %>
+            <%= select_tag "#{prefix}[kind]", options_for_select(schedule_kind_options(Plant.new), row&.kind), include_blank: "None", id: "#{context}_reminder_#{index}_kind", class: "select" %>
+            <%= label_tag "#{context}_reminder_#{index}_label", "Label #{index + 1}", class: "sr-only" %>
+            <%= text_field_tag "#{prefix}[label]", row&.label, id: "#{context}_reminder_#{index}_label", maxlength: 80, placeholder: "Label (your own kind)" %>
+            <%= label_tag "#{context}_reminder_#{index}_interval", "Every #{index + 1}", class: "sr-only" %>
+            <%= number_field_tag "#{prefix}[interval]", row&.interval, id: "#{context}_reminder_#{index}_interval", min: 1, max: 365, placeholder: "Every" %>
+            <%= label_tag "#{context}_reminder_#{index}_unit", "Unit #{index + 1}", class: "sr-only" %>
+            <%= select_tag "#{prefix}[interval_unit]", options_for_select(interval_unit_options, row&.interval_unit || "day"), id: "#{context}_reminder_#{index}_unit", class: "select" %>
+          </div>
+        <% end %>
+      </fieldset>
+    </div>
+  <% end %>
+<% end %>
+
+<fieldset class="grid gap-2">
+  <legend class="mb-1 text-sm font-medium">References</legend>
+
+  <% refs = record.reference_list %>
+  <% LibraryProfile::Contents::REFERENCE_ROWS.times do |index| %>
+    <div class="grid gap-2 sm:grid-cols-2">
+      <%= label_tag "reference_#{index}_title", "Reference #{index + 1} title", class: "sr-only" %>
+      <%= text_field_tag "#{name}[reference_params][#{index}][title]", refs[index]&.title, id: "reference_#{index}_title", maxlength: 200, placeholder: "Title" %>
+      <%= label_tag "reference_#{index}_url", "Reference #{index + 1} link", class: "sr-only" %>
+      <%= url_field_tag "#{name}[reference_params][#{index}][url]", refs[index]&.url, id: "reference_#{index}_url", placeholder: "https://…" %>
+    </div>
+  <% end %>
+</fieldset>

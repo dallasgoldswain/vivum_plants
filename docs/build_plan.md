@@ -58,7 +58,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B15 | Shared environment maintenance | EN04, D121–D126 | B11, B14 | Done |
 | B16 | Purchased tissue culture: groups, splits, stages | PL06, TC01–TC05, D127–D134 | B10, B14 | Done |
 | B17 | Guidance settings and new-plant defaults | ST01–ST05, D135–D140 | B10, B05 | Done (units, notification preferences and AI stop deferred) |
-| B18 | Built-in library profiles (~50 species) and suggestions | GU01, GU03, D10, D29 | B14, B17 | Planned |
+| B18 | Library profiles: platform and personal libraries, suggestions | GU01, GU03, D10, D29, D141–D154 | B14, B17 | Done (launch profiles and seller libraries to come) |
 
 ## Phase 4 — Clients and notifications
 
@@ -728,7 +728,7 @@ page and the plant's Guidance section rather than a new nav item. Tests cover th
 acceptance cases; the settings, warning, plant comparison and phone-size bulk pages were
 checked in a browser. Help topic `guidance-settings` needs review.
 
-### B18 Library profiles: platform and personal libraries, suggestions — discussed 2026-11-13
+### B18 Library profiles: platform and personal libraries, suggestions — discussed 2026-11-13, built 2026-11-14
 
 **Scope**
 - **Profiles (GU01, D141, D143, D149):** `library_profiles` belonging to the platform, a user
@@ -770,3 +770,16 @@ first; turning the library off for a plant hides suggestions and keeps accepted 
 editing your profile changes no accepted reminder and flags affected plants; platform drafts
 and retired versions are never shown to collectors; another user's profiles are never
 visible; the Today choice card disappears after Yes or No.
+
+**Built notes:** Platform and personal profiles share one table and one content format
+(`LibraryProfile::Contents`); a platform profile's row mirrors its published version, so
+collectors' lists and copies never touch versions. A suggestion is settled when the plant
+has the same reminder at the same cadence, accepted or reviewed it since the profile's last
+edit, or dismissed it since then. Accepted suggestions start today and count after
+completion. The operator editor is custom Madmin pages (not a generated resource) because
+the content is structured. The plant page's Guidance card now shows when either the guidance
+settings or the library is on. Sample profiles are seeded in development only. Tests cover
+the acceptance cases; Today's choice card, the platform library, a plant's suggestions
+before and after a profile edit, the profile form and the phone-size library and Today were
+checked in a browser. Help topics `library` and `library-suggestions` need review.
+
