@@ -12,6 +12,10 @@
 <nav class="flex gap-2" aria-label="Sell">
   <%= nav_link_to "Overview", sell_root_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
 
+  <% if capability?("seller.stock") %>
+    <%= nav_link_to "Stock", sell_stock_items_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
+  <% end %>
+
   <% if capability?("seller.members") %>
     <%= nav_link_to "Members", sell_members_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>

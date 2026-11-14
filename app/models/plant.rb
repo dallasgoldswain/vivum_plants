@@ -2,7 +2,7 @@
 # and growing context are required; identity can stay unknown and names can repeat.
 class Plant < ApplicationRecord
   GROWING_CONTEXTS = %w[ indoor terrarium paludarium aquatic outdoor ].freeze
-  STATUSES = %w[ active quarantined lost sold gifted archived ].freeze
+  STATUSES = %w[ active quarantined lost sold gifted archived moved_to_stock ].freeze
   ACTIVE_STATUSES = %w[ active quarantined ].freeze
   TAG_LIMIT = 20
   # Purchased tissue culture stages, in their usual order; any can follow any (TC02, D128).
@@ -24,6 +24,7 @@ class Plant < ApplicationRecord
   has_many :environment_event_plants, dependent: :delete_all
   has_many :maintenance_events, through: :environment_event_plants, source: :environment_event
   has_many :photos, dependent: :destroy
+  has_many :stock_items, dependent: :nullify
 
   accepts_nested_attributes_for :acquisition, reject_if: :acquisition_blank?
 

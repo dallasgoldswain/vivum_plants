@@ -3,6 +3,9 @@ class Seller < ApplicationRecord
   has_many :invitations, dependent: :delete_all
   has_many :users, through: :memberships
   belongs_to :plan
+  has_many :stock_items, dependent: :destroy
+  has_many :stock_locations, dependent: :destroy
+  has_many :stock_movements, dependent: :delete_all
 
   # Pilot and comp are free and never charged; paid needs a Paystack subscription, which
   # isn't built yet, so it can't be chosen (SB03, D64).

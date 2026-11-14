@@ -30,7 +30,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
-| B19 | Stock items, lots and the stock ledger (plant-record link added with B10) | SE01, SE02, SE04 | B02 | Planned |
+| B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08 | B19 | Planned |
 | B21 | Buyers, aliases and phone verification | BY01–BY03 | B02 | Planned |
 | B22 | Orders, holds, cancellations, returns | SE05, SE06 | B19, B21 | Planned |
@@ -784,7 +784,7 @@ before and after a profile edit, the profile form and the phone-size library and
 checked in a browser. Help topics `library` and `library-suggestions` need review.
 
 
-### B19 Stock items, locations, holds and the ledger — discussed 2026-11-14
+### B19 Stock items, locations, holds and the ledger — discussed and built 2026-11-14
 
 **Scope**
 - **Items (SE01, D155, D156):** `stock_items` (seller, kind specimen or batch, code from a
@@ -818,3 +818,15 @@ an expired hold releases once; a count can't go below what's held; a packer can 
 but never sees a price or cost; moving a plant to stock creates a linked specimen and keeps
 the plant's history, and fulfilling it records the sale on the plant's timeline; another
 seller's stock is never visible.
+
+**Built notes:** Balances are kept in `stock_balances` beside the ledger rather than summed
+on every read, so the lock-and-check stays cheap and the database refuses negatives. Holds
+count only while active and unexpired, so stock is free the moment a hold's time passes;
+the job then records the expiry once. The collection link moves stock into the business the
+session is acting for (owners and managers), and a plant holding several plants must be
+split first. Unauthorised stock actions use the app's existing redirect. The flag release
+guard test now uses `seller.listings` as its unimplemented example. Tests cover the
+acceptance cases; the stock list and item page as a host/packer (no prices; a move between
+locations) were checked in a browser, also at phone size. Help topics `stock` and
+`stock-holds` need review.
+

@@ -1,0 +1,56 @@
+<% content_for :title, "Locations · #{Current.seller.name} · VIVUM Plants" %>
+<% manage = allowed_to?(:create?, StockItem) %>
+
+<%= render "sell/stock_items/header" %>
+
+<div>
+  <%= link_to "← Stock", sell_stock_items_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+  <h2 class="vv-h3 mt-2">Locations</h2>
+</div>
+
+<div class="card max-w-2xl">
+  <section class="grid gap-3">
+    <% if @locations.any? %>
+      <ul class="grid gap-2">
+        <% @locations.each do |location| %>
+          <li class="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-2 last:border-0">
+            <% if manage && !location.archived? %>
+              <%= form_with url: sell_stock_location_path(location), method: :patch, class: "form flex flex-wrap items-end gap-2" do |form| %>
+                <%= label_tag "location_#{location.id}_name", "Name of #{location.name}", class: "sr-only" %>
+                <%= text_field_tag :name, location.name, id: "location_#{location.id}_name", maxlength: 60, required: true %>
+                <%= form.submit "Rename", class: "btn-sm-ghost" %>
+              <% end %>
+            <% else %>
+              <span><%= location.name %><%= " (archived)" if location.archived? %></span>
+            <% end %>
+
+            <span class="flex items-center gap-2">
+              <span class="vv-caption"><%= pluralize(@counts.fetch(location.id, 0), "plant") %> on hand</span>
+
+              <% if manage %>
+                <% if location.archived? %>
+                  <%= button_to "Restore", sell_stock_location_path(location), method: :patch, params: { restore: "1" }, class: "btn-sm-ghost" %>
+                <% elsif @counts.fetch(location.id, 0).zero? %>
+                  <%= button_to "Archive", sell_stock_location_path(location), method: :patch, params: { archive: "1" }, class: "btn-sm-ghost" %>
+                <% end %>
+              <% end %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>No locations yet.</p>
+    <% end %>
+
+    <% if manage %>
+      <%= form_with url: sell_stock_locations_path, class: "form flex flex-wrap items-end gap-2" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :name, "New location" %>
+          <%= form.text_field :name, required: true, maxlength: 60, placeholder: "e.g. Shop shelf" %>
+        </div>
+
+        <%= form.submit "Add", class: "btn-outline" %>
+      <% end %>
+    <% end %>
+  </section>
+</div>

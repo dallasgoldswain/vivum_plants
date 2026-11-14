@@ -252,6 +252,22 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   platform profiles seeded in development only. Export sections `library_profiles` and
   `library_dismissals`; help topics `library` and `library-suggestions`;
   `library.profiles` and `care.library_guidance` marked implemented.
+- Seller stock (B19): `stock_items` (specimen or batch; per-seller `S-0001` codes from
+  `sellers.last_stock_number`, or the seller's own; price and private cost in cents),
+  `stock_locations`, append-only `stock_movements` (read-only once saved), `stock_balances`
+  per item and location (saleable and unavailable, never negative by check constraint) and
+  `stock_holds` with a required expiry (SE01, SE02, D155–D159). `Stock::Ledger` makes every
+  change in one transaction that locks the item then its balances, refusing negatives,
+  saleable below held, more than one specimen, and a second hold on a specimen; it records
+  receipts, moves, unavailable and available again, losses, counts (adjustments), holds,
+  releases, expiries and fulfilments (D160). `ExpireStockHoldsJob` runs every 5 minutes.
+  `StockItemPolicy`: owners and managers manage; host/packers move, mark and record losses
+  and never see prices or costs (D161). `Stock::Transfer.from_plant!` moves a plant to stock
+  as a linked specimen (new plant status `moved_to_stock`); fulfilling it marks the plant
+  sold, and the moving member can take it back (SE04, D162). Item photos count against the
+  seller's plan (`Photo.quota_for_seller`); CSV downloads of stock and movements (D163).
+  Sell → Stock and Locations pages; help topics `stock` and `stock-holds`; `seller.stock`
+  and `seller.reservations` marked implemented.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

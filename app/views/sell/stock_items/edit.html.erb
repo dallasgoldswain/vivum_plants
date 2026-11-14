@@ -1,0 +1,12 @@
+<% content_for :title, "Edit #{@stock_item.code} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="card max-w-3xl">
+  <header>
+    <h2>Edit <%= @stock_item.code %></h2>
+    <p>Quantities change through movements on the item's page, never here.</p>
+  </header>
+
+  <section><%= render "sell/stock_items/form", stock_item: @stock_item, locations: [] %></section>
+</div>

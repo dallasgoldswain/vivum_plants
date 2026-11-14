@@ -1,0 +1,94 @@
+<% content_for :title, "Stock · #{Current.seller.name} · VIVUM Plants" %>
+<% prices = allowed_to?(:see_prices?, StockItem) %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <h2 class="vv-h3"><%= params[:archived] == "1" ? "Archived stock" : "Stock" %></h2>
+
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Locations", sell_stock_locations_path, class: "btn-outline" %>
+
+    <% if allowed_to?(:create?, StockItem) %>
+      <%= link_to "Download CSV", sell_stock_export_path(format: :csv), class: "btn-ghost" %>
+      <%= link_to "Add stock", new_sell_stock_item_path, class: "btn" %>
+    <% end %>
+  </div>
+</div>
+
+<% if @locations.empty? %>
+  <div class="card max-w-2xl">
+    <header>
+      <h2>Add your first location</h2>
+      <p>Where you keep stock: a greenhouse, a shelf, the shop. You can add more later.</p>
+    </header>
+
+    <% if allowed_to?(:create?, StockItem) %>
+      <section>
+        <%= form_with url: sell_stock_locations_path, class: "form flex flex-wrap items-end gap-2" do |form| %>
+          <%= hidden_field_tag :return_to, "stock", id: nil %>
+
+          <div class="grid gap-2">
+            <%= form.label :name, "Location" %>
+            <%= form.text_field :name, required: true, maxlength: 60, placeholder: "e.g. Greenhouse" %>
+          </div>
+
+          <%= form.submit "Add location", class: "btn" %>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+<% else %>
+  <%= form_with url: sell_stock_items_path, method: :get, class: "flex flex-wrap gap-2", role: "search" do |form| %>
+    <%= form.label :q, "Search stock", class: "sr-only" %>
+    <%= form.search_field :q, value: params[:q], placeholder: "Name, code or cultivar", class: "input min-w-48 flex-1" %>
+    <%= form.label :location, "Location", class: "sr-only" %>
+    <%= form.select :location, location_options(@locations), { include_blank: "All locations", selected: params[:location] }, class: "select w-auto" %>
+
+    <label class="flex min-h-11 items-center gap-2 text-sm">
+      <%= form.check_box :available, { checked: params[:available] == "1" }, "1", nil %>
+      Available only
+    </label>
+
+    <label class="flex min-h-11 items-center gap-2 text-sm">
+      <%= form.check_box :archived, { checked: params[:archived] == "1" }, "1", nil %>
+      Archived
+    </label>
+
+    <%= form.submit "Filter", name: nil, class: "btn-outline" %>
+  <% end %>
+
+  <% if @items.any? %>
+    <ul class="grid gap-2">
+      <% @items.each do |item| %>
+        <% saleable = item.balances.sum(&:saleable) %>
+        <% held = @held.fetch(item.id, 0) %>
+
+        <li>
+          <%= link_to sell_stock_item_path(item), class: "vv-plant-row" do %>
+            <% if item.cover_photo&.image&.attached? %>
+              <%= image_tag item.cover_photo.image.variant(:thumb), alt: "", class: "vv-plant-row-image" %>
+            <% end %>
+
+            <span class="grid min-w-0 flex-1 gap-0.5">
+              <span class="truncate font-medium"><%= item.label %></span>
+
+              <span class="vv-caption truncate">
+                <%= [ item.code, stock_kind_label(item.kind), item.size, (rands(item.price_cents) if prices) ].compact.join(" · ") %>
+              </span>
+            </span>
+
+            <span class="text-right text-sm">
+              <span class="font-medium"><%= [ saleable - held, 0 ].max %> available</span>
+              <span class="vv-caption block"><%= item.balances.sum(&:on_hand) %> on hand<%= ", #{held} held" if held.positive? %></span>
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="card">
+      <section><p>No stock matches.</p></section>
+    </div>
+  <% end %>
+<% end %>

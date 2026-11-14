@@ -148,6 +148,15 @@ TOTP secrets use Active Record encryption.
   bin/rails credentials:edit
   ```
 
+## Seller stock
+
+Sell → Stock (B19, SE01, SE02, SE04, D155–D163). Everything belongs to a seller and is loaded through `authorized_scope(StockItem.all)` (the seller the session acts for), so another seller's stock is a 404.
+
+- **Quantities** are never stored on `StockItem`. `Stock::Ledger` is the only writer: each change locks the item, then its `StockBalance` rows, writes one `StockMovement` and the balance together, and refuses negatives (also a check constraint), saleable below what's held, a specimen above one, and a second hold on a specimen. Movements are read-only once saved; correct a mistake with another movement.
+- **Availability** is saleable − current holds (`StockHold.current`: active and not past its expiry). `ExpireStockHoldsJob` (every 5 minutes, `config/recurring.yml`) records expiries once.
+- **Roles** live in `StockItemPolicy` (`manage_stock?` for owners and managers; `handle?` for any member; `see_prices?`).
+- **Collection link:** `Stock::Transfer.from_plant!` creates a linked specimen and sets the plant to `moved_to_stock`; `Stock::Ledger#fulfil!` marks a linked plant sold; `#to_collection!` reverses a transfer for the member who made it.
+
 ## Collection
 
 Collectors' plant records, environments, substrates, care, reminders, environment maintenance, tissue culture, guidance settings and the library (B10–B18, PL01–PL06, EN01–EN04, SU01–SU05, TC01–TC05, CA01–CA05, UX01, UX02, OF02, OF03, ST01–ST04, GU01, GU03, D80–D154). Plants, environments and recipes belong to one user only; controllers load them through `Current.user.plants`, `Current.user.environments` and `Current.user.recipes`, so another user's record is a 404.

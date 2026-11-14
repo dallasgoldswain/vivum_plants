@@ -9,7 +9,7 @@ module PlantsHelper
   end
 
   def plant_status_options
-    Plant::STATUSES.map { [ plant_status_label(it), it ] }
+    (Plant::STATUSES - %w[ moved_to_stock ]).map { [ plant_status_label(it), it ] }
   end
 
   def plant_status_badge(plant)

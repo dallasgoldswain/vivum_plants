@@ -22,6 +22,10 @@
     <div class="flex items-center gap-2">
       <%= help_link "observations-and-photos" %>
 
+      <% if @plant.active? && Current.membership&.manager_or_owner? && capability?("seller.stock") && @plant.quantity.to_i <= 1 %>
+        <%= link_to "Move to stock…", new_plant_stock_transfer_path(@plant), class: "btn-ghost" %>
+      <% end %>
+
       <% if @plant.quantity.to_i > 1 %>
         <%= link_to "Split…", new_plant_split_path(@plant), class: "btn-ghost" %>
       <% end %>

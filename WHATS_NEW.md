@@ -93,5 +93,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - No signal? Today, plants, environments and recipes you've opened stay readable, and new
   observations, care, readings and reminder updates wait on your device until you're back
   online.
+- Sellers can keep stock in VIVUM: unique specimens and batches with their own codes,
+  by location, with every delivery, move, loss and count in the history. Hold plants for
+  someone until a time you choose. Host/packers can move stock but never see prices.
+- Move a plant from your own collection into your business's stock, and back again while
+  nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
   What's new shows a dot when there's something you haven't seen.

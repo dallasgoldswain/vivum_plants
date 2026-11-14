@@ -1,0 +1,268 @@
+<% content_for :title, "#{@stock_item.code} #{@stock_item.name} · VIVUM Plants" %>
+<% prices = allowed_to?(:see_prices?, @stock_item) %>
+<% manage = allowed_to?(:manage_stock?, @stock_item) %>
+<% stocked = @positions.select { it.on_hand.positive? } %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <%= link_to "← Stock", sell_stock_items_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+    <h2 class="vv-h3 mt-2"><%= @stock_item.label %></h2>
+
+    <p class="vv-caption mt-1">
+      <%= [ @stock_item.code, stock_kind_label(@stock_item.kind), @stock_item.size, @stock_item.botanical_name, ("Archived" if @stock_item.archived?) ].compact.join(" · ") %>
+    </p>
+
+    <% if prices %>
+      <p class="mt-1">
+        <%= @stock_item.price_cents ? "#{rands(@stock_item.price_cents)} each" : "No price yet" %>
+        <% if @stock_item.cost_cents %>
+          <span class="vv-caption">· cost <%= rands(@stock_item.cost_cents) %></span>
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+
+  <% if manage %>
+    <div class="flex gap-2">
+      <%= link_to "Edit", edit_sell_stock_item_path(@stock_item), class: "btn-outline" %>
+
+      <% if !@stock_item.archived? && @totals.on_hand.zero? && @holds.none?(&:current?) %>
+        <%= button_to "Archive", sell_stock_item_archive_path(@stock_item), class: "btn-ghost" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% if (plant = @stock_item.plant) %>
+  <div class="alert" role="status">
+    <h3>From a collection</h3>
+
+    <section class="flex flex-wrap items-center justify-between gap-2">
+      <span>
+        Moved in from <%= plant.record_id %><%= " by #{@stock_item.moved_by.email_address}" if @stock_item.moved_by %>.
+        Its history stays with the plant.
+      </span>
+
+      <% if @stock_item.moved_by == Current.user && !@stock_item.archived? %>
+        <%= button_to "Move back to my collection", sell_stock_item_collection_return_path(@stock_item), class: "btn-sm-outline", data: { turbo_confirm: "Take #{@stock_item.code} out of stock and back into your collection?" } %>
+      <% end %>
+    </section>
+  </div>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+  <div class="grid content-start gap-6">
+    <div class="card" id="stock">
+      <header>
+        <h2><%= @totals.available %> available</h2>
+        <p><%= @totals.on_hand %> on hand · <%= @totals.unavailable %> unavailable · <%= @totals.held %> held</p>
+      </header>
+
+      <% if @positions.any? %>
+        <section>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Location</th>
+                <th scope="col">Saleable</th>
+                <th scope="col">Unavailable</th>
+                <th scope="col">Held</th>
+                <th scope="col">Available</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% @positions.each do |position| %>
+                <tr>
+                  <th scope="row" class="font-normal"><%= position.location.name %></th>
+                  <td><%= position.saleable %></td>
+                  <td><%= position.unavailable %></td>
+                  <td><%= position.held %></td>
+                  <td><%= position.available %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </section>
+      <% end %>
+    </div>
+
+    <% unless @stock_item.archived? %>
+      <div class="card" id="movements-form">
+        <header>
+          <h2>Record a change</h2>
+          <p>Every change goes in the history with your name.</p>
+        </header>
+
+        <section class="grid gap-2">
+          <% if manage %>
+            <details>
+              <summary class="cursor-pointer font-medium">Receive</summary>
+
+              <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+                <%= hidden_field_tag :kind, "receipt", id: nil %>
+                <div class="grid gap-2"><%= label_tag :receipt_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "receipt_quantity", min: 1, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :receipt_location, "At" %><%= select_tag :location_id, options_for_select(location_options(@locations)), id: "receipt_location", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :receipt_reason, "Note" %><%= text_field_tag :reason, nil, id: "receipt_reason", maxlength: 200, placeholder: "e.g. from supplier" %></div>
+                <div><%= form.submit "Receive", class: "btn-sm" %></div>
+              <% end %>
+            </details>
+          <% end %>
+
+          <% if stocked.any? %>
+            <details>
+              <summary class="cursor-pointer font-medium">Move</summary>
+
+              <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+                <%= hidden_field_tag :kind, "move", id: nil %>
+                <div class="grid gap-2"><%= label_tag :move_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "move_quantity", min: 1, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :move_bucket, "Which" %><%= select_tag :bucket, options_for_select([ [ "Saleable", "saleable" ], [ "Unavailable", "unavailable" ] ]), id: "move_bucket", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :move_from, "From" %><%= select_tag :location_id, options_for_select(location_options(stocked.map(&:location))), id: "move_from", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :move_to, "To" %><%= select_tag :to_location_id, options_for_select(location_options(@locations)), id: "move_to", class: "select" %></div>
+                <div><%= form.submit "Move", class: "btn-sm" %></div>
+              <% end %>
+            </details>
+
+            <details>
+              <summary class="cursor-pointer font-medium">Mark unavailable</summary>
+
+              <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+                <%= hidden_field_tag :kind, "mark_unavailable", id: nil %>
+                <div class="grid gap-2"><%= label_tag :unavailable_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "unavailable_quantity", min: 1, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :unavailable_location, "At" %><%= select_tag :location_id, options_for_select(location_options(stocked.map(&:location))), id: "unavailable_location", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :unavailable_reason, "Why" %><%= select_tag :reason, options_for_select(StockHelper::UNAVAILABLE_REASONS), id: "unavailable_reason", class: "select" %></div>
+                <div><%= form.submit "Mark unavailable", class: "btn-sm" %></div>
+              <% end %>
+            </details>
+
+            <% if @totals.unavailable.positive? %>
+              <details>
+                <summary class="cursor-pointer font-medium">Mark available again</summary>
+
+                <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+                  <%= hidden_field_tag :kind, "mark_available", id: nil %>
+                  <div class="grid gap-2"><%= label_tag :available_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "available_quantity", min: 1, required: true %></div>
+                  <div class="grid gap-2"><%= label_tag :available_location, "At" %><%= select_tag :location_id, options_for_select(location_options(stocked.select { it.unavailable.positive? }.map(&:location))), id: "available_location", class: "select" %></div>
+                  <div class="grid gap-2"><%= label_tag :available_reason, "Note" %><%= text_field_tag :reason, nil, id: "available_reason", maxlength: 200, placeholder: "e.g. out of quarantine" %></div>
+                  <div><%= form.submit "Mark available", class: "btn-sm" %></div>
+                <% end %>
+              </details>
+            <% end %>
+
+            <details>
+              <summary class="cursor-pointer font-medium">Record a loss</summary>
+
+              <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+                <%= hidden_field_tag :kind, "loss", id: nil %>
+                <div class="grid gap-2"><%= label_tag :loss_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "loss_quantity", min: 1, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :loss_bucket, "Which" %><%= select_tag :bucket, options_for_select([ [ "Saleable", "saleable" ], [ "Unavailable", "unavailable" ] ]), id: "loss_bucket", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :loss_location, "At" %><%= select_tag :location_id, options_for_select(location_options(stocked.map(&:location))), id: "loss_location", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :loss_reason, "Why" %><%= text_field_tag :reason, nil, id: "loss_reason", maxlength: 200, required: true, placeholder: "e.g. rot" %></div>
+                <div><%= form.submit "Record loss", class: "btn-sm" %></div>
+              <% end %>
+            </details>
+          <% end %>
+
+          <% if manage && @positions.any? %>
+            <details>
+              <summary class="cursor-pointer font-medium">Count</summary>
+
+              <%= form_with url: sell_stock_item_movements_path(@stock_item), class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+                <%= hidden_field_tag :kind, "count", id: nil %>
+                <div class="grid gap-2"><%= label_tag :count_location, "At" %><%= select_tag :location_id, options_for_select(location_options(@positions.map(&:location))), id: "count_location", class: "select" %></div>
+                <div class="grid gap-2"><%= label_tag :count_counted, "Saleable counted" %><%= number_field_tag :counted, nil, id: "count_counted", min: 0, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :count_reason, "Note" %><%= text_field_tag :reason, nil, id: "count_reason", maxlength: 200, placeholder: "e.g. monthly count" %></div>
+                <div><%= form.submit "Save count", class: "btn-sm" %></div>
+              <% end %>
+            </details>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <div class="card" id="history">
+      <header><h2>History</h2></header>
+
+      <section>
+        <% if @movements.any? %>
+          <ul class="grid gap-2 text-sm">
+            <% @movements.each do |movement| %>
+              <li>
+                <span class="font-medium"><%= movement_summary(movement) %></span>
+                <span class="vv-caption block">
+                  <%= l(movement.occurred_at, format: :short) %> · <%= movement.member&.email_address || "VIVUM" %><%= " · #{movement.reason}" if movement.reason %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">Nothing recorded yet.</p>
+        <% end %>
+      </section>
+    </div>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <div class="card" id="holds">
+      <header>
+        <h2>Holds</h2>
+        <p>Held stock isn't available to anyone else until the hold ends.</p>
+      </header>
+
+      <section class="grid gap-3">
+        <% if @holds.any? %>
+          <ul class="grid gap-2">
+            <% @holds.each do |hold| %>
+              <li class="grid gap-1 rounded-md border border-border p-3 text-sm">
+                <span class="font-medium"><%= hold.quantity %> for <%= hold.held_for %></span>
+
+                <span class="vv-caption">
+                  At <%= hold.stock_location.name %> ·
+                  <%= hold.current? ? "until #{l(hold.expires_at, format: :short)}" : "expired #{l(hold.expires_at, format: :short)}" %>
+                </span>
+
+                <% if manage && hold.current? %>
+                  <div class="flex gap-2">
+                    <%= button_to "Fulfil", fulfil_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm", data: { turbo_confirm: "#{hold.quantity} leave stock for #{hold.held_for}?" } %>
+                    <%= button_to "Release", release_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm-ghost" %>
+                  </div>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">Nothing held.</p>
+        <% end %>
+
+        <% if manage && capability?("seller.reservations") && @totals.available.positive? && !@stock_item.archived? %>
+          <details>
+            <summary class="cursor-pointer font-medium">Hold stock</summary>
+
+            <%= form_with url: sell_stock_item_holds_path(@stock_item), class: "form mt-3 grid gap-3" do |form| %>
+              <div class="grid gap-2"><%= label_tag :hold_for, "For" %><%= text_field_tag :held_for, nil, id: "hold_for", maxlength: 120, required: true, placeholder: "e.g. Thandi, from the Sunday group" %></div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-2"><%= label_tag :hold_quantity, "How many" %><%= number_field_tag :quantity, 1, id: "hold_quantity", min: 1, max: @totals.available, required: true %></div>
+                <div class="grid gap-2"><%= label_tag :hold_location, "At" %><%= select_tag :location_id, options_for_select(location_options(@positions.select { it.available.positive? }.map(&:location))), id: "hold_location", class: "select" %></div>
+              </div>
+
+              <div class="grid gap-2"><%= label_tag :hold_expires_at, "Hold until" %><%= datetime_local_field_tag :expires_at, nil, id: "hold_expires_at", required: true, min: Time.current.strftime("%Y-%m-%dT%H:%M") %></div>
+              <div><%= form.submit "Hold", class: "btn-sm" %></div>
+            <% end %>
+          </details>
+        <% end %>
+      </section>
+    </div>
+
+    <%= render "sell/stock_items/photos", item: @stock_item, photos: @photos, quota: @quota, manage: manage %>
+
+    <% if @stock_item.notes.present? %>
+      <div class="card">
+        <header><h2>Notes</h2></header>
+        <section><p class="whitespace-pre-line"><%= @stock_item.notes %></p></section>
+      </div>
+    <% end %>
+  </div>
+</div>

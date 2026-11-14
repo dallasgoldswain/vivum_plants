@@ -1,0 +1,12 @@
+<% content_for :title, "Add stock · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header" %>
+
+<div class="card max-w-3xl">
+  <header>
+    <h2>Add stock</h2>
+    <p>Each specimen is its own item; identical plants can share one batch.</p>
+  </header>
+
+  <section><%= render "sell/stock_items/form", stock_item: @stock_item, locations: @locations %></section>
+</div>

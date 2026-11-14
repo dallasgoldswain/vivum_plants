@@ -17,6 +17,7 @@ class Photo < ApplicationRecord
   belongs_to :care_event, optional: true
   belongs_to :environment_event, optional: true
   belongs_to :acquisition, optional: true
+  belongs_to :stock_item, optional: true
 
   has_one_attached :image do |attachable|
     attachable.variant :thumb, resize_to_fill: [ 480, 480 ], format: :jpeg, saver: { quality: 80, strip: true }, preprocessed: true
@@ -35,7 +36,12 @@ class Photo < ApplicationRecord
 
   # The quota (OF03): collectors keep up to 500 photos; deleting photos frees space.
   def self.quota_for(user)
-    Quota.new(used: user.photos.count, limit: COLLECTOR_LIMIT)
+    Quota.new(used: user.photos.where(stock_item_id: nil).count, limit: COLLECTOR_LIMIT)
+  end
+
+  # Stock photos count against the seller's plan, not the member who added them (D163).
+  def self.quota_for_seller(seller)
+    Quota.new(used: joins(:stock_item).where(stock_items: { seller_id: seller.id }).count, limit: seller.plan.photo_limit)
   end
 
   Quota = Data.define(:used, :limit) do
@@ -46,13 +52,17 @@ class Photo < ApplicationRecord
 
   # Builds a processed photo from an uploaded file, or raises Rejected with a reason the
   # collector can read. Never stores the original.
-  def self.build_from_upload(upload, user:, plant: nil, environment: nil, acquisition: nil, care_event: nil, environment_event: nil, caption: nil, taken_on: nil)
-    raise Rejected, "You've reached your #{COLLECTOR_LIMIT} photos. Delete some to add more." if quota_for(user).full?
+  def self.build_from_upload(upload, user:, plant: nil, environment: nil, acquisition: nil, stock_item: nil, care_event: nil, environment_event: nil, caption: nil, taken_on: nil)
+    if stock_item
+      raise Rejected, "Your business has reached its #{quota_for_seller(stock_item.seller).limit} photos. Delete some to add more." if quota_for_seller(stock_item.seller).full?
+    elsif quota_for(user).full?
+      raise Rejected, "You've reached your #{COLLECTOR_LIMIT} photos. Delete some to add more."
+    end
     raise Rejected, "Choose a JPEG, PNG or WebP photo." unless ACCEPTED_TYPES.include?(Marcel::MimeType.for(upload.tempfile))
     raise Rejected, "That photo is over #{MAX_UPLOAD_SIZE / 1.megabyte} MB." if upload.size > MAX_UPLOAD_SIZE
 
     processed = process(upload.tempfile.path)
-    new(user: user, plant: plant, environment: environment, acquisition: acquisition, care_event: care_event, environment_event: environment_event, caption: caption.presence, taken_on: taken_on.presence || (care_event || environment_event)&.occurred_at&.to_date || Date.current).tap do |photo|
+    new(user: user, plant: plant, environment: environment, acquisition: acquisition, stock_item: stock_item, care_event: care_event, environment_event: environment_event, caption: caption.presence, taken_on: taken_on.presence || (care_event || environment_event)&.occurred_at&.to_date || Date.current).tap do |photo|
       photo.image.attach(io: File.open(processed.path), filename: "#{File.basename(upload.original_filename.to_s, '.*').parameterize.presence || 'photo'}.jpg", content_type: "image/jpeg")
     end
   rescue Vips::Error
@@ -69,7 +79,7 @@ class Photo < ApplicationRecord
       .call
   end
 
-  def subject = plant || environment || acquisition
+  def subject = plant || environment || acquisition || stock_item
   def cover? = subject.cover_photo_id == id
 
   private
@@ -82,7 +92,8 @@ class Photo < ApplicationRecord
     end
 
     def same_owner
-      errors.add(:base, "A photo belongs to one plant, environment or purchase") unless [ plant, environment, acquisition ].compact.one?
+      errors.add(:base, "A photo belongs to one plant, environment, purchase or stock item") unless [ plant, environment, acquisition, stock_item ].compact.one?
+      errors.add(:stock_item, "must be in a business you belong to") if stock_item && !user.memberships.exists?(seller_id: stock_item.seller_id)
       errors.add(:plant, "must be yours") if plant && plant.user_id != user_id
       errors.add(:environment, "must be yours") if environment && environment.user_id != user_id
       errors.add(:acquisition, "must be yours") if acquisition && acquisition.user_id != user_id

@@ -1,0 +1,44 @@
+<%# A stock item's photos, counted against the business's plan (D163). %>
+<div class="card" id="photos">
+  <header>
+    <h2>Photos</h2>
+    <% if manage %>
+      <p><%= quota.used %> of <%= number_with_delimiter quota.limit, delimiter: " " %> business photos used.</p>
+    <% end %>
+  </header>
+
+  <section class="grid gap-4">
+    <% if photos.any? %>
+      <ul class="vv-photo-grid">
+        <% photos.each do |photo| %>
+          <li class="grid gap-1">
+            <%= image_tag photo.image.variant(:thumb), alt: photo.caption.presence || "Photo of #{item.name}", loading: "lazy", class: "vv-photo-thumb" %>
+
+            <% if manage %>
+              <div class="flex gap-1">
+                <% unless item.cover_photo_id == photo.id %>
+                  <%= button_to "Make cover", cover_sell_stock_item_photo_path(item, photo), class: "btn-sm-ghost" %>
+                <% end %>
+
+                <%= button_to "Delete", sell_stock_item_photo_path(item, photo), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Delete this photo?" } %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% elsif !manage %>
+      <p class="vv-caption">No photos yet.</p>
+    <% end %>
+
+    <% if manage && !quota.full? %>
+      <%= form_with url: sell_stock_item_photos_path(item), scope: :photo, class: "form grid gap-3" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :images, "Add photos" %>
+          <%= form.file_field :images, multiple: true, include_hidden: false, required: true, accept: Photo::ACCEPTED_TYPES.join(",") %>
+        </div>
+
+        <div><%= form.submit "Upload", class: "btn-sm-outline" %></div>
+      <% end %>
+    <% end %>
+  </section>
+</div>

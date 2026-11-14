@@ -36,6 +36,7 @@ Rails.application.routes.draw do
       resource :guidance, only: :update
       resource :guidance_application, only: :create
       resource :library_link, only: %i[ create destroy ]
+      resource :stock_transfer, only: %i[ new create ]
       resources :library_suggestions, only: :create
       resources :library_dismissals, only: :create
     end
@@ -109,6 +110,25 @@ Rails.application.routes.draw do
 
   namespace :sell do
     root "home#show"
+    # Stock (SE01, SE02, D155–D163).
+    resources :stock_items, path: "stock" do
+      scope module: :stock_items do
+        resources :movements, only: :create
+        resources :holds, only: :create do
+          member do
+            post :release
+            post :fulfil
+          end
+        end
+        resources :photos, only: %i[ create destroy ] do
+          post :cover, on: :member
+        end
+        resource :collection_return, only: :create
+        resource :archive, only: :create
+      end
+    end
+    resources :stock_locations, path: "locations", only: %i[ index create update ]
+    resource :stock_export, only: :show
     resources :members, only: %i[ index update destroy ], controller: "memberships"
     resources :invitations, only: %i[ create destroy ] do
       post :resend, on: :member

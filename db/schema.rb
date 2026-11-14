@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_14_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -484,14 +484,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
     t.bigint "environment_id"
     t.bigint "environment_event_id"
     t.bigint "acquisition_id"
+    t.bigint "stock_item_id"
     t.index ["acquisition_id"], name: "index_photos_on_acquisition_id"
     t.index ["care_event_id"], name: "index_photos_on_care_event_id"
     t.index ["environment_event_id"], name: "index_photos_on_environment_event_id"
     t.index ["environment_id"], name: "index_photos_on_environment_id"
     t.index ["plant_id", "taken_on"], name: "index_photos_on_plant_id_and_taken_on"
     t.index ["plant_id"], name: "index_photos_on_plant_id"
+    t.index ["stock_item_id"], name: "index_photos_on_stock_item_id"
     t.index ["user_id"], name: "index_photos_on_user_id"
-    t.check_constraint "num_nonnulls(plant_id, environment_id, acquisition_id) = 1", name: "photos_one_subject"
+    t.check_constraint "num_nonnulls(plant_id, environment_id, acquisition_id, stock_item_id) = 1", name: "photos_one_subject"
   end
 
   create_table "plans", force: :cascade do |t|
@@ -651,6 +653,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
     t.string "billing_mode", default: "pilot", null: false
     t.bigint "plan_id", null: false
     t.date "free_until"
+    t.integer "last_stock_number", default: 0, null: false
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
@@ -663,6 +666,96 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
     t.bigint "seller_id"
     t.index ["seller_id"], name: "index_sessions_on_seller_id"
     t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "stock_balances", force: :cascade do |t|
+    t.bigint "stock_item_id", null: false
+    t.bigint "stock_location_id", null: false
+    t.integer "saleable", default: 0, null: false
+    t.integer "unavailable", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["stock_item_id", "stock_location_id"], name: "index_stock_balances_on_stock_item_id_and_stock_location_id", unique: true
+    t.index ["stock_location_id"], name: "index_stock_balances_on_stock_location_id"
+    t.check_constraint "saleable >= 0 AND unavailable >= 0", name: "stock_balances_not_negative"
+  end
+
+  create_table "stock_holds", force: :cascade do |t|
+    t.bigint "stock_item_id", null: false
+    t.bigint "stock_location_id", null: false
+    t.integer "quantity", null: false
+    t.string "held_for", null: false
+    t.datetime "expires_at", null: false
+    t.string "state", default: "active", null: false
+    t.bigint "created_by_id"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_stock_holds_on_created_by_id"
+    t.index ["expires_at"], name: "index_stock_holds_active_expiry", where: "((state)::text = 'active'::text)"
+    t.index ["stock_item_id"], name: "index_stock_holds_on_stock_item_id"
+    t.index ["stock_location_id"], name: "index_stock_holds_on_stock_location_id"
+    t.check_constraint "quantity > 0", name: "stock_holds_quantity_positive"
+  end
+
+  create_table "stock_items", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.string "kind", null: false
+    t.string "code", null: false
+    t.integer "number"
+    t.string "name", null: false
+    t.string "cultivar"
+    t.string "botanical_name"
+    t.string "size"
+    t.integer "price_cents"
+    t.integer "cost_cents"
+    t.string "currency", default: "ZAR", null: false
+    t.text "notes"
+    t.bigint "plant_id"
+    t.bigint "moved_by_id"
+    t.bigint "cover_photo_id"
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "seller_id, lower((code)::text)", name: "index_stock_items_on_seller_and_code", unique: true
+    t.index ["cover_photo_id"], name: "index_stock_items_on_cover_photo_id"
+    t.index ["moved_by_id"], name: "index_stock_items_on_moved_by_id"
+    t.index ["plant_id"], name: "index_stock_items_on_plant_id"
+    t.index ["seller_id"], name: "index_stock_items_on_seller_id"
+    t.check_constraint "cost_cents IS NULL OR cost_cents >= 0", name: "stock_items_cost_not_negative"
+    t.check_constraint "price_cents IS NULL OR price_cents >= 0", name: "stock_items_price_not_negative"
+  end
+
+  create_table "stock_locations", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.string "name", null: false
+    t.datetime "archived_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "seller_id, lower((name)::text)", name: "index_stock_locations_on_seller_and_name", unique: true
+    t.index ["seller_id"], name: "index_stock_locations_on_seller_id"
+  end
+
+  create_table "stock_movements", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.bigint "stock_item_id", null: false
+    t.string "kind", null: false
+    t.integer "quantity", null: false
+    t.bigint "stock_location_id", null: false
+    t.bigint "to_location_id"
+    t.string "bucket", default: "saleable", null: false
+    t.string "reason"
+    t.bigint "stock_hold_id"
+    t.bigint "member_id"
+    t.datetime "occurred_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["member_id"], name: "index_stock_movements_on_member_id"
+    t.index ["seller_id"], name: "index_stock_movements_on_seller_id"
+    t.index ["stock_hold_id"], name: "index_stock_movements_on_stock_hold_id"
+    t.index ["stock_item_id", "occurred_at"], name: "index_stock_movements_on_stock_item_id_and_occurred_at"
+    t.index ["stock_item_id"], name: "index_stock_movements_on_stock_item_id"
+    t.index ["stock_location_id"], name: "index_stock_movements_on_stock_location_id"
+    t.index ["to_location_id"], name: "index_stock_movements_on_to_location_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -743,6 +836,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
   add_foreign_key "photos", "environment_events", on_delete: :cascade
   add_foreign_key "photos", "environments", on_delete: :cascade
   add_foreign_key "photos", "plants", on_delete: :cascade
+  add_foreign_key "photos", "stock_items", on_delete: :cascade
   add_foreign_key "photos", "users"
   add_foreign_key "plant_setups", "plants", on_delete: :cascade
   add_foreign_key "plant_setups", "recipe_versions", on_delete: :restrict
@@ -762,6 +856,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_090000) do
   add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify
   add_foreign_key "sessions", "users"
+  add_foreign_key "stock_balances", "stock_items", on_delete: :cascade
+  add_foreign_key "stock_balances", "stock_locations"
+  add_foreign_key "stock_holds", "stock_items"
+  add_foreign_key "stock_holds", "stock_locations"
+  add_foreign_key "stock_holds", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "stock_items", "photos", column: "cover_photo_id", on_delete: :nullify
+  add_foreign_key "stock_items", "plants", on_delete: :nullify
+  add_foreign_key "stock_items", "sellers"
+  add_foreign_key "stock_items", "users", column: "moved_by_id", on_delete: :nullify
+  add_foreign_key "stock_locations", "sellers"
+  add_foreign_key "stock_movements", "sellers"
+  add_foreign_key "stock_movements", "stock_holds"
+  add_foreign_key "stock_movements", "stock_items"
+  add_foreign_key "stock_movements", "stock_locations"
+  add_foreign_key "stock_movements", "stock_locations", column: "to_location_id"
+  add_foreign_key "stock_movements", "users", column: "member_id", on_delete: :nullify
 
   create_function :protect_audit_events, sql_definition: <<-'SQL'
       CREATE OR REPLACE FUNCTION public.protect_audit_events()
