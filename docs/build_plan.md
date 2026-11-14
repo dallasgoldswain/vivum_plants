@@ -830,3 +830,33 @@ acceptance cases; the stock list and item page as a host/packer (no prices; a mo
 locations) were checked in a browser, also at phone size. Help topics `stock` and
 `stock-holds` need review.
 
+
+### B20 Listings, sale cards and sharing — discussed 2026-11-14
+
+**Scope**
+- **Listings (SE03, D164, D165):** `listings` (seller, stock item, reference L-0001 from a
+  per-seller counter, title, price, listed quantity cap, photo ids, size, collection and
+  delivery details, caption, state draft, active, paused or ended). One active or paused
+  listing per item (partial unique index). Available = the item's available stock, capped;
+  "sold out" at 0. Fulfilling a specimen ends its listing. Sell → Listings with state and
+  availability filters; "List it" from an item page.
+- **Stock settings (D168):** per-seller defaults for collection and delivery details.
+- **Sale cards (SE07, D166, D167):** `sale_cards` (listing, format square or status, file
+  type, price, title and photo shown, created by, image attachment). Rendered with libvips:
+  photo cropped to fit, a text panel with name and price that never hides the price, size
+  and business name. Stale flag when the listing no longer matches or isn't sellable. A
+  daily job deletes cards older than 90 days.
+- **Sharing (SE08, D169):** a Stimulus controller using the Web Share API with the card
+  file and caption, falling back to Download and Copy caption; a wa.me link with the
+  caption.
+- **Roles and data (D170):** owners and managers only; listing, cards and sharing flags
+  implemented; listings in the seller's CSV export; help topics.
+
+**Deferred:** logo, social links and contact line on cards (B29); buyer listing pages and
+links (B30); paid card layouts (B43); listings in live sales (B25).
+
+**Acceptance:** a reserved quantity-1 listing shows 0 available; pausing never changes
+stock; an R450 listing's card shows R450 and the chosen photo; a very long name never hides
+the price; a card shows no cost, holds or notes; changing the price flags earlier cards as
+stale; sharing never holds stock or creates an order; fulfilling a listed specimen ends its
+listing; a host/packer can't open listings.

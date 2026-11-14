@@ -2,7 +2,7 @@
 
 **Version 1.3** · 9 November 2026 · Implementation requirements
 **Status:** Draft for product owner sign-off. Supersedes v1.2.
-**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D163)
+**Decision log:** [prd_decisions.md](prd_decisions.md) (D01–D170)
 
 Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.* Production domain: `plants.vivumlabs.co.za` (D32); the parent name VIVUM Labs plays on a tissue culture lab and a software lab. Trademark clearance is outside this PRD and unverified.
 
@@ -19,7 +19,7 @@ Working brand: VIVUM Plant Codex. Proposed tagline: *Every plant. Every detail.*
 
 ## Document status
 
-**Confirmed** = explicitly decided (C01–C08, D01–D163). **Baseline** = detailed requirement adopted for build, subject to product owner sign-off of this version. **Open** = decision still required (§32). Numeric performance and retention targets are planning targets until confirmed.
+**Confirmed** = explicitly decided (C01–C08, D01–D170). **Baseline** = detailed requirement adopted for build, subject to product owner sign-off of this version. **Open** = decision still required (§32). Numeric performance and retention targets are planning targets until confirmed.
 
 ## Reading guide
 
