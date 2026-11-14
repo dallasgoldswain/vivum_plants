@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.sale_cards, whatsapp.share]
 prerequisites: [listings]
 keywords: [card, sale card, image, share, whatsapp, status, download, caption, square, stale, out of date]
+reviewed: 2026-11-14
+reviewed_digest: 69ff6ec694ee3a677274baa6cd1d50af5abd8d11b844626b513c5a26aaf54bac
 ---
 
 A sale card is an image of a listing to post in groups or on Status: the photo,
