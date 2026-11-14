@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.listings]
 prerequisites: [stock]
 keywords: [listing, list, sell, price, reference, sold out, pause, end, draft, caption, collection, delivery]
+reviewed: 2026-11-14
+reviewed_digest: 120ccda19577e0c7b075a00502104122fdd751abfe39c5853afd7cdc2432ecec
 ---
 
 A listing is what you offer from one stock item: the name buyers see, the price,
