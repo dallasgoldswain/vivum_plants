@@ -32,7 +32,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 |---|---|---|---|---|
 | B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
-| B21 | Buyers, aliases and phone verification | BY01–BY03 | B02 | Planned |
+| B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Discussed |
 | B22 | Orders, holds, cancellations, returns | SE05, SE06 | B19, B21 | Planned |
 | B23 | Manual payments and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
@@ -872,3 +872,48 @@ CI checks. Tests cover the acceptance cases; listing an item, making a Status ca
 stale flag after a price change and the listings page at phone size were checked in a
 browser. Help topics `listings` and `sale-cards` need review.
 
+
+### B21 Buyers, aliases and phone verification — discussed 2026-11-16
+
+**Scope**
+- **Buyers (BY01, D171):** `buyers` (seller, display name, phone in E.164, unique per seller,
+  optional email, contact preference WhatsApp, call, SMS or email, verified at and method,
+  deleted at). Local numbers are normalised to +27. Sell → Buyers lists buyers and searches
+  name, alias and phone in any format. A buyer page shows contacts, addresses, aliases,
+  consents, verification and holds. All lookups are scoped to the current seller.
+- **Addresses (D175):** `buyer_addresses` (label, recipient, street, suburb, city, province,
+  postal code, default).
+- **Aliases (BY02, D172):** `buyer_aliases` (seller, display name, optional group name,
+  optional buyer). Owners and managers link and unlink them by hand; matching names never
+  merge. Stock holds gain an optional buyer or alias; the free-text "for" stays for older
+  holds.
+- **Verification (BY03, D173):** `buyer_verifications` holds a single-use token digest and
+  its expiry (proposed 7 days). "Send verification link" opens wa.me with the link. The
+  public page `/v/:token` names the seller as the responsible party (PR02), shows nothing
+  personal beyond a masked number, and confirms the number. The page also lets the buyer
+  give or withdraw WhatsApp and marketing consent. Changing a buyer's phone clears
+  verification and revokes open links.
+- **Consents (PR03, PR04, D174):** consent records per buyer per seller, with purpose,
+  version, given or withdrawn, source (seller recorded or buyer) and how it was given.
+  Marketing is off by default.
+- **Roles (D176):** `BuyerPolicy`. Owners and managers have full access. Host/packers see
+  names and aliases and can create aliases, never contacts or addresses.
+- **Buyer data requests (PR05, D177):** an owner exports one buyer's data as JSON, or
+  deletes the buyer. Deletion wipes contacts, addresses and consents, unlinks aliases and
+  keeps an anonymised tombstone for holds. Each request is logged as a data request.
+  Buyers, aliases and addresses join the seller CSV export.
+- **Merging (D178):** a manual merge moves aliases, holds, addresses and consents to the
+  kept buyer and deletes the other, recorded in the audit log.
+- **Flags:** `seller.buyers`, `buyer.phone_verification` and `privacy.buyer_dsr` become
+  implemented. Help topics cover buyers, aliases and verification.
+
+**Deferred:** inbound WhatsApp verification and template messages (B38); buyers on orders
+and redacting addresses after 12 months (B22); aliases captured in Host View (B25); buyer
+sign-in and collection import (BY04, B32).
+
+**Acceptance:** two "Sam" aliases stay separate until linked. Seller A can't find seller B's
+buyer by phone. Entering "082 123 4567" matches "+27821234567". A used or expired
+verification link can't verify again. Changing the number clears verification. A
+host/packer never sees a phone or address. Withdrawing marketing consent on the buyer page
+takes effect at once. A deleted buyer's export holds nothing personal, and their holds
+read "Deleted buyer". Merging moves aliases and holds.
