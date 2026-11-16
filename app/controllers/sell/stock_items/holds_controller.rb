@@ -9,7 +9,7 @@ class Sell::StockItems::HoldsController < Sell::BaseController
   def create
     location = location_param or return back_to_item(alert: "Choose a location.")
     expires_at = Time.zone.parse(params[:expires_at].to_s) if params[:expires_at].present?
-    ledger.hold!(quantity: params[:quantity].to_i, location: location, held_for: params[:held_for], expires_at: expires_at)
+    ledger.hold!(quantity: params[:quantity].to_i, location: location, held_for: params[:held_for], expires_at: expires_at, **holder)
     back_to_item(notice: "Held.")
   rescue Stock::Ledger::Refused => error
     back_to_item(alert: error.message)
@@ -32,5 +32,15 @@ class Sell::StockItems::HoldsController < Sell::BaseController
   end
 
   private
+    # "buyer:12" or "alias:7" from the For list (D172); otherwise the free text.
+    def holder
+      kind, id = params[:holder].to_s.split(":", 2)
+      case kind
+      when "buyer" then { buyer: Current.seller.buyers.active.find(id) }
+      when "alias" then { buyer_alias: Current.seller.buyer_aliases.find(id) }
+      else {}
+      end
+    end
+
     def set_hold = @hold = @stock_item.holds.find(params[:id])
 end

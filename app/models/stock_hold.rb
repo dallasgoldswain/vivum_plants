@@ -7,6 +7,8 @@ class StockHold < ApplicationRecord
   belongs_to :stock_item
   belongs_to :stock_location
   belongs_to :created_by, class_name: "User", optional: true
+  belongs_to :buyer, optional: true
+  belongs_to :buyer_alias, optional: true
   has_many :movements, class_name: "StockMovement", dependent: :restrict_with_error
 
   enum :state, STATES.index_by(&:itself), validate: true, default: "active"
@@ -21,4 +23,12 @@ class StockHold < ApplicationRecord
   scope :due_to_expire, -> { where(state: "active").where(expires_at: ..Time.current) }
 
   def current? = active? && expires_at > Time.current
+
+  # Who it's for (D172): the buyer, the alias (with its linked buyer), or older free text.
+  def holder_name
+    if buyer then buyer.name
+    elsif buyer_alias then [ buyer_alias.label, (" · #{buyer_alias.buyer.name}" if buyer_alias.buyer) ].join
+    else held_for
+    end
+  end
 end

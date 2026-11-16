@@ -1,0 +1,116 @@
+<% content_for :title, "Buyers · #{Current.seller.name} · VIVUM Plants" %>
+<% manage = allowed_to?(:create?, Buyer) %>
+
+<%= render "sell/stock_items/header", help: "buyers" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <h2 class="vv-h3">Buyers</h2>
+
+  <% if manage %>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Download CSV", sell_buyers_path(format: :csv), class: "btn-ghost" %>
+      <%= link_to "New buyer", new_sell_buyer_path, class: "btn" %>
+    </div>
+  <% end %>
+</div>
+
+<%= form_with url: sell_buyers_path, method: :get, class: "flex flex-wrap gap-2", role: "search" do |form| %>
+  <%= form.label :q, "Search buyers", class: "sr-only" %>
+  <%= form.search_field :q, value: params[:q], placeholder: @contacts ? "Name, alias or phone" : "Name or alias", class: "input min-w-48 flex-1" %>
+  <%= form.submit "Search", name: nil, class: "btn-outline" %>
+<% end %>
+
+<% if @buyers.any? %>
+  <ul class="grid gap-2" id="buyers">
+    <% @buyers.each do |buyer| %>
+      <li>
+        <% if manage %>
+          <%= link_to sell_buyer_path(buyer), class: "vv-plant-row" do %>
+            <span class="grid min-w-0 flex-1 gap-0.5">
+              <span class="truncate font-medium"><%= buyer.name %></span>
+              <span class="vv-caption truncate"><%= [ phone_label(buyer.phone), *buyer.aliases.map(&:label) ].join(" · ") %></span>
+            </span>
+
+            <%= verification_badge(buyer) %>
+          <% end %>
+        <% else %>
+          <div class="vv-plant-row">
+            <span class="grid min-w-0 flex-1 gap-0.5">
+              <span class="truncate font-medium"><%= buyer.name %></span>
+
+              <% if buyer.aliases.any? %>
+                <span class="vv-caption truncate"><%= buyer.aliases.map(&:label).join(" · ") %></span>
+              <% end %>
+            </span>
+          </div>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <div class="card">
+    <section>
+      <p><%= params[:q].present? ? "No buyers match." : "No buyers yet." %></p>
+    </section>
+  </div>
+<% end %>
+
+<div class="card" id="aliases">
+  <header>
+    <h2>Aliases not linked yet</h2>
+
+    <p>
+      Names people use, such as in a WhatsApp group. They're never linked to a
+      buyer by themselves.
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if @aliases.any? %>
+      <ul class="grid gap-2">
+        <% @aliases.each do |buyer_alias| %>
+          <li
+            class="
+              flex flex-wrap items-center justify-between gap-2 rounded-md
+              border border-border p-3 text-sm
+            "
+          >
+            <span class="font-medium"><%= buyer_alias.label %></span>
+
+            <% if manage %>
+              <div class="flex flex-wrap items-center gap-2">
+                <%= form_with url: sell_buyer_alias_path(buyer_alias), method: :patch, class: "flex gap-2" do |form| %>
+                  <%= label_tag "link_#{buyer_alias.id}", "Link #{buyer_alias.label} to", class: "sr-only" %>
+                  <%= select_tag :buyer_id, options_from_collection_for_select(Current.seller.buyers.active.by_name, :id, :name), id: "link_#{buyer_alias.id}", prompt: "Link to…", required: true, class: "select w-auto" %>
+                  <%= form.submit "Link", name: nil, class: "btn-sm-outline" %>
+                <% end %>
+
+                <%= button_to "Remove", sell_buyer_alias_path(buyer_alias), method: :delete, class: "btn-sm-ghost", aria: { label: "Remove #{buyer_alias.label}" } %>
+              </div>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="vv-caption">None.</p>
+    <% end %>
+
+    <details>
+      <summary class="cursor-pointer font-medium">Add an alias</summary>
+
+      <%= form_with model: BuyerAlias.new, url: sell_buyer_aliases_path, class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :name, "Name they use" %><%= form.text_field :name, required: true, maxlength: 120, placeholder: "e.g. Sam 🌿" %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :group_name, "Group (optional)" %><%= form.text_field :group_name, maxlength: 120, placeholder: "e.g. Sunday auction" %>
+        </div>
+
+        <div class="self-end">
+          <%= form.submit "Add alias", class: "btn-sm" %>
+        </div>
+      <% end %>
+    </details>
+  </section>
+</div>

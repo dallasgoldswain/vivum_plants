@@ -20,6 +20,10 @@
     <%= nav_link_to "Listings", sell_listings_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>
 
+  <% if capability?("seller.buyers") %>
+    <%= nav_link_to "Buyers", sell_buyers_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
+  <% end %>
+
   <% if capability?("seller.members") %>
     <%= nav_link_to "Members", sell_members_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>

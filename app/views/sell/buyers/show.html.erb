@@ -1,0 +1,280 @@
+<% content_for :title, "#{@buyer.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "buyers" %>
+
+<div class="flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <%= link_to "← Buyers", sell_buyers_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+    <h2 class="vv-h3 mt-2 flex items-center gap-2">
+      <%= @buyer.name %> <%= verification_badge(@buyer) %>
+    </h2>
+
+    <p class="vv-caption mt-1">
+      <%= [ phone_label(@buyer.phone), @buyer.email, "prefers #{Buyer::CONTACT_PREFERENCES[@buyer.contact_preference]}" ].compact.join(" · ") %>
+    </p>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Edit", edit_sell_buyer_path(@buyer), class: "btn-outline" %>
+
+    <% if capability?("buyer.phone_verification") %>
+      <%= button_to @buyer.verified? ? "Send a new verification link" : "Send verification link", sell_buyer_verification_path(@buyer), class: @buyer.verified? ? "btn-ghost" : "btn", form: { data: { turbo: false }, target: "_blank" } %>
+    <% end %>
+  </div>
+</div>
+
+<% unless @buyer.verified? %>
+  <p class="vv-caption">
+    Unverified: the number hasn't been confirmed by the buyer. Send a
+    verification link to open WhatsApp with a message for them; the link works
+    once, for 7 days.
+  </p>
+<% end %>
+
+<div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+  <div class="grid content-start gap-6">
+    <div class="card" id="addresses">
+      <header>
+        <h2>Delivery addresses</h2>
+      </header>
+
+      <section class="grid gap-3">
+        <% if @buyer.addresses.any? %>
+          <ul class="grid gap-2">
+            <% @buyer.addresses.each do |address| %>
+              <li
+                class="
+                  flex flex-wrap items-start justify-between gap-2
+                  rounded-md border border-border p-3 text-sm
+                "
+              >
+                <span>
+                  <span class="font-medium"><%= address.label || address.recipient %></span>
+
+                  <% if address.default? %>
+                    <span class="badge-outline">Default</span>
+                  <% end %>
+
+                  <span class="vv-caption block"><%= [ address.recipient, address.one_line, address.province ].join(" · ") %></span>
+                </span>
+
+                <span class="flex gap-2">
+                  <% unless address.default? %>
+                    <%= button_to "Make default", default_sell_buyer_address_path(@buyer, address), class: "btn-sm-ghost" %>
+                  <% end %>
+
+                  <%= button_to "Remove", sell_buyer_address_path(@buyer, address), method: :delete, class: "btn-sm-ghost", data: { turbo_confirm: "Remove this address?" } %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">No addresses yet.</p>
+        <% end %>
+
+        <details>
+          <summary class="cursor-pointer font-medium">Add an address</summary>
+
+          <%= form_with model: BuyerAddress.new, scope: :address, url: sell_buyer_addresses_path(@buyer), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+            <div class="grid gap-2">
+              <%= form.label :label, "Label (optional)" %><%= form.text_field :label, maxlength: 120, placeholder: "e.g. Work" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= form.label :recipient %><%= form.text_field :recipient, value: @buyer.name, required: true, maxlength: 120 %>
+            </div>
+
+            <div class="grid gap-2 sm:col-span-2">
+              <%= form.label :street, "Street address" %><%= form.text_field :street, required: true, maxlength: 120 %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= form.label :suburb, "Suburb (optional)" %><%= form.text_field :suburb, maxlength: 120 %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= form.label :city, "City or town" %><%= form.text_field :city, required: true, maxlength: 120 %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= form.label :province %><%= form.select :province, BuyerAddress::PROVINCES, { prompt: "Choose…" }, required: true, class: "select" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= form.label :postal_code, "Postal code" %><%= form.text_field :postal_code, required: true, maxlength: 4, inputmode: "numeric", pattern: "[0-9]{4}" %>
+            </div>
+
+            <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+              <%= form.check_box :default %> Make this the default
+            </label>
+
+            <div class="sm:col-span-2">
+              <%= form.submit "Add address", class: "btn-sm" %>
+            </div>
+          <% end %>
+        </details>
+      </section>
+    </div>
+
+    <div class="card" id="consents">
+      <header>
+        <h2>Consents</h2>
+
+        <p>
+          What <%= @buyer.name %> has agreed to hear from
+          <%= Current.seller.name %>.
+        </p>
+      </header>
+
+      <section class="grid gap-3">
+        <ul class="grid gap-2 text-sm">
+          <% BuyerConsent::PURPOSES.each_value do |purpose| %>
+            <li class="flex justify-between gap-2">
+              <span><%= purpose.label %></span>
+              <span class="<%= @buyer.consent?(purpose.key) ? 'badge-secondary' : 'badge-outline' %>"><%= consent_summary(@buyer, purpose.key) %></span>
+            </li>
+          <% end %>
+        </ul>
+
+        <details>
+          <summary class="cursor-pointer font-medium">Record a change</summary>
+
+          <%= form_with url: sell_buyer_consents_path(@buyer), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+            <div class="grid gap-2">
+              <%= label_tag :consent_purpose, "For" %><%= select_tag :purpose, options_for_select(BuyerConsent::PURPOSES.values.map { [ it.label, it.key ] }), id: "consent_purpose", class: "select" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag :consent_granted, "The buyer" %><%= select_tag :granted, options_for_select([ [ "Agreed", "1" ], [ "Withdrew", "0" ] ]), id: "consent_granted", class: "select" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag :consent_method, "How" %><%= text_field_tag :method, nil, id: "consent_method", maxlength: 200, placeholder: "e.g. said yes in our WhatsApp chat" %>
+            </div>
+
+            <div class="grid gap-2">
+              <%= label_tag :consent_given_on, "When" %><%= date_field_tag :given_on, Date.current, id: "consent_given_on", max: Date.current %>
+            </div>
+
+            <div><%= form.submit "Record", class: "btn-sm" %></div>
+          <% end %>
+        </details>
+
+        <% if @consents.any? %>
+          <details>
+            <summary class="cursor-pointer font-medium">History</summary>
+
+            <ul class="mt-3 grid gap-2 text-sm">
+              <% @consents.each do |consent| %>
+                <li>
+                  <span class="font-medium"><%= BuyerConsent.purpose(consent.purpose).label %>: <%= consent.granted? ? "agreed" : "withdrew" %></span>
+
+                  <span class="vv-caption block">
+                    <%= l(consent.given_at.to_date, format: :long) %> ·
+                    <%= consent.source == "buyer" ? "by the buyer" : "recorded by #{consent.recorded_by&.email_address || 'a member'}" %><%= " · #{consent.method}" if consent.method %>
+                  </span>
+                </li>
+              <% end %>
+            </ul>
+          </details>
+        <% end %>
+      </section>
+    </div>
+
+    <div class="card" id="holds">
+      <header>
+        <h2>Holds</h2>
+      </header>
+
+      <section>
+        <% if @holds.any? %>
+          <ul class="grid gap-2 text-sm">
+            <% @holds.each do |hold| %>
+              <li>
+                <%= link_to "#{hold.quantity} × #{hold.stock_item.label}", sell_stock_item_path(hold.stock_item), class: "font-medium underline-offset-4 hover:underline" %>
+
+                <span class="vv-caption block">
+                  <%= hold.stock_item.code %> ·
+                  <%= hold.current? ? "held until #{l(hold.expires_at, format: :short)}" : hold.state %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">Nothing held for <%= @buyer.name %>.</p>
+        <% end %>
+      </section>
+    </div>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <div class="card" id="aliases">
+      <header>
+        <h2>Aliases</h2>
+        <p>Names <%= @buyer.name %> uses, such as in a WhatsApp group.</p>
+      </header>
+
+      <section class="grid gap-3">
+        <% if @buyer.aliases.any? %>
+          <ul class="grid gap-2 text-sm">
+            <% @buyer.aliases.each do |buyer_alias| %>
+              <li class="flex items-center justify-between gap-2">
+                <span><%= buyer_alias.label %></span>
+                <%= button_to "Unlink", sell_buyer_alias_path(buyer_alias), method: :patch, params: { buyer_id: "" }, class: "btn-sm-ghost", aria: { label: "Unlink #{buyer_alias.label}" } %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">None linked.</p>
+        <% end %>
+
+        <% if @unlinked_aliases.any? %>
+          <%= form_with url: sell_buyer_alias_links_path(@buyer), class: "form flex flex-wrap gap-2" do |form| %>
+            <%= label_tag :alias_to_link, "Link an alias", class: "sr-only" %>
+            <%= select_tag :alias_id, options_from_collection_for_select(@unlinked_aliases, :id, :label), id: "alias_to_link", class: "select w-auto min-w-0 flex-1" %>
+            <%= form.submit "Link", name: nil, class: "btn-sm-outline" %>
+          <% end %>
+        <% end %>
+      </section>
+    </div>
+
+    <% if @others.any? %>
+      <div class="card" id="merge">
+        <header>
+          <h2>Merge a duplicate</h2>
+
+          <p>
+            Move another record's aliases, holds, addresses and consents here,
+            then remove it.
+          </p>
+        </header>
+
+        <section>
+          <%= form_with url: sell_buyer_merge_path(@buyer), class: "form flex flex-wrap gap-2", data: { turbo_confirm: "Merge into #{@buyer.name}? The other record is removed." } do |form| %>
+            <%= label_tag :other_buyer_id, "Buyer to merge in", class: "sr-only" %>
+            <%= select_tag :other_buyer_id, options_from_collection_for_select(@others, :id, ->(b) { "#{b.name} · #{phone_label(b.phone)}" }), prompt: "Choose a buyer…", required: true, class: "select w-auto min-w-0 flex-1" %>
+            <%= form.submit "Merge", class: "btn-sm-outline" %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <% if allowed_to?(:erase?, @buyer) && capability?("privacy.buyer_dsr") %>
+      <div class="card" id="data">
+        <header>
+          <h2>Buyer's data</h2>
+
+          <p>
+            If <%= @buyer.name %> asks for their data, or asks you to delete it.
+          </p>
+        </header>
+
+        <section class="flex flex-wrap gap-2">
+          <%= link_to "Download their data", sell_buyer_export_path(@buyer), class: "btn-sm-outline", data: { turbo: false } %>
+          <%= button_to "Delete buyer", sell_buyer_path(@buyer), method: :delete, class: "btn-sm-destructive", data: { turbo_confirm: "Delete #{@buyer.name}'s details, addresses and consents? Holds will show \"Deleted buyer\". This can't be undone." } %>
+        </section>
+      </div>
+    <% end %>
+  </div>
+</div>

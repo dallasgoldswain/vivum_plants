@@ -1,0 +1,13 @@
+<% content_for :title, "Edit #{@buyer.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "buyers" %>
+
+<div>
+  <%= link_to "← #{@buyer.name}", sell_buyer_path(@buyer), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2">Edit buyer</h2>
+</div>
+
+<div class="card">
+  <section><%= render "form", buyer: @buyer %></section>
+</div>

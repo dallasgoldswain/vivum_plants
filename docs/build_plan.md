@@ -32,7 +32,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 |---|---|---|---|---|
 | B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
-| B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Discussed |
+| B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
 | B22 | Orders, holds, cancellations, returns | SE05, SE06 | B19, B21 | Planned |
 | B23 | Manual payments and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
@@ -873,7 +873,7 @@ stale flag after a price change and the listings page at phone size were checked
 browser. Help topics `listings` and `sale-cards` need review.
 
 
-### B21 Buyers, aliases and phone verification — discussed 2026-11-16
+### B21 Buyers, aliases and phone verification — discussed and built 2026-11-16
 
 **Scope**
 - **Buyers (BY01, D171):** `buyers` (seller, display name, phone in E.164, unique per seller,
@@ -917,3 +917,12 @@ verification link can't verify again. Changing the number clears verification. A
 host/packer never sees a phone or address. Withdrawing marketing consent on the buyer page
 takes effect at once. A deleted buyer's export holds nothing personal, and their holds
 read "Deleted buyer". Merging moves aliases and holds.
+
+**Built notes:** Buyer data requests are logged in the audit log (`buyer.exported`,
+`buyer.deleted`) rather than `data_requests`, which belongs to account holders. Deleting a
+buyer also rewrites the matching hold and stock movement text, since holds copy the
+holder's name. Verification links last 7 days. "Send verification link" opens wa.me in a
+new tab, and after confirming, the buyer page redirects back to itself for Turbo. Tests
+cover the acceptance cases. A browser check covered the buyers list, linking an alias, the
+public verification page, and the verified buyer at phone width. Help topics `buyers`,
+`buyer-verification` and `buyer-data` need review.

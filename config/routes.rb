@@ -108,6 +108,10 @@ Rails.application.routes.draw do
   # A recipe's public link (D102): opens without signing in.
   get "r/:token", to: "shared_recipes#show", as: :shared_recipe
 
+  # A buyer confirms their number (BY03, D173): opens without signing in.
+  get "v/:token", to: "buyer_verifications#show", as: :buyer_verification
+  post "v/:token", to: "buyer_verifications#update"
+
   namespace :sell do
     root "home#show"
     # Stock (SE01, SE02, D155–D163).
@@ -137,6 +141,20 @@ Rails.application.routes.draw do
         resources :sale_cards, only: %i[ create show ]
       end
     end
+    # Buyers and aliases (BY01–BY03, D171–D178).
+    resources :buyers do
+      scope module: :buyers do
+        resources :addresses, only: %i[ create destroy ] do
+          post :default, on: :member
+        end
+        resource :verification, only: :create
+        resources :alias_links, only: :create
+        resources :consents, only: :create
+        resource :merge, only: :create
+        resource :export, only: :show
+      end
+    end
+    resources :buyer_aliases, path: "aliases", only: %i[ create update destroy ]
     resources :members, only: %i[ index update destroy ], controller: "memberships"
     resources :invitations, only: %i[ create destroy ] do
       post :resend, on: :member

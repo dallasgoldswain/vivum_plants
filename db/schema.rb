@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,80 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
     t.index ["created_at"], name: "index_audit_events_on_created_at"
     t.index ["target_key"], name: "index_audit_events_on_target_key"
     t.index ["target_type", "target_id"], name: "index_audit_events_on_target_type_and_target_id"
+  end
+
+  create_table "buyer_addresses", force: :cascade do |t|
+    t.bigint "buyer_id", null: false
+    t.string "label"
+    t.string "recipient", null: false
+    t.string "street", null: false
+    t.string "suburb"
+    t.string "city", null: false
+    t.string "province", null: false
+    t.string "postal_code", null: false
+    t.boolean "default", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_id"], name: "index_buyer_addresses_on_buyer_id"
+  end
+
+  create_table "buyer_aliases", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.bigint "buyer_id"
+    t.string "name", null: false
+    t.string "group_name"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_id"], name: "index_buyer_aliases_on_buyer_id"
+    t.index ["created_by_id"], name: "index_buyer_aliases_on_created_by_id"
+    t.index ["seller_id"], name: "index_buyer_aliases_on_seller_id"
+  end
+
+  create_table "buyer_consents", force: :cascade do |t|
+    t.bigint "buyer_id", null: false
+    t.string "purpose", null: false
+    t.string "version", null: false
+    t.boolean "granted", null: false
+    t.string "source", null: false
+    t.string "method"
+    t.datetime "given_at", null: false
+    t.bigint "recorded_by_id"
+    t.datetime "created_at", null: false
+    t.index ["buyer_id", "purpose", "created_at"], name: "index_buyer_consents_on_buyer_id_and_purpose_and_created_at"
+    t.index ["buyer_id"], name: "index_buyer_consents_on_buyer_id"
+    t.index ["recorded_by_id"], name: "index_buyer_consents_on_recorded_by_id"
+  end
+
+  create_table "buyer_verifications", force: :cascade do |t|
+    t.bigint "buyer_id", null: false
+    t.string "token_digest", null: false
+    t.string "phone", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.datetime "revoked_at"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_id"], name: "index_buyer_verifications_on_buyer_id"
+    t.index ["created_by_id"], name: "index_buyer_verifications_on_created_by_id"
+    t.index ["token_digest"], name: "index_buyer_verifications_on_token_digest", unique: true
+  end
+
+  create_table "buyers", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.string "name", null: false
+    t.string "phone"
+    t.string "email"
+    t.string "contact_preference", default: "whatsapp", null: false
+    t.datetime "verified_at"
+    t.string "verification_method"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["seller_id", "phone"], name: "index_buyers_on_seller_id_and_phone", unique: true, where: "(phone IS NOT NULL)"
+    t.index ["seller_id"], name: "index_buyers_on_seller_id"
+    t.check_constraint "phone IS NOT NULL OR deleted_at IS NOT NULL", name: "buyers_phone_unless_deleted"
   end
 
   create_table "care_events", force: :cascade do |t|
@@ -731,6 +805,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
     t.datetime "resolved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "buyer_id"
+    t.bigint "buyer_alias_id"
+    t.index ["buyer_alias_id"], name: "index_stock_holds_on_buyer_alias_id"
+    t.index ["buyer_id"], name: "index_stock_holds_on_buyer_id"
     t.index ["created_by_id"], name: "index_stock_holds_on_created_by_id"
     t.index ["expires_at"], name: "index_stock_holds_active_expiry", where: "((state)::text = 'active'::text)"
     t.index ["stock_item_id"], name: "index_stock_holds_on_stock_item_id"
@@ -823,6 +901,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
   add_foreign_key "acquisitions", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "buyer_addresses", "buyers", on_delete: :cascade
+  add_foreign_key "buyer_aliases", "buyers", on_delete: :nullify
+  add_foreign_key "buyer_aliases", "sellers"
+  add_foreign_key "buyer_aliases", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "buyer_consents", "buyers", on_delete: :cascade
+  add_foreign_key "buyer_consents", "users", column: "recorded_by_id", on_delete: :nullify
+  add_foreign_key "buyer_verifications", "buyers", on_delete: :cascade
+  add_foreign_key "buyer_verifications", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "buyers", "sellers"
   add_foreign_key "care_events", "care_tasks", on_delete: :nullify
   add_foreign_key "care_events", "environments", column: "from_environment_id", on_delete: :nullify
   add_foreign_key "care_events", "environments", on_delete: :nullify
@@ -902,6 +989,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_14_170000) do
   add_foreign_key "sessions", "users"
   add_foreign_key "stock_balances", "stock_items", on_delete: :cascade
   add_foreign_key "stock_balances", "stock_locations"
+  add_foreign_key "stock_holds", "buyer_aliases", on_delete: :nullify
+  add_foreign_key "stock_holds", "buyers"
   add_foreign_key "stock_holds", "stock_items"
   add_foreign_key "stock_holds", "stock_locations"
   add_foreign_key "stock_holds", "users", column: "created_by_id", on_delete: :nullify

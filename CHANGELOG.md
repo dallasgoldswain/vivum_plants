@@ -285,6 +285,20 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   `whatsapp.share` marked implemented. On macOS, forked test workers draw a stand-in for
   card text, since CoreText crashes after fork; CI on Linux renders real text. Views
   added in B17–B19 are now formatted with `herb format`.
+- Buyers, aliases and phone verification (B21): `buyers` (seller-scoped, phone in E.164
+  unique per seller with local 0… numbers normalised to +27, optional email, contact
+  preference, verification); `buyer_addresses` (SA structured, one default);
+  `buyer_aliases` linked to a buyer only by hand; `buyer_verifications` (single-use,
+  7-day links stored as a SHA-256 digest, revoked when the number changes); append-only
+  `buyer_consents` for WhatsApp messages and marketing (BY01–BY03, D171–D175). Sell →
+  Buyers with search by name, alias or phone, CSV download, merge (D178) and owner-only
+  JSON export and deletion that anonymises the buyer and their hold text (PR05, D177).
+  "Send verification link" redirects to wa.me; the public `/v/:token` page masks the
+  number, names the seller as responsible party and records the buyer's consents.
+  `stock_holds` gain `buyer_id` and `buyer_alias_id`; holds pick a buyer or alias.
+  Host/packers see names and add aliases only (D176). `seller.buyers`,
+  `buyer.phone_verification` and `privacy.buyer_dsr` marked implemented; help topics
+  `buyers`, `buyer-verification` and `buyer-data`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

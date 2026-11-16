@@ -1,0 +1,43 @@
+<%= form_with model: [ :sell, buyer ], class: "form grid gap-4" do |form| %>
+  <% if buyer.errors.any? %>
+    <div class="alert-destructive" role="alert">
+      <h3>Couldn't save</h3>
+      <section><%= buyer.errors.full_messages.to_sentence %>.</section>
+    </div>
+  <% end %>
+
+  <div class="grid gap-2">
+    <%= form.label :name %>
+    <%= form.text_field :name, required: true, maxlength: 120, placeholder: "e.g. Sam Dlamini" %>
+  </div>
+
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div class="grid gap-2">
+      <%= form.label :phone, "Phone number" %>
+      <%= form.telephone_field :phone, value: phone_label(buyer.phone), required: true, maxlength: 30, placeholder: "082 123 4567", autocomplete: "off" %>
+
+      <p class="vv-caption">
+        South African numbers can start with 0. Others need + and the country
+        code.
+      </p>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :email, "Email (optional)" %>
+      <%= form.email_field :email, maxlength: 254 %>
+    </div>
+
+    <div class="grid gap-2">
+      <%= form.label :contact_preference, "Prefers" %>
+      <%= form.select :contact_preference, Buyer::CONTACT_PREFERENCES.invert, {}, class: "select" %>
+    </div>
+  </div>
+
+  <% if buyer.persisted? && buyer.verified? %>
+    <p class="vv-caption">
+      Changing the number means the buyer needs to verify again.
+    </p>
+  <% end %>
+
+  <div><%= form.submit "Save", class: "btn" %></div>
+<% end %>

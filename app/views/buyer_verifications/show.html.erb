@@ -1,0 +1,66 @@
+<% content_for :title, "Confirm your number · #{@seller.name}" %>
+
+<div>
+  <p class="vv-kicker mb-2"><%= @seller.name %></p>
+  <h1 class="vv-h2">Confirm your number</h1>
+</div>
+
+<div class="card">
+  <% if @confirmed %>
+    <header>
+      <h2>Thank you, your number is confirmed</h2>
+
+      <p>
+        <%= @seller.name %> can now see that
+        <%= PhoneNumber.mask(@buyer.phone) %> is yours. You can close this page.
+      </p>
+    </header>
+  <% elsif @verification.usable? %>
+    <header>
+      <h2>Is <%= PhoneNumber.mask(@buyer.phone) %> your number?</h2>
+
+      <p>
+        <%= @seller.name %> asked you to confirm the WhatsApp number they have
+        for you.
+      </p>
+    </header>
+
+    <section>
+      <%= form_with url: buyer_verification_path(params[:token]), class: "form grid gap-4" do |form| %>
+        <fieldset class="grid gap-2">
+          <legend class="mb-1 text-sm font-medium">
+            What may <%= @seller.name %> send you? (optional)
+          </legend>
+
+          <% BuyerConsent::PURPOSES.each_value do |purpose| %>
+            <label class="flex min-h-11 items-start gap-2 text-sm font-normal">
+              <%= check_box_tag "consents[#{purpose.key}]", "1", @buyer.consent?(purpose.key), id: "consent_#{purpose.key}", class: "mt-1" %>
+
+              <span>
+                <span class="font-medium"><%= purpose.label %></span>
+                <span class="vv-caption block"><%= purpose.description %></span>
+              </span>
+            </label>
+          <% end %>
+        </fieldset>
+
+        <div><%= form.submit "Yes, this is my number", class: "btn" %></div>
+      <% end %>
+    </section>
+  <% else %>
+    <header>
+      <h2>This link no longer works</h2>
+
+      <p>
+        It has been used or has expired. Ask <%= @seller.name %> to send you a
+        new one.
+      </p>
+    </header>
+  <% end %>
+</div>
+
+<p class="vv-caption">
+  <%= @seller.name %> is responsible for the details they keep about you, and
+  uses VIVUM Plants to keep them. Ask <%= @seller.name %> if you'd like to see,
+  change or delete them.
+</p>

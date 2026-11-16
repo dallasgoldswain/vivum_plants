@@ -314,7 +314,14 @@
           <ul class="grid gap-2">
             <% @holds.each do |hold| %>
               <li class="grid gap-1 rounded-md border border-border p-3 text-sm">
-                <span class="font-medium"><%= hold.quantity %> for <%= hold.held_for %></span>
+                <span class="font-medium">
+                  <%= hold.quantity %> for
+                  <% if hold.buyer && !hold.buyer.deleted? && capability?("seller.buyers") %>
+                    <%= link_to hold.holder_name, sell_buyer_path(hold.buyer), class: "underline underline-offset-4" %>
+                  <% else %>
+                    <%= hold.holder_name %>
+                  <% end %>
+                </span>
 
                 <span class="vv-caption">
                   At <%= hold.stock_location.name %> ·
@@ -323,7 +330,7 @@
 
                 <% if manage && hold.current? %>
                   <div class="flex gap-2">
-                    <%= button_to "Fulfil", fulfil_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm", data: { turbo_confirm: "#{hold.quantity} leave stock for #{hold.held_for}?" } %>
+                    <%= button_to "Fulfil", fulfil_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm", data: { turbo_confirm: "#{hold.quantity} leave stock for #{hold.holder_name}?" } %>
                     <%= button_to "Release", release_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm-ghost" %>
                   </div>
                 <% end %>
@@ -339,8 +346,14 @@
             <summary class="cursor-pointer font-medium">Hold stock</summary>
 
             <%= form_with url: sell_stock_item_holds_path(@stock_item), class: "form mt-3 grid gap-3" do |form| %>
+              <% if capability?("seller.buyers") %>
+                <div class="grid gap-2">
+                  <%= label_tag :hold_holder, "For" %><%= select_tag :holder, grouped_options_for_select(holder_options), id: "hold_holder", include_blank: "Someone else (type below)", class: "select" %>
+                </div>
+              <% end %>
+
               <div class="grid gap-2">
-                <%= label_tag :hold_for, "For" %><%= text_field_tag :held_for, nil, id: "hold_for", maxlength: 120, required: true, placeholder: "e.g. Thandi, from the Sunday group" %>
+                <%= label_tag :hold_for, capability?("seller.buyers") ? "Or name" : "For" %><%= text_field_tag :held_for, nil, id: "hold_for", maxlength: 120, required: !capability?("seller.buyers"), placeholder: "e.g. Thandi, from the Sunday group" %>
               </div>
 
               <div class="grid grid-cols-2 gap-3">

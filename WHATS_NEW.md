@@ -99,6 +99,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - List stock for sale with its own name, price, photos and collection details, and make
   sale card images for groups and Status. Share them straight to WhatsApp with a ready
   caption. Cards that no longer match the price are marked out of date.
+- Keep your buyers in one place: numbers, delivery addresses, the names they use in
+  groups, and what they've agreed to hear from you. Send a link on WhatsApp so they can
+  confirm their number. Hold stock for a buyer, merge duplicates, and download or delete
+  a buyer's details when they ask.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

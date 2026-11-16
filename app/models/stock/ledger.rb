@@ -51,9 +51,13 @@ class Stock::Ledger
     end
   end
 
-  def hold!(quantity:, location:, held_for:, expires_at:)
+  def hold!(quantity:, location:, expires_at:, held_for: nil, buyer: nil, buyer_alias: nil)
     raise Refused, "Choose when the hold ends." if expires_at.blank?
     raise Refused, "The hold must end in the future." if expires_at <= Time.current
+    raise Refused, "That buyer belongs to another business." if [ buyer, buyer_alias ].compact.any? { it.seller_id != item.seller_id }
+    raise Refused, "That buyer has been deleted." if buyer&.deleted?
+
+    held_for = buyer&.name || buyer_alias&.label || held_for
 
     transaction do
       raise Refused, "This specimen is already held." if item.specimen? && item.holds.current.exists?
@@ -61,7 +65,7 @@ class Stock::Ledger
       available = position(location).available
       raise Refused, "Only #{available} available at #{location.name}." if quantity > available
 
-      hold = item.holds.create!(stock_location: location, quantity: quantity, held_for: held_for, expires_at: expires_at, created_by: member)
+      hold = item.holds.create!(stock_location: location, quantity: quantity, held_for: held_for, buyer: buyer, buyer_alias: buyer_alias, expires_at: expires_at, created_by: member)
       record(:hold, quantity, location, stock_hold: hold, reason: hold.held_for)
       hold
     end

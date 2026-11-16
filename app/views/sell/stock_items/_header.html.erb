@@ -4,7 +4,7 @@
 
     <div class="flex items-start justify-between gap-3">
       <h1 class="vv-h2"><%= Current.seller.name %></h1>
-      <%= help_link "stock" %>
+      <%= help_link local_assigns.fetch(:help, "stock") %>
     </div>
   </div>
 

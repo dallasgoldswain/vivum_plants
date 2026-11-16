@@ -26,7 +26,7 @@ help.contextual: { domain: help, state: core, implemented: true, depends_on: [he
 # --- Privacy ---
 privacy.consents: { domain: privacy, state: core, implemented: true, description: "Versioned consent records (PR03). Terms acceptance and Settings → Privacy are never gated by this flag" }
 privacy.dsr: { domain: privacy, state: core, implemented: true, description: "Data subject requests for account holders (PR05). A legal right, never gated by this flag" }
-privacy.buyer_dsr: { domain: privacy, state: core, depends_on: [seller.buyers], description: "Seller tools to export and delete a buyer's data" }
+privacy.buyer_dsr: { domain: privacy, state: core, implemented: true, depends_on: [seller.buyers], description: "Seller tools to export and delete a buyer's data" }
 
 # --- Clients ---
 client.pwa: { domain: clients, state: core, description: "Installable PWA" }
@@ -89,7 +89,7 @@ seller.orders: { domain: seller, state: core, depends_on: [seller.reservations, 
 seller.reservations: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Holds and reservations (SE06)", off: "No new holds; existing holds can still be released and expire" }
 seller.receipts: { domain: seller, state: core, depends_on: [seller.orders], description: "Receipts (RC01)" }
 seller.vat_invoices: { domain: seller, state: core, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
-seller.buyers: { domain: seller, state: core, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
+seller.buyers: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
 seller.closeout: { domain: seller, state: core, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
 seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
 
@@ -128,7 +128,7 @@ shipping.tracking: { domain: shipping, state: core, depends_on: [seller.orders],
 buyer.order_link: { domain: buyer, state: core, depends_on: [seller.orders], description: "Buyer order review link (WB01)" }
 buyer.tracking_link: { domain: buyer, state: core, depends_on: [shipping.tracking], description: "Buyer tracking link (WB01)" }
 buyer.receipt_link: { domain: buyer, state: core, depends_on: [seller.receipts], description: "Buyer receipt link (WB01)" }
-buyer.phone_verification: { domain: buyer, state: core, depends_on: [seller.buyers], description: "Buyer phone verification by code (BY03)" }
+buyer.phone_verification: { domain: buyer, state: core, implemented: true, depends_on: [seller.buyers], description: "Buyer phone verification by link (BY03)" }
 
 # --- Care handover ---
 care.sheets: { domain: handover, state: core, depends_on: [seller.workspace], description: "Care sheet templates and published versions (CP01)" }
