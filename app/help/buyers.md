@@ -5,6 +5,8 @@ summary: Keep your buyers' numbers, addresses and consents, and link the names t
 audience: seller
 capabilities: [seller.buyers]
 keywords: [buyer, customer, phone, number, address, alias, group, whatsapp, merge, duplicate, consent, marketing]
+reviewed: 2026-11-16
+reviewed_digest: e2e4fd84aa3945f8d38c09c25f2ea583a39185160cdc00bf08b7ee162efecbc2
 ---
 
 Your buyers belong to your business. No other seller can see them, even if they
