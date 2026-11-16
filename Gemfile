@@ -70,7 +70,7 @@ gem "lexxy"
 
 # AI via one client for Anthropic and OpenAI (PRD D09/D23); the provider gems are for
 # provider-specific features RubyLLM doesn't cover
-gem "ruby_llm", "~> 2.1.1"
+gem "ruby_llm", "~> 2.2.0"
 gem "anthropic"
 gem "openai"
 
