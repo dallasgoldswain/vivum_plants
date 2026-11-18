@@ -6,6 +6,8 @@ audience: seller
 capabilities: [buyer.phone_verification]
 prerequisites: [buyers]
 keywords: [verify, verified, unverified, confirm, phone, number, link, whatsapp]
+reviewed: 2026-11-18
+reviewed_digest: 1ac58edd89799a89357dfe5714c25ee4ed7f60d42d373d95f31be45bd66677db
 ---
 
 A buyer is **Unverified** until they confirm their number. You can still hold
