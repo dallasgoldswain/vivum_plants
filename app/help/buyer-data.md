@@ -6,6 +6,8 @@ audience: seller
 capabilities: [privacy.buyer_dsr]
 prerequisites: [buyers]
 keywords: [privacy, popia, delete, export, download, data, request, forget]
+reviewed: 2026-11-18
+reviewed_digest: e53e5b9bf4b70efb75c16c6a13737d90acf0a5cf35319dae308edc6cb622d447
 ---
 
 Your business is responsible for the details you keep about your buyers. If a
