@@ -33,8 +33,8 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
-| B22 | Orders, holds, cancellations, returns | SE05, SE06 | B19, B21 | Planned |
-| B23 | Manual payments and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
+| B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Discussed |
+| B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
@@ -926,3 +926,45 @@ new tab, and after confirming, the buyer page redirects back to itself for Turbo
 cover the acceptance cases. A browser check covered the buyers list, linking an alias, the
 public verification page, and the verified buyer at phone width. Help topics `buyers`,
 `buyer-verification` and `buyer-data` need review.
+
+### B22 Orders, holds and cancellations — discussed 2026-11-20
+
+**Scope**
+- **Orders (SE05, D179, D186):** `orders` (seller, buyer, number from a per-seller counter
+  such as O-0001, source, state draft, reserved, fulfilled or cancelled, payment state
+  unpaid, hold expiry, delivery method pickup or shipping, address snapshot, shipping fee,
+  discount and reason, courier and tracking text, fulfilled and cancelled times and
+  members). `order_lines` (stock item, optional listing, quantity, agreed unit price in
+  cents, state, cancel reason, optional hold). Totals are lines + shipping − discount, never
+  below zero, in ZAR. A buyer is required; aliases must be linked first.
+- **Reserving (SE06, D180):** reserving takes one seller-chosen expiry (no default) and
+  creates one hold per line for the buyer through `Stock::Ledger`, all or nothing in one
+  transaction, naming any short line. Holds show the order number. The expiry can be
+  extended. Expired holds release through the existing job; the order shows expired lines.
+- **Changes (D183):** add and remove lines and change quantities on draft and reserved
+  orders; reserved changes adjust holds in the same transaction. Editing an agreed price
+  keeps the old price and a reason. Cancel a line or the order with a reason; holds release
+  once and a repeated cancel is a no-op. Fulfilled orders can't be cancelled.
+- **Delivery and fulfilment (D181, D182):** shipping copies a buyer address onto the order.
+  Fulfil marks the order collected or shipped and fulfils its holds. Fulfilling an unpaid
+  order needs a confirmation.
+- **Roles (D185):** `OrderPolicy`, owners and managers only; every change records the member
+  and goes to the audit log.
+- **List and data (D187):** Sell → Orders with state filters and search by number, buyer or
+  item; a buyer page lists their orders. Orders and lines join the seller export and the
+  buyer data export. `seller.orders` and `seller.reservations` become implemented, with a
+  help topic.
+- **Retention (D188):** deleting a buyer needs their draft and reserved orders closed first,
+  and leaves orders with their name and address snapshots. A recurring job redacts buyer
+  addresses unused on an order and unedited for 12 months.
+
+**Deferred:** payments, paid state, receipts, returns and refunds (B23); auction and claim
+orders and grouping wins by buyer (B25, B26); packing and host/packer order access (B27);
+buyer order links (B30); Bob Go shipping (B42).
+
+**Acceptance:** a draft leaves stock available; reserving holds it; two orders for the last
+specimen → one reserves; cancelling releases once and a repeated cancel adds no stock; a
+price change on the item after adding a line leaves the order's price; editing a price keeps
+the old one and the reason; fulfilling removes stock and clears holds; a shipping address
+edit on the buyer leaves the order's snapshot; seller A never sees seller B's orders; a
+host/packer can't open orders; a buyer with a reserved order can't be deleted.
