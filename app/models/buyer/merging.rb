@@ -1,5 +1,5 @@
-# Two records for one person become one, by hand only (D178): aliases, holds, addresses and
-# consents move to the kept buyer and the other is removed.
+# Two records for one person become one, by hand only (D178): aliases, holds, orders, addresses
+# and consents move to the kept buyer and the other is removed.
 module Buyer::Merging
   extend ActiveSupport::Concern
 
@@ -9,6 +9,7 @@ module Buyer::Merging
     transaction do
       other.aliases.update_all(buyer_id: id)
       other.holds.update_all(buyer_id: id)
+      other.orders.update_all(buyer_id: id)
       other.addresses.update_all(buyer_id: id, default: false)
       other.consents.update_all(buyer_id: id)
       self.email ||= other.email

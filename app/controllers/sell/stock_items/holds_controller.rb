@@ -42,5 +42,9 @@ class Sell::StockItems::HoldsController < Sell::BaseController
       end
     end
 
-    def set_hold = @hold = @stock_item.holds.find(params[:id])
+    # An order's hold changes through its order (D180), never on its own.
+    def set_hold
+      @hold = @stock_item.holds.find(params[:id])
+      back_to_item(alert: "This hold is for #{@hold.order_line.order.reference}; change it on the order.") if @hold.order_line
+    end
 end

@@ -299,6 +299,22 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   Host/packers see names and add aliases only (D176). `seller.buyers`,
   `buyer.phone_verification` and `privacy.buyer_dsr` marked implemented; help topics
   `buyers`, `buyer-verification` and `buyer-data`.
+- Orders, holds and cancellations (B22): `orders` (seller and buyer, O-0001 numbers from
+  a per-seller counter, source, state separate from payment state, one hold expiry,
+  pickup or shipping with a JSON copy of the buyer's address, shipping fee, discount with
+  reason, buyer name snapshot) and `order_lines` (stock item, optional listing, quantity,
+  agreed and current unit price, price reason, cancel reason, stock hold) (SE05, SE06,
+  D179–D186). `Order::Reserving` locks the order and its items in id order and drives
+  `Stock::Ledger`: reserving is all or nothing, updating the hold moves current holds
+  and re-holds expired lines, a repeated cancel is a no-op, and fulfilling an unpaid order
+  needs confirmation. `Stock::Ledger#hold!` takes a `reference`, and gains `extend!` and
+  `let_go!`; an order's holds can't be released or fulfilled from the stock page. Sell →
+  Orders with state filters, search by number, buyer or item, orders and lines CSV; buyer
+  pages list orders and the buyer export includes them (D187). Deleting a buyer needs
+  their open orders closed and leaves orders unchanged; `PrivacyHousekeepingJob` deletes
+  buyer addresses unused on an order and unedited for 12 months (`last_used_at`, D188).
+  Owners and managers only (D185). `seller.orders` marked implemented; help topic
+  `orders`, and `buyer-data` updated.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

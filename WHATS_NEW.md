@@ -103,6 +103,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   groups, and what they've agreed to hear from you. Send a link on WhatsApp so they can
   confirm their number. Hold stock for a buyer, merge duplicates, and download or delete
   a buyer's details when they ask.
+- Put together orders for your buyers: add plants at the price you agreed, reserve them
+  until a time you choose, add shipping and a discount, then mark the order collected or
+  shipped. Cancelling releases anything held, and you can download your orders.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

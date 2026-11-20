@@ -1,0 +1,347 @@
+<% content_for :title, "#{@order.reference} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "orders" %>
+
+<div class="flex flex-wrap items-start justify-between gap-3">
+  <div>
+    <%= link_to "← Orders", sell_orders_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+    <h2 class="vv-h3 mt-2 flex flex-wrap items-center gap-2">
+      <%= @order.reference %> ·
+      <%= link_to_unless @order.buyer.deleted?, @order.buyer_name, sell_buyer_path(@order.buyer), class: "underline-offset-4 hover:underline" %>
+      <%= order_state_badge(@order) %> <%= payment_badge(@order) %>
+    </h2>
+
+    <p class="vv-caption mt-1">
+      <%= Order::SOURCES[@order.source] %> · started
+      <%= l(@order.created_at, format: :short) %>
+      <% if @order.reserved? && @order.hold_expires_at %>
+        · held until <%= l(@order.hold_expires_at, format: :short) %>
+      <% end %>
+      <% if @order.fulfilled? %>
+        · <%= @order.pickup? ? "collected" : "shipped" %>
+        <%= l(@order.fulfilled_at, format: :short) %>
+      <% end %>
+      <% if @order.cancelled? %>
+        · cancelled <%= l(@order.cancelled_at, format: :short) %>:
+        <%= @order.cancel_reason %>
+      <% end %>
+    </p>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
+  <div class="grid content-start gap-6">
+    <div class="card" id="lines">
+      <header>
+        <h2>Plants</h2>
+        <p>Prices stay as agreed when each plant was added.</p>
+      </header>
+
+      <section class="grid gap-3">
+        <% if @order.lines.any? %>
+          <ul class="grid gap-2">
+            <% @order.lines.each do |line| %>
+              <li
+                class="grid gap-2 rounded-md border border-border p-3 text-sm"
+                id="<%= dom_id(line) %>"
+              >
+                <div class="flex flex-wrap items-start justify-between gap-2">
+                  <span>
+                    <span class="font-medium <%= 'line-through' if line.cancelled? %>">
+                      <%= line.quantity %> ×
+                      <%= link_to line.description, sell_stock_item_path(line.stock_item), class: "underline-offset-4 hover:underline" %>
+                    </span>
+
+                    <span class="vv-caption block">
+                      <%= line.stock_item.code %> ·
+                      <%= rands(line.unit_price_cents) %> each
+                      <% if line.price_changed? %>
+                        (agreed <%= rands(line.agreed_price_cents) %>;
+                        <%= line.price_reason %>)
+                      <% end %>
+                      <% if line.cancelled? %>
+                        · cancelled: <%= line.cancel_reason %>
+                      <% elsif @order.reserved? %>
+                        ·
+                        <%= line.held? ? "held at #{line.stock_hold.stock_location.name}" : "no longer held" %>
+                      <% end %>
+                    </span>
+                  </span>
+
+                  <span class="font-medium"><%= rands(line.total_cents) unless line.cancelled? %></span>
+                </div>
+
+                <% if @order.open? && line.active? %>
+                  <details>
+                    <summary class="cursor-pointer font-medium">Change</summary>
+
+                    <%= form_with url: sell_order_line_path(@order, line), method: :patch, class: "form mt-3 grid gap-3 sm:grid-cols-3" do |form| %>
+                      <div class="grid gap-2">
+                        <%= label_tag "quantity_#{line.id}", "Quantity" %>
+                        <%= number_field_tag :quantity, line.quantity, id: "quantity_#{line.id}", min: 1, max: (1 if line.stock_item.specimen?), required: true %>
+                      </div>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "price_#{line.id}", "Price each (R)" %>
+                        <%= text_field_tag :price, line.unit_price_cents / 100.0, id: "price_#{line.id}", inputmode: "decimal" %>
+                      </div>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "price_reason_#{line.id}", "Why the price changed" %>
+                        <%= text_field_tag :price_reason, nil, id: "price_reason_#{line.id}", maxlength: 200, placeholder: "Only if you change it" %>
+                      </div>
+
+                      <div class="sm:col-span-3">
+                        <%= form.submit "Save", class: "btn-sm" %>
+                      </div>
+                    <% end %>
+
+                    <% if @order.draft? %>
+                      <%= button_to "Remove", sell_order_line_path(@order, line), method: :delete, class: "btn-sm-ghost mt-2" %>
+                    <% else %>
+                      <%= form_with url: sell_order_line_path(@order, line), method: :delete, class: "form mt-3 flex flex-wrap gap-2" do |form| %>
+                        <%= label_tag "cancel_reason_#{line.id}", "Why cancel this plant", class: "sr-only" %>
+                        <%= text_field_tag :reason, nil, id: "cancel_reason_#{line.id}", required: true, maxlength: 200, placeholder: "Why cancel this plant?", class: "input min-w-0 flex-1" %>
+                        <%= form.submit "Cancel plant", class: "btn-sm-outline" %>
+                      <% end %>
+                    <% end %>
+                  </details>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="vv-caption">Nothing on the order yet.</p>
+        <% end %>
+
+        <% if @order.open? %>
+          <%= tag.details open: @order.lines.none? do %>
+            <summary class="cursor-pointer font-medium">Add a plant</summary>
+
+            <%= form_with url: sell_order_lines_path(@order), class: "form mt-3 grid gap-3 sm:grid-cols-[3fr_1fr_1fr]" do |form| %>
+              <div class="grid gap-2">
+                <%= label_tag :line_item, "Stock item" %>
+                <%= select_tag :stock_item_id, options_for_select(order_item_options(@items)), id: "line_item", prompt: "Choose an item…", required: true, class: "select" %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= label_tag :line_quantity, "Quantity" %><%= number_field_tag :quantity, 1, id: "line_quantity", min: 1, required: true %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= label_tag :line_price, "Price each (R)" %><%= text_field_tag :price, nil, id: "line_price", inputmode: "decimal", placeholder: "Listed price" %>
+              </div>
+
+              <div class="sm:col-span-3">
+                <%= form.submit "Add", class: "btn-sm" %>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <dl
+          class="
+            grid grid-cols-[1fr_auto] gap-1 border-t border-border pt-3
+            text-sm
+          "
+        >
+          <dt>Plants</dt>
+
+          <dd class="text-right"><%= rands(@order.lines_cents) %></dd>
+
+          <dt>Shipping</dt>
+
+          <dd class="text-right"><%= rands(@order.shipping_cents) %></dd>
+
+          <% if @order.discount_cents.positive? %>
+            <dt>Discount (<%= @order.discount_reason %>)</dt>
+            <dd class="text-right">−<%= rands(@order.discount_cents) %></dd>
+          <% end %>
+
+          <dt class="font-medium">Total</dt>
+
+          <dd class="text-right font-medium" id="order_total">
+            <%= rands(@order.total_cents) %>
+          </dd>
+        </dl>
+      </section>
+    </div>
+
+    <% if @order.notes %>
+      <div class="card">
+        <header>
+          <h2>Notes</h2>
+        </header>
+
+        <section>
+          <p class="text-sm"><%= @order.notes %></p>
+        </section>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="grid content-start gap-6">
+    <% if @order.open? && capability?("seller.reservations") %>
+      <div class="card" id="reserve">
+        <header>
+          <h2><%= @order.reserved? ? "Hold" : "Reserve" %></h2>
+
+          <p>
+            <% if @order.reserved? %>
+              Move when the hold ends, or hold again any plant whose hold ran
+              out.
+            <% else %>
+              Holds every plant for <%= @order.buyer_name %> until the time you
+              choose. Until then the stock stays available to others.
+            <% end %>
+          </p>
+        </header>
+
+        <section>
+          <%= form_with url: sell_order_reservation_path(@order), class: "form grid gap-3" do |form| %>
+            <div class="grid gap-2">
+              <%= label_tag :reserve_expires_at, "Hold until" %>
+              <%= datetime_local_field_tag :expires_at, datetime_local_value(@order.hold_expires_at&.future? ? @order.hold_expires_at : nil), id: "reserve_expires_at", required: true, min: datetime_local_value(Time.current) %>
+            </div>
+
+            <div>
+              <%= form.submit @order.reserved? ? "Update hold" : "Reserve", class: @order.reserved? ? "btn-sm-outline" : "btn-sm" %>
+            </div>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <div class="card" id="delivery">
+      <header>
+        <h2>Delivery</h2>
+      </header>
+
+      <section class="grid gap-3">
+        <p class="text-sm">
+          <% if @order.shipping? %>
+            Shipping to
+            <%= @order.shipping_lines.join(", ").presence || "an address still to choose" %>
+          <% else %>
+            Pickup
+          <% end %>
+
+          <% if @order.courier || @order.tracking_reference %>
+            <span class="vv-caption block"><%= [ @order.courier, @order.tracking_reference ].compact.join(" · ") %></span>
+          <% end %>
+        </p>
+
+        <% if @order.open? %>
+          <details>
+            <summary class="cursor-pointer font-medium">
+              Change delivery or discount
+            </summary>
+
+            <%= form_with model: @order, url: sell_order_path(@order), method: :patch, class: "form mt-3 grid gap-3" do |form| %>
+              <div class="grid gap-2">
+                <%= form.label :delivery_method, "Delivery" %>
+                <%= form.select :delivery_method, Order::DELIVERY_METHODS.invert, {}, class: "select" %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= label_tag :order_address_id, "Ship to" %>
+
+                <% if @addresses.any? %>
+                  <%= select_tag "order[address_id]", options_for_select(@addresses.map { [ [ it.label, it.recipient, it.one_line ].compact.join(" · "), it.id ] }), id: "order_address_id", include_blank: @order.shipping_address ? "Keep the address on the order" : "Choose an address…", class: "select" %>
+                <% else %>
+                  <p class="vv-caption">
+                    <%= @order.buyer_name %> has no addresses yet; add one on
+                    <%= link_to_unless @order.buyer.deleted?, "their page", sell_buyer_path(@order.buyer), class: "underline underline-offset-4" %>.
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= form.label :shipping, "Shipping fee (R)" %>
+                <%= form.text_field :shipping, value: (@order.shipping if @order.shipping_cents.positive?), inputmode: "decimal", placeholder: "0" %>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-2">
+                  <%= form.label :discount, "Discount (R)" %>
+                  <%= form.text_field :discount, value: (@order.discount if @order.discount_cents.positive?), inputmode: "decimal", placeholder: "0" %>
+                </div>
+
+                <div class="grid gap-2">
+                  <%= form.label :discount_reason, "Why" %>
+                  <%= form.text_field :discount_reason, maxlength: 200, placeholder: "e.g. bought three" %>
+                </div>
+              </div>
+
+              <div class="grid gap-2">
+                <%= form.label :source, "Where it came from" %>
+                <%= form.select :source, Order::SOURCES.invert, {}, class: "select" %>
+              </div>
+
+              <div class="grid gap-2">
+                <%= form.label :notes, "Notes" %><%= form.text_area :notes, rows: 2, maxlength: 1000 %>
+              </div>
+
+              <div><%= form.submit "Save", class: "btn-sm" %></div>
+            <% end %>
+          </details>
+        <% end %>
+      </section>
+    </div>
+
+    <% if @order.reserved? %>
+      <div class="card" id="fulfil">
+        <header>
+          <h2><%= @order.pickup? ? "Collected" : "Shipped" %></h2>
+          <p>The plants leave your stock.</p>
+        </header>
+
+        <section>
+          <%= form_with url: sell_order_fulfilment_path(@order), class: "form grid gap-3" do |form| %>
+            <% if @order.shipping? %>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-2">
+                  <%= label_tag :fulfil_courier, "Courier (optional)" %><%= text_field_tag :courier, nil, id: "fulfil_courier", maxlength: 200 %>
+                </div>
+
+                <div class="grid gap-2">
+                  <%= label_tag :fulfil_tracking, "Tracking (optional)" %><%= text_field_tag :tracking_reference, nil, id: "fulfil_tracking", maxlength: 200 %>
+                </div>
+              </div>
+            <% end %>
+
+            <% if @order.unpaid? %>
+              <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
+                <%= check_box_tag :unpaid_confirmed, "1", false, required: true %>
+                It hasn't been paid in VIVUM; fulfil it anyway (e.g. cash on
+                pickup)
+              </label>
+            <% end %>
+
+            <div>
+              <%= form.submit @order.pickup? ? "Mark collected" : "Mark shipped", class: "btn-sm" %>
+            </div>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+
+    <% if @order.open? %>
+      <div class="card" id="cancel">
+        <header>
+          <h2>Cancel order</h2>
+          <p>Anything held is released.</p>
+        </header>
+
+        <section>
+          <%= form_with url: sell_order_cancellation_path(@order), class: "form flex flex-wrap gap-2", data: { turbo_confirm: "Cancel #{@order.reference}?" } do |form| %>
+            <%= label_tag :cancel_reason, "Why cancel", class: "sr-only" %>
+            <%= text_field_tag :reason, nil, id: "cancel_reason", required: true, maxlength: 200, placeholder: "Why cancel?", class: "input min-w-0 flex-1" %>
+            <%= form.submit "Cancel order", class: "btn-sm-destructive" %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -14,6 +14,7 @@ class Buyer < ApplicationRecord
   has_many :verifications, class_name: "BuyerVerification", dependent: :delete_all
   has_many :consents, class_name: "BuyerConsent", dependent: :delete_all
   has_many :holds, class_name: "StockHold", dependent: :restrict_with_error
+  has_many :orders, dependent: :restrict_with_error
 
   normalizes :name, with: ->(value) { value.squish }
   normalizes :email, with: ->(value) { value.strip.downcase.presence }

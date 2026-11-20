@@ -159,6 +159,7 @@ Sell → Stock (B19, SE01, SE02, SE04, D155–D163). Everything belongs to a sel
 
 - **Listings** (B20) never hold stock: `Listing#available` reads the item's availability. `SaleCard::Renderer` draws cards with libvips text (Pango); the Docker image needs `fonts-dejavu-core`. On macOS, libvips text uses CoreText, which crashes in forked processes, so `test/test_helper.rb` swaps in a stand-in for text inside forked test workers; CI on Linux renders real text.
 - **Buyers** (B21) belong to one seller; phones are stored in E.164 (`PhoneNumber.normalise`, unique per seller) and `Buyer.search` matches any format. Aliases link to a buyer only by hand. `BuyerVerification` stores a token digest; `/v/:token` is public. `Buyer#erase!` keeps an anonymised row and rewrites the buyer's hold and movement text to "Deleted buyer". Host/packers never see contacts (`BuyerPolicy#see_contacts?`).
+- **Orders** (B22) change only through `Order::Reserving` (`add_line!`, `change_quantity!`, `change_price!`, `remove_line!`, `reserve!`, `cancel!`, `fulfil!`), which locks the order and then its stock items in id order and calls `Stock::Ledger`. Each reserved line has its own stock hold, labelled with the order number; those holds can't be changed from the stock page. Payment state stays `unpaid` until B23.
 
 ## Collection
 

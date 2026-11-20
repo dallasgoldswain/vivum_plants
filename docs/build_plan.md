@@ -33,7 +33,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B19 | Stock items, locations, holds and the stock ledger, with the collection link | SE01, SE02, SE04, D155–D163 | B02 | Done |
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
-| B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Discussed |
+| B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
@@ -927,7 +927,7 @@ cover the acceptance cases. A browser check covered the buyers list, linking an 
 public verification page, and the verified buyer at phone width. Help topics `buyers`,
 `buyer-verification` and `buyer-data` need review.
 
-### B22 Orders, holds and cancellations — discussed 2026-11-20
+### B22 Orders, holds and cancellations — discussed and built 2026-11-20
 
 **Scope**
 - **Orders (SE05, D179, D186):** `orders` (seller, buyer, number from a per-seller counter
@@ -968,3 +968,13 @@ price change on the item after adding a line leaves the order's price; editing a
 the old one and the reason; fulfilling removes stock and clears holds; a shipping address
 edit on the buyer leaves the order's snapshot; seller A never sees seller B's orders; a
 host/packer can't open orders; a buyer with a reserved order can't be deleted.
+
+**Built notes:** A line has no location until it's held: reserving holds each line at the
+location with the most available stock that covers it, so a quantity split across
+locations needs a stock move first. "Update hold" both moves the end of current holds and
+re-holds lines whose hold ran out. On a draft, removing a plant deletes the line; on a
+reserved order it's cancelled with a reason. Redacting an address deletes it. The
+`seller.orders` tab shows only to owners and managers. Tests cover the acceptance cases. A
+browser check covered starting an order from a buyer, adding two plants, shipping with a
+fee and discount, reserving, and the order at phone width. Help topic `orders` needs
+review, and `buyer-data` needs a new review after its text changed.

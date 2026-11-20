@@ -321,6 +321,11 @@
                   <% else %>
                     <%= hold.holder_name %>
                   <% end %>
+
+                  <% if (order = hold.order_line&.order) %>
+                    on
+                    <%= link_to_if allowed_to?(:show?, order), order.reference, sell_order_path(order), class: "underline underline-offset-4" %>
+                  <% end %>
                 </span>
 
                 <span class="vv-caption">
@@ -328,7 +333,7 @@
                   <%= hold.current? ? "until #{l(hold.expires_at, format: :short)}" : "expired #{l(hold.expires_at, format: :short)}" %>
                 </span>
 
-                <% if manage && hold.current? %>
+                <% if manage && hold.current? && !hold.order_line %>
                   <div class="flex gap-2">
                     <%= button_to "Fulfil", fulfil_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm", data: { turbo_confirm: "#{hold.quantity} leave stock for #{hold.holder_name}?" } %>
                     <%= button_to "Release", release_sell_stock_item_hold_path(@stock_item, hold), class: "btn-sm-ghost" %>

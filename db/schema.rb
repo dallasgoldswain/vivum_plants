@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -104,6 +104,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
     t.boolean "default", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "last_used_at"
     t.index ["buyer_id"], name: "index_buyer_addresses_on_buyer_id"
   end
 
@@ -562,6 +563,64 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
     t.index ["recipient_type", "recipient_id"], name: "index_noticed_notifications_on_recipient"
   end
 
+  create_table "order_lines", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "stock_item_id", null: false
+    t.bigint "listing_id"
+    t.string "description", null: false
+    t.integer "quantity", null: false
+    t.integer "agreed_price_cents", null: false
+    t.integer "unit_price_cents", null: false
+    t.string "price_reason"
+    t.string "state", default: "active", null: false
+    t.string "cancel_reason"
+    t.bigint "stock_hold_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["listing_id"], name: "index_order_lines_on_listing_id"
+    t.index ["order_id"], name: "index_order_lines_on_order_id"
+    t.index ["stock_hold_id"], name: "index_order_lines_on_stock_hold_id", unique: true
+    t.index ["stock_item_id"], name: "index_order_lines_on_stock_item_id"
+    t.check_constraint "quantity > 0", name: "order_lines_quantity_positive"
+    t.check_constraint "unit_price_cents >= 0 AND agreed_price_cents >= 0", name: "order_lines_prices_not_negative"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.bigint "buyer_id", null: false
+    t.integer "number", null: false
+    t.string "reference", null: false
+    t.string "buyer_name", null: false
+    t.string "source", default: "chat", null: false
+    t.string "state", default: "draft", null: false
+    t.string "payment_state", default: "unpaid", null: false
+    t.datetime "hold_expires_at"
+    t.string "delivery_method", default: "pickup", null: false
+    t.jsonb "shipping_address"
+    t.integer "shipping_cents", default: 0, null: false
+    t.integer "discount_cents", default: 0, null: false
+    t.string "discount_reason"
+    t.string "currency", default: "ZAR", null: false
+    t.text "notes"
+    t.string "courier"
+    t.string "tracking_reference"
+    t.datetime "fulfilled_at"
+    t.bigint "fulfilled_by_id"
+    t.datetime "cancelled_at"
+    t.bigint "cancelled_by_id"
+    t.string "cancel_reason"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_id"], name: "index_orders_on_buyer_id"
+    t.index ["cancelled_by_id"], name: "index_orders_on_cancelled_by_id"
+    t.index ["created_by_id"], name: "index_orders_on_created_by_id"
+    t.index ["fulfilled_by_id"], name: "index_orders_on_fulfilled_by_id"
+    t.index ["seller_id", "number"], name: "index_orders_on_seller_id_and_number", unique: true
+    t.index ["seller_id"], name: "index_orders_on_seller_id"
+    t.check_constraint "shipping_cents >= 0 AND discount_cents >= 0", name: "orders_amounts_not_negative"
+  end
+
   create_table "otp_backup_codes", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "code_digest", null: false
@@ -768,6 +827,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
     t.integer "last_stock_number", default: 0, null: false
     t.integer "last_listing_number", default: 0, null: false
     t.text "listing_details"
+    t.integer "last_order_number", default: 0, null: false
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
@@ -959,6 +1019,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_16_090000) do
   add_foreign_key "measurements", "users"
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
+  add_foreign_key "order_lines", "listings", on_delete: :nullify
+  add_foreign_key "order_lines", "orders", on_delete: :cascade
+  add_foreign_key "order_lines", "stock_holds"
+  add_foreign_key "order_lines", "stock_items"
+  add_foreign_key "orders", "buyers"
+  add_foreign_key "orders", "sellers"
+  add_foreign_key "orders", "users", column: "cancelled_by_id", on_delete: :nullify
+  add_foreign_key "orders", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "orders", "users", column: "fulfilled_by_id", on_delete: :nullify
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
   add_foreign_key "photos", "acquisitions", on_delete: :cascade
   add_foreign_key "photos", "care_events", on_delete: :cascade

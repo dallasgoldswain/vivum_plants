@@ -20,7 +20,7 @@ class Sell::StockItemsController < Sell::BaseController
     @positions = @stock_item.positions
     @totals = Stock::Position.sum(@positions)
     @locations = Current.seller.stock_locations.active.by_name
-    @holds = @stock_item.holds.where(state: "active").includes(:stock_location, :created_by, :buyer, buyer_alias: :buyer).order(:expires_at)
+    @holds = @stock_item.holds.where(state: "active").includes(:stock_location, :created_by, :buyer, { buyer_alias: :buyer }, order_line: :order).order(:expires_at)
     @movements = @stock_item.movements.includes(:stock_location, :to_location, :member).newest_first.limit(100)
     @photos = @stock_item.photos.with_attached_image.newest_first
     @quota = Photo.quota_for_seller(Current.seller)

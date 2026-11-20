@@ -15,6 +15,13 @@ class BuyerAddress < ApplicationRecord
   after_save :sole_default, if: -> { saved_change_to_default? && default? }
   before_create -> { self.default = true unless buyer.addresses.exists? }
 
+  RETENTION = 12.months
+
+  # Not used on an order or edited for 12 months (PR07, D188); orders keep their own copy.
+  def self.redact_unused!
+    where("GREATEST(updated_at, COALESCE(last_used_at, updated_at)) < ?", RETENTION.ago).delete_all
+  end
+
   def one_line = [ street, suburb, city, postal_code ].compact.join(", ")
 
   private

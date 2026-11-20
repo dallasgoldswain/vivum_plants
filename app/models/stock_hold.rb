@@ -10,6 +10,7 @@ class StockHold < ApplicationRecord
   belongs_to :buyer, optional: true
   belongs_to :buyer_alias, optional: true
   has_many :movements, class_name: "StockMovement", dependent: :restrict_with_error
+  has_one :order_line, dependent: :nullify
 
   enum :state, STATES.index_by(&:itself), validate: true, default: "active"
 

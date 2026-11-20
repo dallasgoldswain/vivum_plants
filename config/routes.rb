@@ -154,6 +154,14 @@ Rails.application.routes.draw do
         resource :export, only: :show
       end
     end
+    resources :orders, only: %i[ index show new create update ] do
+      scope module: :orders do
+        resources :lines, only: %i[ create update destroy ]
+        resource :reservation, only: :create
+        resource :cancellation, only: :create
+        resource :fulfilment, only: :create
+      end
+    end
     resources :buyer_aliases, path: "aliases", only: %i[ create update destroy ]
     resources :members, only: %i[ index update destroy ], controller: "memberships"
     resources :invitations, only: %i[ create destroy ] do

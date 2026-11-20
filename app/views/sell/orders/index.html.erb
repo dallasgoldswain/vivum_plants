@@ -1,0 +1,58 @@
+<% content_for :title, "Orders · #{Current.seller.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "orders" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <h2 class="vv-h3">Orders</h2>
+
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Download CSV", sell_orders_path(format: :csv), class: "btn-ghost" %>
+    <%= link_to "Lines CSV", sell_orders_path(format: :csv, kind: "lines"), class: "btn-ghost" %>
+    <%= link_to "New order", new_sell_order_path, class: "btn" %>
+  </div>
+</div>
+
+<%= form_with url: sell_orders_path, method: :get, class: "flex flex-wrap gap-2", role: "search" do |form| %>
+  <%= form.label :q, "Search orders", class: "sr-only" %>
+  <%= form.search_field :q, value: params[:q], placeholder: "O- number, buyer or item", class: "input min-w-48 flex-1" %>
+  <%= form.label :filter, "Show", class: "sr-only" %>
+  <%= form.select :filter, [ [ "Open", "open" ], [ "Drafts", "draft" ], [ "Reserved", "reserved" ], [ "Fulfilled", "fulfilled" ], [ "Cancelled", "cancelled" ], [ "All", "all" ] ], { selected: @filter }, class: "select w-auto" %>
+  <%= form.submit "Filter", name: nil, class: "btn-outline" %>
+<% end %>
+
+<% if @orders.any? %>
+  <ul class="grid gap-2" id="orders">
+    <% @orders.each do |order| %>
+      <li>
+        <%= link_to sell_order_path(order), class: "vv-plant-row" do %>
+          <span class="grid min-w-0 flex-1 gap-0.5">
+            <span class="truncate font-medium"><%= order.reference %> · <%= order.buyer_name %></span>
+
+            <span class="vv-caption truncate">
+              <%= pluralize(order.active_lines.sum(&:quantity), "plant") %> ·
+              <%= rands(order.total_cents) %> ·
+              <%= Order::DELIVERY_METHODS[order.delivery_method] %>
+            </span>
+          </span>
+
+          <span class="grid justify-items-end gap-1 text-sm">
+            <%= order_state_badge(order) %>
+
+            <% if order.reserved? && order.hold_expires_at %>
+              <span class="vv-caption">until <%= l(order.hold_expires_at, format: :short) %></span>
+            <% end %>
+          </span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <div class="card">
+    <section>
+      <p>
+        No orders here. Choose New order, or open a buyer and start one from
+        their page.
+      </p>
+    </section>
+  </div>
+<% end %>

@@ -1,0 +1,53 @@
+<% content_for :title, "New order · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "orders" %>
+
+<div>
+  <%= link_to "← Orders", sell_orders_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2">New order</h2>
+</div>
+
+<div class="card">
+  <section>
+    <% if @buyers.any? %>
+      <%= form_with model: @order, url: sell_orders_path, class: "form grid gap-4" do |form| %>
+        <% if @order.errors.any? %>
+          <div class="alert-destructive" role="alert">
+            <h3>Couldn't start the order</h3>
+            <section><%= @order.errors.full_messages.to_sentence %>.</section>
+          </div>
+        <% end %>
+
+        <div class="grid gap-2">
+          <%= form.label :buyer_id, "Buyer" %>
+          <%= form.collection_select :buyer_id, @buyers, :id, :name, { prompt: "Choose a buyer…" }, required: true, class: "select" %>
+
+          <p class="vv-caption">
+            Only someone you know as an alias? Link the alias to a buyer first,
+            in
+            <%= link_to "Buyers", sell_buyers_path, class: "underline underline-offset-4" %>.
+          </p>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :source, "Where it came from" %>
+          <%= form.select :source, Order::SOURCES.invert, {}, class: "select" %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :notes, "Notes (optional)" %>
+          <%= form.text_area :notes, rows: 2, maxlength: 1000 %>
+        </div>
+
+        <div><%= form.submit "Start order", class: "btn" %></div>
+      <% end %>
+    <% else %>
+      <p>
+        Orders are for a buyer. Add one in
+        <%= link_to "Buyers", new_sell_buyer_path, class: "underline underline-offset-4" %>
+        first.
+      </p>
+    <% end %>
+  </section>
+</div>

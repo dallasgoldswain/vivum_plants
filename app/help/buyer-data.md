@@ -17,12 +17,19 @@ the buyer's page under **Buyer's data**.
 ## Download their data
 
 **Download their data** gives you a file with their details, addresses, aliases,
-consents and holds. Send it to them.
+consents, holds and orders. Send it to them.
 
 ## Delete a buyer
 
 **Delete buyer** removes their name, number, email, addresses and consents, and
 unlinks their aliases. This can't be undone. Holds and the stock history that
 mentioned them show "Deleted buyer" instead, so your stock records stay complete.
+
+Orders are your business records, kept for 5 years, so they keep the buyer's
+name and the address they were shipped to. Cancel or fulfil any open orders
+before deleting the buyer.
+
+Addresses that haven't been used on an order or changed for 12 months are
+removed by themselves.
 
 Both are recorded in VIVUM's log.

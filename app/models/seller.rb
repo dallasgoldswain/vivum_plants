@@ -9,6 +9,7 @@ class Seller < ApplicationRecord
   has_many :listings, dependent: :destroy
   has_many :buyers, dependent: :destroy
   has_many :buyer_aliases, dependent: :delete_all
+  has_many :orders, dependent: :destroy
 
   # Pilot and comp are free and never charged; paid needs a Paystack subscription, which
   # isn't built yet, so it can't be chosen (SB03, D64).

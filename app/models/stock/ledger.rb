@@ -51,13 +51,14 @@ class Stock::Ledger
     end
   end
 
-  def hold!(quantity:, location:, expires_at:, held_for: nil, buyer: nil, buyer_alias: nil)
+  # An order's hold carries its number (D180): "O-0001 · Sam Dlamini".
+  def hold!(quantity:, location:, expires_at:, held_for: nil, buyer: nil, buyer_alias: nil, reference: nil)
     raise Refused, "Choose when the hold ends." if expires_at.blank?
     raise Refused, "The hold must end in the future." if expires_at <= Time.current
     raise Refused, "That buyer belongs to another business." if [ buyer, buyer_alias ].compact.any? { it.seller_id != item.seller_id }
     raise Refused, "That buyer has been deleted." if buyer&.deleted?
 
-    held_for = buyer&.name || buyer_alias&.label || held_for
+    held_for = [ reference, buyer&.name || buyer_alias&.label || held_for ].compact.join(" · ")
 
     transaction do
       raise Refused, "This specimen is already held." if item.specimen? && item.holds.current.exists?
@@ -72,6 +73,24 @@ class Stock::Ledger
   end
 
   def release!(hold) = finish!(hold, "released", :release)
+
+  # Moves a current hold's end (D180); an ended hold can't come back.
+  def extend!(hold, expires_at:)
+    raise Refused, "The hold must end in the future." if expires_at.blank? || expires_at <= Time.current
+
+    transaction do
+      hold.lock!
+      raise Refused, "That hold has ended." unless hold.current?
+
+      hold.update!(expires_at: expires_at)
+      hold
+    end
+  end
+
+  # Ends a hold however it stands: released while current, expired once its time has passed.
+  def let_go!(hold)
+    hold.current? ? release!(hold) : expire!(hold)
+  end
   def expire!(hold) = finish!(hold, "expired", :expire, require_current: false)
 
   # The held units leave: on hand drops and the hold ends (D159). A specimen that came from a

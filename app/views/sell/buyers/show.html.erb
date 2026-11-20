@@ -182,6 +182,33 @@
       </section>
     </div>
 
+    <% if capability?("seller.orders") %>
+      <div class="card" id="orders">
+        <header>
+          <h2>Orders</h2>
+        </header>
+
+        <section class="grid gap-3">
+          <% if @orders.any? %>
+            <ul class="grid gap-2 text-sm">
+              <% @orders.each do |order| %>
+                <li class="flex items-center justify-between gap-2">
+                  <%= link_to "#{order.reference} · #{rands(order.total_cents)}", sell_order_path(order), class: "font-medium underline-offset-4 hover:underline" %>
+                  <%= order_state_badge(order) %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="vv-caption">No orders yet.</p>
+          <% end %>
+
+          <div>
+            <%= link_to "New order", new_sell_order_path(buyer_id: @buyer.id), class: "btn-sm-outline" %>
+          </div>
+        </section>
+      </div>
+    <% end %>
+
     <div class="card" id="holds">
       <header>
         <h2>Holds</h2>
@@ -272,7 +299,7 @@
 
         <section class="flex flex-wrap gap-2">
           <%= link_to "Download their data", sell_buyer_export_path(@buyer), class: "btn-sm-outline", data: { turbo: false } %>
-          <%= button_to "Delete buyer", sell_buyer_path(@buyer), method: :delete, class: "btn-sm-destructive", data: { turbo_confirm: "Delete #{@buyer.name}'s details, addresses and consents? Holds will show \"Deleted buyer\". This can't be undone." } %>
+          <%= button_to "Delete buyer", sell_buyer_path(@buyer), method: :delete, class: "btn-sm-destructive", data: { turbo_confirm: "Delete #{@buyer.name}'s details, addresses and consents? Holds will show \"Deleted buyer\"; orders keep their name and address. This can't be undone." } %>
         </section>
       </div>
     <% end %>

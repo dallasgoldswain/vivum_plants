@@ -24,6 +24,7 @@ class Sell::BuyersController < Sell::BaseController
   end
 
   def show
+    @orders = @buyer.orders.includes(:lines).newest_first.limit(20)
     @holds = @buyer.holds.includes(:stock_item, :stock_location).order(created_at: :desc).limit(20)
     @consents = @buyer.consents.order(created_at: :desc, id: :desc)
     @unlinked_aliases = Current.seller.buyer_aliases.unlinked.by_name
@@ -59,6 +60,8 @@ class Sell::BuyersController < Sell::BaseController
   def destroy
     @buyer.erase!
     redirect_to sell_buyers_path, notice: "The buyer's details are deleted."
+  rescue ActiveRecord::RecordNotDestroyed => error
+    redirect_to sell_buyer_path(@buyer), alert: error.message
   end
 
   private
