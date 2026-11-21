@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.orders]
 prerequisites: [buyers, stock-holds]
 keywords: [order, sale, sell, reserve, reservation, hold, cancel, pickup, collect, shipping, ship, discount, total, invoice]
+reviewed: 2026-11-21
+reviewed_digest: a91d76447606520ee54902d70ab32b505921dd1fb56e9791af7f91ba3429b952
 ---
 
 An order is what one buyer is getting from your business. Owners and managers
