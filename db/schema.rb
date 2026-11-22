@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -563,6 +563,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
     t.index ["recipient_type", "recipient_id"], name: "index_noticed_notifications_on_recipient"
   end
 
+  create_table "order_documents", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.bigint "order_id", null: false
+    t.bigint "order_payment_id"
+    t.string "kind", null: false
+    t.integer "number", null: false
+    t.string "reference", null: false
+    t.integer "total_cents", null: false
+    t.decimal "vat_rate", precision: 5, scale: 2
+    t.integer "vat_cents"
+    t.string "reason"
+    t.jsonb "details", default: {}, null: false
+    t.bigint "issued_by_id"
+    t.datetime "issued_at", null: false
+    t.datetime "created_at", null: false
+    t.index ["issued_by_id"], name: "index_order_documents_on_issued_by_id"
+    t.index ["order_id"], name: "index_order_documents_on_order_id"
+    t.index ["order_id"], name: "index_order_documents_one_receipt_per_order", unique: true, where: "((kind)::text = 'receipt'::text)"
+    t.index ["order_payment_id"], name: "index_order_documents_on_order_payment_id"
+    t.index ["seller_id", "number"], name: "index_order_documents_on_seller_id_and_number", unique: true
+    t.index ["seller_id"], name: "index_order_documents_on_seller_id"
+  end
+
   create_table "order_lines", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "stock_item_id", null: false
@@ -583,6 +606,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
     t.index ["stock_item_id"], name: "index_order_lines_on_stock_item_id"
     t.check_constraint "quantity > 0", name: "order_lines_quantity_positive"
     t.check_constraint "unit_price_cents >= 0 AND agreed_price_cents >= 0", name: "order_lines_prices_not_negative"
+  end
+
+  create_table "order_payments", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.string "kind", default: "payment", null: false
+    t.integer "amount_cents", null: false
+    t.string "method", null: false
+    t.date "paid_on", null: false
+    t.string "reference"
+    t.string "reason"
+    t.bigint "recorded_by_id"
+    t.datetime "voided_at"
+    t.bigint "voided_by_id"
+    t.string "void_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_order_payments_on_order_id"
+    t.index ["recorded_by_id"], name: "index_order_payments_on_recorded_by_id"
+    t.index ["voided_by_id"], name: "index_order_payments_on_voided_by_id"
+    t.check_constraint "amount_cents > 0", name: "order_payments_amount_positive"
+  end
+
+  create_table "order_returns", force: :cascade do |t|
+    t.bigint "order_line_id", null: false
+    t.bigint "stock_location_id", null: false
+    t.integer "quantity", null: false
+    t.string "outcome", null: false
+    t.string "reason", null: false
+    t.bigint "member_id"
+    t.datetime "created_at", null: false
+    t.index ["member_id"], name: "index_order_returns_on_member_id"
+    t.index ["order_line_id"], name: "index_order_returns_on_order_line_id"
+    t.index ["stock_location_id"], name: "index_order_returns_on_stock_location_id"
+    t.check_constraint "quantity > 0", name: "order_returns_quantity_positive"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -828,6 +885,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
     t.integer "last_listing_number", default: 0, null: false
     t.text "listing_details"
     t.integer "last_order_number", default: 0, null: false
+    t.string "legal_name"
+    t.string "vat_number"
+    t.text "address"
+    t.string "phone"
+    t.string "contact_email"
+    t.integer "last_document_number", default: 0, null: false
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
@@ -867,6 +930,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
     t.datetime "updated_at", null: false
     t.bigint "buyer_id"
     t.bigint "buyer_alias_id"
+    t.boolean "pinned", default: false, null: false
     t.index ["buyer_alias_id"], name: "index_stock_holds_on_buyer_alias_id"
     t.index ["buyer_id"], name: "index_stock_holds_on_buyer_id"
     t.index ["created_by_id"], name: "index_stock_holds_on_created_by_id"
@@ -1019,10 +1083,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_090000) do
   add_foreign_key "measurements", "users"
   add_foreign_key "memberships", "sellers"
   add_foreign_key "memberships", "users"
+  add_foreign_key "order_documents", "order_payments"
+  add_foreign_key "order_documents", "orders"
+  add_foreign_key "order_documents", "sellers"
+  add_foreign_key "order_documents", "users", column: "issued_by_id", on_delete: :nullify
   add_foreign_key "order_lines", "listings", on_delete: :nullify
   add_foreign_key "order_lines", "orders", on_delete: :cascade
   add_foreign_key "order_lines", "stock_holds"
   add_foreign_key "order_lines", "stock_items"
+  add_foreign_key "order_payments", "orders"
+  add_foreign_key "order_payments", "users", column: "recorded_by_id", on_delete: :nullify
+  add_foreign_key "order_payments", "users", column: "voided_by_id", on_delete: :nullify
+  add_foreign_key "order_returns", "order_lines"
+  add_foreign_key "order_returns", "stock_locations"
+  add_foreign_key "order_returns", "users", column: "member_id", on_delete: :nullify
   add_foreign_key "orders", "buyers"
   add_foreign_key "orders", "sellers"
   add_foreign_key "orders", "users", column: "cancelled_by_id", on_delete: :nullify

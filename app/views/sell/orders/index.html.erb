@@ -6,8 +6,27 @@
   <h2 class="vv-h3">Orders</h2>
 
   <div class="flex flex-wrap gap-2">
-    <%= link_to "Download CSV", sell_orders_path(format: :csv), class: "btn-ghost" %>
-    <%= link_to "Lines CSV", sell_orders_path(format: :csv, kind: "lines"), class: "btn-ghost" %>
+    <details class="relative">
+      <summary class="btn-ghost cursor-pointer">Downloads</summary>
+
+      <div
+        class="
+          absolute right-0 z-10 mt-1 grid min-w-48 gap-1 rounded-md border
+          border-border bg-surface p-2
+        "
+      >
+        <%= link_to "Orders CSV", sell_orders_path(format: :csv), class: "btn-sm-ghost justify-start" %>
+        <%= link_to "Lines CSV", sell_orders_path(format: :csv, kind: "lines"), class: "btn-sm-ghost justify-start" %>
+        <%= link_to "Payments CSV", sell_orders_path(format: :csv, kind: "payments"), class: "btn-sm-ghost justify-start" %>
+        <%= link_to "Receipts CSV", sell_orders_path(format: :csv, kind: "documents"), class: "btn-sm-ghost justify-start" %>
+        <%= link_to "Returns CSV", sell_orders_path(format: :csv, kind: "returns"), class: "btn-sm-ghost justify-start" %>
+      </div>
+    </details>
+
+    <% if allowed_to?(:update?, Current.seller) %>
+      <%= link_to "Business details", edit_sell_business_details_path, class: "btn-ghost" %>
+    <% end %>
+
     <%= link_to "New order", new_sell_order_path, class: "btn" %>
   </div>
 </div>
@@ -16,7 +35,7 @@
   <%= form.label :q, "Search orders", class: "sr-only" %>
   <%= form.search_field :q, value: params[:q], placeholder: "O- number, buyer or item", class: "input min-w-48 flex-1" %>
   <%= form.label :filter, "Show", class: "sr-only" %>
-  <%= form.select :filter, [ [ "Open", "open" ], [ "Drafts", "draft" ], [ "Reserved", "reserved" ], [ "Fulfilled", "fulfilled" ], [ "Cancelled", "cancelled" ], [ "All", "all" ] ], { selected: @filter }, class: "select w-auto" %>
+  <%= form.select :filter, [ [ "Open", "open" ], [ "Needs review", "review" ], [ "Drafts", "draft" ], [ "Reserved", "reserved" ], [ "Fulfilled", "fulfilled" ], [ "Cancelled", "cancelled" ], [ "All", "all" ] ], { selected: @filter }, class: "select w-auto" %>
   <%= form.submit "Filter", name: nil, class: "btn-outline" %>
 <% end %>
 
@@ -36,9 +55,14 @@
           </span>
 
           <span class="grid justify-items-end gap-1 text-sm">
-            <%= order_state_badge(order) %>
+            <span class="flex gap-1">
+              <%= order_state_badge(order) %>
+              <%= payment_badge(order) unless order.unpaid? %>
+            </span>
 
-            <% if order.reserved? && order.hold_expires_at %>
+            <% if order.needs_review? %>
+              <span class="vv-caption">needs review</span>
+            <% elsif order.reserved? && order.hold_expires_at %>
               <span class="vv-caption">until <%= l(order.hold_expires_at, format: :short) %></span>
             <% end %>
           </span>

@@ -2,7 +2,7 @@
 # Movements are never edited; a mistake is corrected with another movement. Stock::Ledger
 # writes them together with the balances they change.
 class StockMovement < ApplicationRecord
-  KINDS = %w[ receipt move mark_unavailable mark_available loss adjustment hold release expire fulfil to_collection ].freeze
+  KINDS = %w[ receipt move mark_unavailable mark_available loss adjustment hold release expire fulfil to_collection return ].freeze
   BUCKETS = %w[ saleable unavailable ].freeze
 
   belongs_to :seller

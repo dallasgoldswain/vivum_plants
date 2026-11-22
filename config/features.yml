@@ -87,8 +87,8 @@ seller.sale_cards: { domain: seller, state: core, implemented: true, depends_on:
 seller.csv_import: { domain: seller, state: core, depends_on: [seller.stock], description: "CSV stock import with preview (IM01, IM02)" }
 seller.orders: { domain: seller, state: core, implemented: true, depends_on: [seller.reservations, seller.buyers], description: "Orders (SE05)" }
 seller.reservations: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Holds and reservations (SE06)", off: "No new holds; existing holds can still be released and expire" }
-seller.receipts: { domain: seller, state: core, depends_on: [seller.orders], description: "Receipts (RC01)" }
-seller.vat_invoices: { domain: seller, state: core, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
+seller.receipts: { domain: seller, state: core, implemented: true, depends_on: [seller.orders], description: "Receipts (RC01)" }
+seller.vat_invoices: { domain: seller, state: core, implemented: true, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
 seller.buyers: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
 seller.closeout: { domain: seller, state: core, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
 seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
@@ -116,7 +116,7 @@ requests.offers: { domain: requests, state: core, depends_on: [requests.matching
 requests.wanted_list: { domain: requests, state: core, depends_on: [requests.manual], description: "Demand by plant and form (WL01)" }
 
 # --- Payments and shipping ---
-payments.manual: { domain: payments, state: core, depends_on: [seller.orders], description: "Manual payment records" }
+payments.manual: { domain: payments, state: core, implemented: true, depends_on: [seller.orders], description: "Manual payment records" }
 payments.bob_pay: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Bob Pay hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
 payments.yoco: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Yoco hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
 shipping.pickup: { domain: shipping, state: core, depends_on: [seller.orders], description: "Pickup fulfilment" }

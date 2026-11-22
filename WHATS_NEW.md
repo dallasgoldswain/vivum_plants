@@ -106,6 +106,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Put together orders for your buyers: add plants at the price you agreed, reserve them
   until a time you choose, add shipping and a discount, then mark the order collected or
   shipped. Cancelling releases anything held, and you can download your orders.
+- Record how buyers paid you, and VIVUM issues a receipt when an order is paid in full.
+  If you're VAT-registered, receipts are tax invoices with VAT shown. Record refunds and
+  returns, and add your business details for receipts. Paid orders keep their plants
+  held until you've dealt with them.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

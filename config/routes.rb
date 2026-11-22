@@ -134,6 +134,7 @@ Rails.application.routes.draw do
     resources :stock_locations, path: "locations", only: %i[ index create update ]
     resource :stock_export, only: :show
     resource :stock_settings, only: %i[ edit update ]
+    resource :business_details, only: %i[ edit update ]
     # Listings and sale cards (SE03, SE07, SE08, D164–D170).
     resources :listings, except: :destroy do
       scope module: :listings do
@@ -160,6 +161,11 @@ Rails.application.routes.draw do
         resource :reservation, only: :create
         resource :cancellation, only: :create
         resource :fulfilment, only: :create
+        resources :payments, only: :create do
+          post :void, on: :member
+        end
+        resources :returns, only: :create
+        resources :documents, only: :show
       end
     end
     resources :buyer_aliases, path: "aliases", only: %i[ create update destroy ]

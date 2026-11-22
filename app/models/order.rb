@@ -4,6 +4,8 @@
 # Stock changes go through Stock::Ledger, so holds and availability follow the stock rules.
 class Order < ApplicationRecord
   include Order::Reserving
+  include Order::Payments
+  include Order::Returns
 
   STATES = %w[ draft reserved fulfilled cancelled ].freeze
   OPEN_STATES = %w[ draft reserved ].freeze
@@ -25,7 +27,6 @@ class Order < ApplicationRecord
 
   validates :source, inclusion: { in: SOURCES.keys }
   validates :delivery_method, inclusion: { in: DELIVERY_METHODS.keys }
-  validates :payment_state, inclusion: { in: %w[ unpaid ] }
   validates :shipping_cents, :discount_cents, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :discount_reason, presence: { message: "is needed for a discount" }, if: -> { discount_cents.positive? }
   validates :discount_reason, :courier, :tracking_reference, :cancel_reason, length: { maximum: 200 }
@@ -40,6 +41,10 @@ class Order < ApplicationRecord
 
   scope :open, -> { where(state: OPEN_STATES) }
   scope :newest_first, -> { order(number: :desc) }
+  # Paid orders whose hold time has passed, and overpaid orders (D189, D190).
+  scope :needing_review, -> {
+    where(payment_state: "overpaid").or(where(state: "reserved", payment_state: %w[ part_paid paid ]).where(hold_expires_at: ..Time.current))
+  }
 
   # Number, buyer name or an item's name or code (D187); scoped by the caller to one seller.
   def self.search(query)
@@ -56,6 +61,7 @@ class Order < ApplicationRecord
   def pickup? = delivery_method == "pickup"
   def shipping? = delivery_method == "shipping"
   def unpaid? = payment_state == "unpaid"
+  def fully_paid? = %w[ paid overpaid ].include?(payment_state)
 
   def active_lines = lines.select(&:active?)
   def lines_cents = active_lines.sum(&:total_cents)

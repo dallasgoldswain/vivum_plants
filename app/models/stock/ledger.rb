@@ -111,6 +111,15 @@ class Stock::Ledger
     end
   end
 
+  # Units a buyer sent back (SE06, D196): on hand again in the chosen bucket, or lost.
+  def return!(quantity:, location:, outcome:, reason:)
+    bucket = outcome == "saleable" ? :saleable : :unavailable
+    transaction do
+      write(:return, quantity, location, bucket: bucket.to_s, reason: reason) { change(location, bucket => quantity.to_i) }
+      lose!(quantity: quantity, location: location, bucket: "unavailable", reason: reason) if outcome == "lost"
+    end
+  end
+
   # Takes a specimen back to the collection of the member who moved it in (D162).
   def to_collection!
     raise Refused, "Only a specimen moved from a collection can go back." unless item.specimen? && item.plant

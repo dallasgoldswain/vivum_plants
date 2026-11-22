@@ -34,7 +34,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
-| B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Discussed |
+| B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
@@ -979,7 +979,7 @@ browser check covered starting an order from a buyer, adding two plants, shippin
 fee and discount, reserving, and the order at phone width. Help topic `orders` needs
 review, and `buyer-data` needs a new review after its text changed.
 
-### B23 Manual payments, returns, receipts and VAT invoices — discussed 2026-11-22
+### B23 Manual payments, returns, receipts and VAT invoices — discussed and built 2026-11-22
 
 **Scope**
 - **Business details (D193):** `sellers` gain legal name, VAT number, address, phone and
@@ -1023,3 +1023,16 @@ changing the VAT number leaves issued documents unchanged; a refund over what's 
 refused; a VAT seller's refund after a tax invoice issues a credit note; a paid order's
 hold never expires and shows for review; a part-paid order can't be cancelled until
 refunded; a damaged return stays unavailable; a host/packer never sees payments.
+
+**Built notes:** Receipts number R-0001 and tax invoices INV-0001, and credit notes CN-,
+all from the one per-seller counter, so the prefix changes but the numbers never skip. A
+refund recorded after a receipt counts as a correction: it lowers what's due as well as
+what's paid, so the order still reads paid with the refund shown; before a receipt, a
+refund only lowers what's paid. Refunds with a credit note can't be voided. Holds are
+pinned rather than given a far expiry, so availability and the expiry job both read one
+flag. The Business details page is under Sell → Orders. The PDF uses Prawn's built-in
+fonts, which only cover Windows-1252, so characters outside it are swapped or dropped.
+Tests cover the acceptance cases. A browser check covered part paying, paying in full
+(the tax invoice page), refunding with a credit note, the order at phone width and
+Business details. Help topics `order-payments`, `order-returns` and `business-details`
+need review.

@@ -15,7 +15,8 @@ module Buyer::Erasure
       consents: consents.order(:created_at, :id).map { { purpose: it.purpose, version: it.version, granted: it.granted, source: it.source, method: it.method, given_at: it.given_at.iso8601 } },
       holds: holds.includes(:stock_item).order(:created_at).map { { item: it.stock_item.code, quantity: it.quantity, state: it.state, held_until: it.expires_at.iso8601, created_at: it.created_at.iso8601 } },
       orders: orders.includes(:lines).order(:number).map do |order|
-        { number: order.reference, state: order.state, payment_state: order.payment_state, delivery_method: order.delivery_method, shipping_address: order.shipping_address, total_cents: order.total_cents, created_at: order.created_at.iso8601,
+        { number: order.reference, state: order.state, payment_state: order.payment_state, documents: order.documents.map(&:reference),
+          payments: order.payments.map { { kind: it.kind, amount_cents: it.amount_cents, method: it.method, paid_on: it.paid_on.iso8601, voided: it.voided? } }, delivery_method: order.delivery_method, shipping_address: order.shipping_address, total_cents: order.total_cents, created_at: order.created_at.iso8601,
           lines: order.lines.map { { item: it.description, quantity: it.quantity, unit_price_cents: it.unit_price_cents, state: it.state } } }
       end
     }

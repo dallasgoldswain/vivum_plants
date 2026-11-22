@@ -10,6 +10,7 @@ class Seller < ApplicationRecord
   has_many :buyers, dependent: :destroy
   has_many :buyer_aliases, dependent: :delete_all
   has_many :orders, dependent: :destroy
+  has_many :order_documents, dependent: :delete_all
 
   # Pilot and comp are free and never charged; paid needs a Paystack subscription, which
   # isn't built yet, so it can't be chosen (SB03, D64).
@@ -20,7 +21,17 @@ class Seller < ApplicationRecord
   # Why an operator changed billing; required for billing changes and kept in the audit log.
   attribute :audit_reason, :string
 
+  normalizes :legal_name, :phone, with: ->(value) { value.squish.presence }
+  normalizes :vat_number, with: ->(value) { value.gsub(/\s/, "").presence }
+  normalizes :contact_email, with: ->(value) { value.strip.downcase.presence }
+  normalizes :address, with: ->(value) { value.strip.presence }
+
   validates :name, presence: true
+  validates :legal_name, :phone, length: { maximum: 120 }
+  validates :address, length: { maximum: 500 }
+  # A South African VAT number: 10 digits starting with 4 (D193).
+  validates :vat_number, format: { with: /\A4\d{9}\z/, message: "must be 10 digits starting with 4" }, allow_nil: true
+  validates :contact_email, length: { maximum: 254 }, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_nil: true
   validates :listing_details, length: { maximum: 500 }
   validate :paid_needs_paystack
   validates :audit_reason, presence: { message: "is required when changing billing" }, on: :update, if: :billing_changed?

@@ -30,6 +30,23 @@
   </div>
 </div>
 
+<% if @order.needs_review? %>
+  <div class="alert" role="status" id="review">
+    <h2>
+      <%= @order.payment_state == "overpaid" ? "More has been paid than the total" : "Hold time passed, review" %>
+    </h2>
+
+    <section>
+      <% if @order.payment_state == "overpaid" %>
+        Record a refund for the difference, or check the payments.
+      <% else %>
+        This order has a payment, so its plants are still held. Update the hold,
+        mark it collected or shipped, or refund and cancel it.
+      <% end %>
+    </section>
+  </div>
+<% end %>
+
 <div class="grid gap-6 lg:grid-cols-[3fr_2fr]">
   <div class="grid content-start gap-6">
     <div class="card" id="lines">
@@ -72,7 +89,56 @@
                   <span class="font-medium"><%= rands(line.total_cents) unless line.cancelled? %></span>
                 </div>
 
-                <% if @order.open? && line.active? %>
+                <% if line.returns.any? %>
+                  <ul class="vv-caption grid gap-1">
+                    <% line.returns.each do |returned| %>
+                      <li>
+                        <%= returned.quantity %> returned to
+                        <%= returned.stock_location.name %>:
+                        <%= OrderReturn::OUTCOMES[returned.outcome].downcase %>
+                        (<%= returned.reason %>)
+                      </li>
+                    <% end %>
+                  </ul>
+                <% end %>
+
+                <% if @order.fulfilled? && line.returnable_quantity.positive? %>
+                  <details>
+                    <summary class="cursor-pointer font-medium">
+                      Record a return
+                    </summary>
+
+                    <%= form_with url: sell_order_returns_path(@order), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+                      <%= hidden_field_tag :line_id, line.id, id: "return_line_#{line.id}" %>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "return_quantity_#{line.id}", "Quantity" %>
+                        <%= number_field_tag :quantity, line.returnable_quantity, id: "return_quantity_#{line.id}", min: 1, max: line.returnable_quantity, required: true %>
+                      </div>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "return_location_#{line.id}", "Back to" %>
+                        <%= select_tag :stock_location_id, options_from_collection_for_select(@locations, :id, :name), id: "return_location_#{line.id}", class: "select" %>
+                      </div>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "return_outcome_#{line.id}", "Condition" %>
+                        <%= select_tag :outcome, options_for_select(OrderReturn::OUTCOMES.invert), id: "return_outcome_#{line.id}", class: "select" %>
+                      </div>
+
+                      <div class="grid gap-2">
+                        <%= label_tag "return_reason_#{line.id}", "Why" %>
+                        <%= text_field_tag :reason, nil, id: "return_reason_#{line.id}", required: true, maxlength: 200, placeholder: "e.g. arrived damaged" %>
+                      </div>
+
+                      <div class="sm:col-span-2">
+                        <%= form.submit "Record return", class: "btn-sm" %>
+                      </div>
+                    <% end %>
+                  </details>
+                <% end %>
+
+                <% if @order.open? && line.active? && !@order.receipted? %>
                   <details>
                     <summary class="cursor-pointer font-medium">Change</summary>
 
@@ -84,7 +150,7 @@
 
                       <div class="grid gap-2">
                         <%= label_tag "price_#{line.id}", "Price each (R)" %>
-                        <%= text_field_tag :price, line.unit_price_cents / 100.0, id: "price_#{line.id}", inputmode: "decimal" %>
+                        <%= text_field_tag :price, rand_amount(line.unit_price_cents), id: "price_#{line.id}", inputmode: "decimal" %>
                       </div>
 
                       <div class="grid gap-2">
@@ -115,7 +181,7 @@
           <p class="vv-caption">Nothing on the order yet.</p>
         <% end %>
 
-        <% if @order.open? %>
+        <% if @order.open? && !@order.receipted? %>
           <%= tag.details open: @order.lines.none? do %>
             <summary class="cursor-pointer font-medium">Add a plant</summary>
 
@@ -164,6 +230,17 @@
           <dd class="text-right font-medium" id="order_total">
             <%= rands(@order.total_cents) %>
           </dd>
+
+          <% if @order.payments.any? %>
+            <dt>Paid</dt>
+            <dd class="text-right" id="order_paid">
+              <%= rands(@order.paid_cents) %>
+            </dd>
+            <dt>Still to pay</dt>
+            <dd class="text-right" id="order_balance">
+              <%= rands([ @order.balance_cents, 0 ].max) %>
+            </dd>
+          <% end %>
         </dl>
       </section>
     </div>
@@ -182,6 +259,10 @@
   </div>
 
   <div class="grid content-start gap-6">
+    <% if capability?("payments.manual") && !@order.cancelled? || @order.payments.any? %>
+      <%= render "sell/orders/payments", order: @order %>
+    <% end %>
+
     <% if @order.open? && capability?("seller.reservations") %>
       <div class="card" id="reserve">
         <header>
@@ -232,7 +313,7 @@
           <% end %>
         </p>
 
-        <% if @order.open? %>
+        <% if @order.open? && !@order.receipted? %>
           <details>
             <summary class="cursor-pointer font-medium">
               Change delivery or discount
@@ -311,10 +392,10 @@
               </div>
             <% end %>
 
-            <% if @order.unpaid? %>
+            <% unless @order.fully_paid? %>
               <label class="flex min-h-11 items-center gap-2 text-sm font-normal">
                 <%= check_box_tag :unpaid_confirmed, "1", false, required: true %>
-                It hasn't been paid in VIVUM; fulfil it anyway (e.g. cash on
+                It isn't paid in full yet; fulfil it anyway (e.g. cash on
                 pickup)
               </label>
             <% end %>
@@ -335,6 +416,12 @@
         </header>
 
         <section>
+          <% if @order.any_payment? %>
+            <p class="vv-caption mb-3">
+              Refund the payments first; then you can cancel it.
+            </p>
+          <% end %>
+
           <%= form_with url: sell_order_cancellation_path(@order), class: "form flex flex-wrap gap-2", data: { turbo_confirm: "Cancel #{@order.reference}?" } do |form| %>
             <%= label_tag :cancel_reason, "Why cancel", class: "sr-only" %>
             <%= text_field_tag :reason, nil, id: "cancel_reason", required: true, maxlength: 200, placeholder: "Why cancel?", class: "input min-w-0 flex-1" %>

@@ -1,6 +1,7 @@
 # Units held for someone until a set time (D159, D14): there's no default expiry. A hold
 # counts against availability while it's active and unexpired; it ends once, as released,
-# fulfilled or expired.
+# fulfilled or expired. A hold on an order with a payment is pinned and never expires on its
+# own (D190).
 class StockHold < ApplicationRecord
   STATES = %w[ active released fulfilled expired ].freeze
 
@@ -20,10 +21,10 @@ class StockHold < ApplicationRecord
   validates :expires_at, presence: true
 
   # Holding stock now: active and not yet past its expiry, even before the job marks it.
-  scope :current, -> { where(state: "active").where("expires_at > ?", Time.current) }
-  scope :due_to_expire, -> { where(state: "active").where(expires_at: ..Time.current) }
+  scope :current, -> { where(state: "active").where("stock_holds.pinned OR stock_holds.expires_at > ?", Time.current) }
+  scope :due_to_expire, -> { where(state: "active", pinned: false).where(expires_at: ..Time.current) }
 
-  def current? = active? && expires_at > Time.current
+  def current? = active? && (pinned? || expires_at > Time.current)
 
   # Who it's for (D172): the buyer, the alias (with its linked buyer), or older free text.
   def holder_name

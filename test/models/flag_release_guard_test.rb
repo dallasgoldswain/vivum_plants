@@ -60,7 +60,7 @@ class FlagReleaseGuardTest < ActiveSupport::TestCase
 
   test "internal and unimplemented capabilities have nothing to check" do
     @flipper.enable("shop.tooling")
-    @flipper.enable("seller.receipts")
+    @flipper.enable("seller.packing")
     assert @flipper.enabled?("shop.tooling")
   end
 end

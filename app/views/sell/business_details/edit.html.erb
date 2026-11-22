@@ -1,0 +1,60 @@
+<% content_for :title, "Business details · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "business-details" %>
+
+<div class="card max-w-2xl">
+  <header>
+    <h2>Business details</h2>
+
+    <p>
+      Receipts and tax invoices show these. Changing them later never changes a
+      receipt you've already issued.
+    </p>
+  </header>
+
+  <section>
+    <%= form_with model: Current.seller, scope: :seller, url: sell_business_details_path, method: :patch, class: "form grid gap-3" do |form| %>
+      <% if Current.seller.errors.any? %>
+        <div class="alert-destructive" role="alert">
+          <h3>Couldn't save</h3>
+
+          <section>
+            <%= Current.seller.errors.full_messages.to_sentence %>.
+          </section>
+        </div>
+      <% end %>
+
+      <div class="grid gap-2">
+        <%= form.label :legal_name, "Registered name (optional)" %>
+        <%= form.text_field :legal_name, maxlength: 120, placeholder: "e.g. Fern & Frond (Pty) Ltd" %>
+      </div>
+
+      <% if capability?("seller.vat_invoices") %>
+        <div class="grid gap-2">
+          <%= form.label :vat_number, "VAT number (if you're VAT-registered)" %>
+          <%= form.text_field :vat_number, maxlength: 12, inputmode: "numeric", placeholder: "4xxxxxxxxx" %>
+
+          <p class="vv-caption">
+            With a VAT number, receipts become tax invoices showing 15% VAT.
+          </p>
+        </div>
+      <% end %>
+
+      <div class="grid gap-2">
+        <%= form.label :address, "Address" %><%= form.text_area :address, rows: 3, maxlength: 500 %>
+      </div>
+
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="grid gap-2">
+          <%= form.label :phone, "Phone" %><%= form.telephone_field :phone, maxlength: 120 %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :contact_email, "Email" %><%= form.email_field :contact_email, maxlength: 254 %>
+        </div>
+      </div>
+
+      <div><%= form.submit "Save", class: "btn" %></div>
+    <% end %>
+  </section>
+</div>

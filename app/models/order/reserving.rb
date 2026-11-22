@@ -10,7 +10,7 @@ module Order::Reserving
     raise Refused, "That item belongs to another business." unless item.seller_id == seller_id
     raise Refused, "That listing is for another item." if listing && listing.stock_item_id != item.id
 
-    changing(member, [ item ]) do
+    changing(member, [ item ], lines_change: true) do
       raise Refused, "#{item.code} is already on this order; change its quantity instead." if lines.active.exists?(stock_item: item)
 
       price_cents ||= listing&.price_cents || item.price_cents
@@ -23,7 +23,7 @@ module Order::Reserving
   end
 
   def change_quantity!(line, quantity:, member:)
-    changing(member, [ line.stock_item ]) do
+    changing(member, [ line.stock_item ], lines_change: true) do
       line.lock!
       raise Refused, "That line is cancelled." unless line.active?
       next line if line.quantity == quantity.to_i
@@ -37,7 +37,7 @@ module Order::Reserving
 
   # Keeps the old price and the reason in the audit log (D183).
   def change_price!(line, price_cents:, reason:, member:)
-    changing(member) do
+    changing(member, lines_change: true) do
       raise Refused, "Give a reason for the new price." if reason.to_s.strip.empty?
       raise Refused, "That line is cancelled." unless line.active?
 
@@ -50,7 +50,7 @@ module Order::Reserving
 
   # A draft's line goes; a reserved order's line is cancelled with a reason (D183).
   def remove_line!(line, member:, reason: nil)
-    changing(member, [ line.stock_item ]) do
+    changing(member, [ line.stock_item ], lines_change: true) do
       line.lock!
       next line unless line.active?
 
@@ -99,6 +99,7 @@ module Order::Reserving
     changing(member, lines.includes(:stock_item).map(&:stock_item), require_open: false) do
       next self if cancelled?
       raise Refused, "A fulfilled order can't be cancelled." if fulfilled?
+      raise Refused, "Refund the payments before cancelling (D197)." if any_payment?
       raise Refused, "Give a reason for cancelling." if reason.to_s.strip.empty?
 
       lines.active.includes(:stock_hold, :stock_item).each { let_go!(it, member) if it.stock_hold&.active? }
@@ -109,12 +110,12 @@ module Order::Reserving
   end
 
   # Collected or shipped (D182): every active line's hold is fulfilled and the stock leaves.
-  # An unpaid order is fulfilled only when the member confirms it (D181).
+  # An order that isn't fully paid is fulfilled only when the member confirms it (D181).
   def fulfil!(member:, unpaid_confirmed: false, courier: nil, tracking_reference: nil)
     changing(member, lines.active.includes(:stock_item).map(&:stock_item), require_open: false) do
       next self if fulfilled?
       raise Refused, "Reserve the order before fulfilling it." unless reserved?
-      raise Refused, "This order hasn't been paid. Confirm you're fulfilling it unpaid." if unpaid? && !unpaid_confirmed
+      raise Refused, "This order hasn't been paid in full. Confirm you're fulfilling it anyway." if !fully_paid? && !unpaid_confirmed
 
       active = lines.active.includes(:stock_hold, :stock_item).to_a
       raise Refused, "Add something to the order first." if active.empty?
@@ -124,19 +125,29 @@ module Order::Reserving
 
       active.each { Stock::Ledger.new(it.stock_item, member: member).fulfil!(it.stock_hold) }
       update!(state: "fulfilled", fulfilled_at: Time.current, fulfilled_by: member, courier: courier, tracking_reference: tracking_reference)
-      Audit.record("order.fulfilled", actor: member, target: self, details: { unpaid: unpaid?, delivery_method: delivery_method })
+      Audit.record("order.fulfilled", actor: member, target: self, details: { payment_state: payment_state, delivery_method: delivery_method })
       self
     end
   end
 
   private
-    def changing(member, items = [], require_open: true)
+    # Line changes are locked once a receipt is issued; before that, a change to a paid
+    # order's total is recorded and the payment state follows it (D197).
+    def changing(member, items = [], require_open: true, lines_change: false)
       transaction do
         lock!
         raise Refused, "This order is #{state}; it can't change." if require_open && !open?
+        raise Refused, "#{receipt.reference} has been issued, so the plants and prices are fixed. Record a refund to correct it." if lines_change && receipted?
 
         StockItem.where(id: items.map(&:id).uniq).order(:id).lock.load
-        yield
+        before = total_cents
+        result = yield
+        lines.reset
+        if lines_change && payments.any?
+          Audit.record("order.total_changed", actor: member, target: self, details: { from_cents: before, to_cents: total_cents }) if total_cents != before
+          refresh_payment_state!(member)
+        end
+        result
       end
     rescue ActiveRecord::RecordInvalid => error
       raise Refused, error.record.errors.full_messages.to_sentence
@@ -153,6 +164,7 @@ module Order::Reserving
       raise Stock::Ledger::Refused, "Only #{line.stock_item.totals.available} available in one place." unless location
 
       hold = ledger.hold!(quantity: line.quantity, location: location, expires_at: hold_expires_at, buyer: buyer, reference: reference)
+      hold.update!(pinned: true) if any_payment?
       line.update!(stock_hold: hold)
     end
 

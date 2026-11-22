@@ -1,0 +1,34 @@
+<%= form_with url: sell_order_payments_path(order), class: "form mt-3 grid gap-3 sm:grid-cols-2" do |form| %>
+  <%= hidden_field_tag :kind, kind, id: "#{kind}_kind" %>
+
+  <div class="grid gap-2">
+    <%= label_tag "#{kind}_amount", "Amount (R)" %>
+    <%= text_field_tag :amount, (rand_amount(order.balance_cents) if kind == "payment" && order.balance_cents.positive?), id: "#{kind}_amount", required: true, inputmode: "decimal" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= label_tag "#{kind}_method", "How" %>
+    <%= select_tag :method, options_for_select(OrderPayment::METHODS.invert), id: "#{kind}_method", class: "select" %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= label_tag "#{kind}_paid_on", "Date" %>
+    <%= date_field_tag :paid_on, Date.current, id: "#{kind}_paid_on", max: Date.current, required: true %>
+  </div>
+
+  <div class="grid gap-2">
+    <%= label_tag "#{kind}_reference", "Reference (optional)" %>
+    <%= text_field_tag :reference, nil, id: "#{kind}_reference", maxlength: 200 %>
+  </div>
+
+  <% if kind == "refund" %>
+    <div class="grid gap-2 sm:col-span-2">
+      <%= label_tag "refund_reason", "Why" %>
+      <%= text_field_tag :reason, nil, id: "refund_reason", required: true, maxlength: 200, placeholder: "e.g. plant arrived damaged" %>
+    </div>
+  <% end %>
+
+  <div class="sm:col-span-2">
+    <%= form.submit kind == "refund" ? "Record refund" : "Record payment", class: "btn-sm" %>
+  </div>
+<% end %>

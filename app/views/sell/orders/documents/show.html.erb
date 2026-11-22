@@ -1,0 +1,133 @@
+<% content_for :title, "#{@document.reference} · VIVUM Plants" %>
+
+<% details = @document.details %>
+<% seller = details["seller"] %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <%= link_to "← #{@order.reference}", sell_order_path(@order), class: "vv-kicker underline-offset-4 hover:underline" %>
+  <%= link_to "Download PDF", sell_order_document_path(@order, @document, format: :pdf), class: "btn-outline", data: { turbo: false } %>
+</div>
+
+<article class="card max-w-3xl" id="document">
+  <header>
+    <h2><%= @document.title %> <%= @document.reference %></h2>
+
+    <p>
+      Issued <%= l(@document.issued_at.to_date, format: :long) %> for order
+      <%= details["order"] %>
+    </p>
+  </header>
+
+  <section class="grid gap-6">
+    <div class="grid gap-4 text-sm sm:grid-cols-2">
+      <div>
+        <p class="vv-kicker mb-1">From</p>
+        <p class="font-medium"><%= seller["legal_name"] || seller["name"] %></p>
+
+        <p class="vv-caption whitespace-pre-line"><%= [ (seller["name"] if seller["legal_name"]), seller["address"], seller["phone"], seller["email"] ].compact_blank.join("\n") %></p>
+
+        <% if @document.vat_rate %>
+          <p>VAT number <%= seller["vat_number"] %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <p class="vv-kicker mb-1">To</p>
+        <p class="font-medium"><%= details.dig("buyer", "name") %></p>
+
+        <p class="vv-caption whitespace-pre-line"><%= Array(details.dig("buyer", "address")).join("\n") %></p>
+      </div>
+    </div>
+
+    <% if @document.credit_note? %>
+      <div class="grid gap-1 text-sm">
+        <p>Against <%= details["against"] %></p>
+        <p>Reason: <%= @document.reason %></p>
+
+        <p>
+          Refunded by <%= details.dig("refund", "method") %> on
+          <%= details.dig("refund", "paid_on") %>
+        </p>
+      </div>
+    <% else %>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-border text-left">
+            <th class="py-2">Item</th>
+            <th class="py-2 text-right">Qty</th>
+            <th class="py-2 text-right">Price</th>
+            <th class="py-2 text-right">Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% details["lines"].each do |line| %>
+            <tr class="border-b border-border">
+              <td class="py-2">
+                <%= line["description"] %>
+                <span class="vv-caption"><%= line["code"] %></span>
+              </td>
+
+              <td class="py-2 text-right"><%= line["quantity"] %></td>
+
+              <td class="py-2 text-right">
+                <%= rands(line["unit_price_cents"]) %>
+              </td>
+
+              <td class="py-2 text-right"><%= rands(line["total_cents"]) %></td>
+            </tr>
+          <% end %>
+
+          <% if details["shipping_cents"].to_i.positive? %>
+            <tr class="border-b border-border">
+              <td class="py-2" colspan="3">Shipping</td>
+
+              <td class="py-2 text-right">
+                <%= rands(details["shipping_cents"]) %>
+              </td>
+            </tr>
+          <% end %>
+
+          <% if details["discount_cents"].to_i.positive? %>
+            <tr class="border-b border-border">
+              <td class="py-2" colspan="3">
+                Discount (<%= details["discount_reason"] %>)
+              </td>
+
+              <td class="py-2 text-right">
+                −<%= rands(details["discount_cents"]) %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+
+    <dl class="ml-auto grid grid-cols-[auto_auto] gap-x-6 gap-y-1 text-sm">
+      <dt class="font-medium">Total</dt>
+
+      <dd class="text-right font-medium" id="document_total">
+        <%= rands(@document.total_cents) %>
+      </dd>
+
+      <% if @document.vat_rate %>
+        <dt>Includes VAT at <%= @document.vat_rate.to_i %>%</dt>
+        <dd class="text-right" id="document_vat">
+          <%= rands(@document.vat_cents) %>
+        </dd>
+      <% end %>
+    </dl>
+
+    <% if details["payments"].present? %>
+      <ul class="vv-caption grid gap-1">
+        <% details["payments"].each do |payment| %>
+          <li>
+            Paid <%= rands(payment["amount_cents"]) %> by
+            <%= payment["method"] %> on
+            <%= payment["paid_on"] %><%= " (#{payment['reference']})" if payment["reference"] %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+</article>

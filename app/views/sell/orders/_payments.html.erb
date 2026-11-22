@@ -1,0 +1,86 @@
+<div class="card" id="payments">
+  <header>
+    <h2>Payments</h2>
+
+    <p>
+      <%= payment_badge(order) %>
+
+      <% if order.refunded_cents.positive? %>
+        <span class="vv-caption">· <%= rands(order.refunded_cents) %> refunded</span>
+      <% end %>
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <% if order.payments.any? %>
+      <ul class="grid gap-2 text-sm">
+        <% order.payments.each do |payment| %>
+          <li
+            class="grid gap-1 rounded-md border border-border p-3"
+            id="<%= dom_id(payment) %>"
+          >
+            <span class="flex justify-between gap-2">
+              <span class="<%= 'line-through' if payment.voided? %> font-medium">
+                <%= payment.refund? ? "Refund" : "Payment" %> ·
+                <%= OrderPayment::METHODS[payment.method] %>
+              </span>
+
+              <span><%= payment.refund? ? "−" : "" %><%= rands(payment.amount_cents) %></span>
+            </span>
+
+            <span class="vv-caption">
+              <%= l(payment.paid_on, format: :long) %>
+              <%= "· #{payment.reference}" if payment.reference %>
+              <%= "· #{payment.reason}" if payment.reason %>
+              <%= "· voided: #{payment.void_reason}" if payment.voided? %>
+            </span>
+
+            <% if !payment.voided? && capability?("payments.manual") && !payment.credit_note %>
+              <details>
+                <summary class="cursor-pointer text-sm">Void</summary>
+
+                <%= form_with url: void_sell_order_payment_path(order, payment), class: "form mt-2 flex flex-wrap gap-2" do |form| %>
+                  <%= label_tag "void_reason_#{payment.id}", "Why void it", class: "sr-only" %>
+                  <%= text_field_tag :reason, nil, id: "void_reason_#{payment.id}", required: true, maxlength: 200, placeholder: "Why void it?", class: "input min-w-0 flex-1" %>
+                  <%= form.submit "Void", class: "btn-sm-ghost" %>
+                <% end %>
+              </details>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if order.documents.any? && capability?("seller.receipts") %>
+      <ul class="grid gap-1 text-sm" id="documents">
+        <% order.documents.each do |document| %>
+          <li>
+            <%= link_to "#{document.title} #{document.reference}", sell_order_document_path(order, document), class: "underline underline-offset-4" %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if capability?("payments.manual") && !order.cancelled? %>
+      <details>
+        <summary class="cursor-pointer font-medium">Record a payment</summary>
+        <%= render "sell/orders/payment_form", order: order, kind: "payment" %>
+      </details>
+
+      <% if order.any_payment? %>
+        <details>
+          <summary class="cursor-pointer font-medium">Record a refund</summary>
+          <%= render "sell/orders/payment_form", order: order, kind: "refund" %>
+        </details>
+      <% end %>
+    <% end %>
+
+    <% unless Current.seller.legal_name || Current.seller.address %>
+      <p class="vv-caption">
+        Receipts show your
+        <%= link_to_if allowed_to?(:update?, Current.seller), "business details", edit_sell_business_details_path, class: "underline underline-offset-4" %>;
+        add them before your first receipt.
+      </p>
+    <% end %>
+  </section>
+</div>

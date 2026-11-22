@@ -315,6 +315,22 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   buyer addresses unused on an order and unedited for 12 months (`last_used_at`, D188).
   Owners and managers only (D185). `seller.orders` marked implemented; help topic
   `orders`, and `buyer-data` updated.
+- Manual payments, returns, receipts and VAT invoices (B23): `sellers` gain legal name,
+  VAT number (10 digits starting with 4), address, phone and contact email, set by owners
+  on Sell → Business details (D193). `order_payments` (payments and refunds, never edited,
+  voided with a reason) drive `orders.payment_state` (unpaid, part paid, paid, overpaid);
+  refunds can't exceed what's paid, and after a receipt a refund also lowers what's due
+  (PY03, D189, D194, D197). `order_documents` hold receipts, tax invoices (15% VAT,
+  rate stored) and credit notes as frozen JSON copies, numbered from one gap-free
+  per-seller counter (R-, INV-, CN-), shown as a page and a Prawn PDF; a receipt is issued
+  once on full payment and then locks the order's lines and prices; VAT sellers' refunds
+  after a tax invoice issue a credit note (RC01, D08, D191, D192, D195). `stock_holds.pinned`
+  keeps holds on orders with a payment from expiring; such orders and overpaid ones show
+  under Needs review (D190). `order_returns` and a `return` ledger movement put returned
+  units back as saleable or unavailable, or record them lost (SE06, D196). Cancelling needs
+  payments refunded first. Payments, documents and returns CSVs; buyer export includes
+  payments and documents. `payments.manual`, `seller.receipts` and `seller.vat_invoices`
+  marked implemented; help topics `order-payments`, `order-returns` and `business-details`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

@@ -3,7 +3,7 @@ module StockHelper
   MOVEMENT_LABELS = {
     "receipt" => "Received", "move" => "Moved", "mark_unavailable" => "Marked unavailable", "mark_available" => "Available again",
     "loss" => "Lost", "adjustment" => "Count adjusted", "hold" => "Held", "release" => "Hold released", "expire" => "Hold expired",
-    "fulfil" => "Fulfilled", "to_collection" => "Back to a collection"
+    "fulfil" => "Fulfilled", "to_collection" => "Back to a collection", "return" => "Returned"
   }.freeze
   UNAVAILABLE_REASONS = %w[ Quarantine Damaged Other ].freeze
 
