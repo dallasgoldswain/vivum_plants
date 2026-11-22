@@ -34,7 +34,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B20 | Listings and sale cards (share/download) | SE03, SE07, SE08, D164–D170 | B19 | Done |
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
-| B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08 | B22 | Planned |
+| B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Discussed |
 | B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
@@ -978,3 +978,48 @@ reserved order it's cancelled with a reason. Redacting an address deletes it. Th
 browser check covered starting an order from a buyer, adding two plants, shipping with a
 fee and discount, reserving, and the order at phone width. Help topic `orders` needs
 review, and `buyer-data` needs a new review after its text changed.
+
+### B23 Manual payments, returns, receipts and VAT invoices — discussed 2026-11-22
+
+**Scope**
+- **Business details (D193):** `sellers` gain legal name, VAT number, address, phone and
+  email, edited by owners on a Business details page in Sell.
+- **Payments and refunds (PY03, D189, D194):** `order_payments` (order, kind payment or
+  refund, amount in cents, method EFT, cash, card machine or other, paid on, reference,
+  reason, member, voided at, voided by, void reason). Never edited; voiding needs a reason.
+  Refunds can't exceed what has been paid. `orders.payment_state` becomes unpaid, part
+  paid, paid or overpaid, worked out after every change; overpaid shows for review.
+- **Paid holds (SE06, D190):** `ExpireStockHoldsJob` skips holds on orders with any
+  payment. Orders whose hold time has passed with a payment show "Hold time passed,
+  review" and sit under a Needs review filter.
+- **Receipts and tax invoices (RC01, D08, D191, D192):** `order_documents` (seller, order,
+  kind receipt or credit note, number from a gap-free per-seller counter, issued at, a
+  frozen JSON copy of seller details, buyer, lines, amounts and payments, VAT rate and
+  VAT amount when the seller had a VAT number, reason for credit notes). A receipt is
+  issued automatically, once, when an order becomes fully paid; then its lines and prices
+  lock. Web page and Prawn PDF from the order page. VAT sellers' receipts read "Tax
+  Invoice" with a VAT-inclusive breakdown at 15%.
+- **Credit notes (D195):** for a VAT seller, a refund on an order with a tax invoice also
+  issues a credit note for that amount in the same sequence.
+- **Returns (SE06, D196):** a return against a fulfilled line (quantity up to what's left
+  to return, location, reason, outcome saleable, unavailable or lost) writes a `return`
+  movement through `Stock::Ledger` into the chosen bucket, or a return then a loss.
+  `order_returns` records each one with the member.
+- **Changes after payment (SC02, D197):** before a receipt, changes recalculate the balance
+  and the previous total and reason go to the audit log; cancelling needs net paid at
+  zero. After a receipt, lines and prices are locked.
+- **Roles and data (D198):** owners and managers only. `payments.manual`,
+  `seller.receipts` and `seller.vat_invoices` become implemented. Payments, documents
+  and returns join the orders CSV, the seller export and the buyer export. Help topics for
+  payments and receipts, returns, and business details.
+
+**Deferred:** buyer receipt link (B30); Bob Pay and Yoco checkout (B40); logo on receipts
+(B29); disputes (B40).
+
+**Acceptance:** two payments of R200 on a R400 order make it paid and issue one receipt;
+a voided payment returns it to part paid but the receipt stays; a non-VAT seller's receipt
+has no VAT line; a VAT seller's documents are numbered without gaps and show 15% VAT;
+changing the VAT number leaves issued documents unchanged; a refund over what's paid is
+refused; a VAT seller's refund after a tax invoice issues a credit note; a paid order's
+hold never expires and shows for review; a part-paid order can't be cancelled until
+refunded; a damaged return stays unavailable; a host/packer never sees payments.
