@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.receipts]
 prerequisites: [orders]
 keywords: [business, company, registered name, vat, vat number, address, phone, email, receipt, invoice]
+reviewed: 2026-11-23
+reviewed_digest: 4ec12f40c530661dc6f005dcdb49e58b28f2d38c270486a365a3ba6a944b17f6
 ---
 
 Receipts and tax invoices show your business details. Owners set them in
