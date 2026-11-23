@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.csv_import]
 prerequisites: [stock]
 keywords: [import, csv, excel, xlsx, spreadsheet, upload, template, bulk, sku, preview, reverse, undo]
+reviewed: 2026-11-23
+reviewed_digest: 359682a4ed69b9a17abae86e45a9084a213759cfeba041b47f642631bad6e2c3
 ---
 
 Owners and managers can add stock from a spreadsheet instead of one item at a
