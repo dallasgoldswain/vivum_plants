@@ -1,0 +1,94 @@
+<% content_for :title, "Import stock · #{Current.seller.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "stock-import" %>
+
+<div>
+  <%= link_to "← Stock", sell_stock_items_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2">Import stock</h2>
+</div>
+
+<div class="card max-w-2xl" id="upload">
+  <header>
+    <h2>Upload a file</h2>
+
+    <p>
+      A CSV (UTF-8) or Excel .xlsx file, up to 2 MB and 2,000 rows. You'll see a
+      preview first; nothing changes until you import it.
+    </p>
+  </header>
+
+  <section class="grid gap-4">
+    <% if @locations.empty? %>
+      <p>
+        Add a location under
+        <%= link_to "Locations", sell_stock_locations_path, class: "underline underline-offset-4" %>
+        first.
+      </p>
+    <% else %>
+      <%= form_with url: sell_stock_imports_path, multipart: true, class: "form grid gap-4" do |form| %>
+        <div class="grid gap-2">
+          <%= form.label :file, "File" %>
+          <%= form.file_field :file, accept: ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+        </div>
+
+        <div class="grid gap-2">
+          <%= form.label :stock_location_id, "Location for rows without one" %>
+          <%= form.select :stock_location_id, location_options(@locations), {}, class: "select" %>
+        </div>
+
+        <label class="flex items-start gap-2 text-sm">
+          <%= form.check_box :add_to_existing, {}, "1", nil %>
+
+          <span>
+            <span class="font-medium">Add to existing</span>
+
+            <span class="vv-caption block">
+              A row with a SKU you already have adds its quantity as received
+              stock. Without this, those rows are errors.
+            </span>
+          </span>
+        </label>
+
+        <div class="flex flex-wrap gap-2">
+          <%= form.submit "Preview", class: "btn" %>
+          <%= link_to "Download the template", template_sell_stock_imports_path, class: "btn-ghost" %>
+        </div>
+      <% end %>
+    <% end %>
+  </section>
+</div>
+
+<div class="card max-w-2xl" id="imports">
+  <header>
+    <h2>Imports</h2>
+  </header>
+
+  <section>
+    <% if @imports.any? %>
+      <ul class="grid gap-2">
+        <% @imports.each do |import| %>
+          <li>
+            <%= link_to sell_stock_import_path(import), class: "flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm hover:bg-muted" do %>
+              <span>
+                <span class="font-medium"><%= import.reference %></span> ·
+                <%= import.filename %>
+                <span class="vv-caption block">
+                  <%= l(import.created_at, format: :short) %>
+
+                  <% if import.created_by %>
+                    · <%= import.created_by.email_address %>
+                  <% end %>
+                </span>
+              </span>
+
+              <%= import_state_badge(import) %>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p>No imports yet.</p>
+    <% end %>
+  </section>
+</div>

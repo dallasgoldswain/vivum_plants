@@ -35,7 +35,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
-| B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Discussed |
+| B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
@@ -1037,7 +1037,7 @@ Tests cover the acceptance cases. A browser check covered part paying, paying in
 Business details. Help topics `order-payments`, `order-returns` and `business-details`
 need review.
 
-### B24 CSV stock import with preview — discussed 2026-11-23
+### B24 CSV stock import with preview — discussed and built 2026-11-23
 
 **Scope**
 - **Upload and template (IM01, D202, D203, D207):** owners and managers upload a UTF-8
@@ -1057,7 +1057,7 @@ need review.
   `receive` movement; existing rows add a `receive` movement only. Movements carry the
   import reference. A second submit finds the import committed and changes nothing; a
   checksum matching an earlier committed import needs a confirm tick. The report records
-  what each row did; `stock_import.committed` is audited.
+  what each row did; `stock_import.imported` is audited.
 - **Reversal (IM02, D206):** once per import, all or nothing: refused, with the blocking
   rows, if any imported quantity is no longer saleable at its location (held, sold or
   moved). Otherwise `lose` movements reverse each row and created items with no stock
@@ -1075,3 +1075,13 @@ existing" is ticked, then only its quantity grows; an unknown location is an err
 submitting commit twice creates one set of items; reversal after a unit is held is
 refused and changes nothing; reversal of an untouched import leaves stock as before;
 hosts and packers can't open imports.
+
+**Built notes:** The uploaded file is never stored: the parsed rows live on the import
+and only the checksum is kept, so expiring a preview just clears its rows. The state
+after commit is called "imported" (`committed` clashes with Active Record). A blank
+quantity is an error, but 0 is allowed for a new batch, which creates the item with no
+stock. An invalid price shows as typed in the preview. Item fields on new rows go
+through the stock item's own validations, so the same length and SKU format rules apply.
+Tests cover the acceptance cases. A browser check covered the upload page, a file with
+problems, a preview adding to an existing SKU, the import report at phone width and a
+reversal. The `stock-import` help topic needs review.

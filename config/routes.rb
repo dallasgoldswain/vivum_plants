@@ -133,6 +133,14 @@ Rails.application.routes.draw do
     end
     resources :stock_locations, path: "locations", only: %i[ index create update ]
     resource :stock_export, only: :show
+    # Stock import with preview (IM01, IM02, D199–D208).
+    resources :stock_imports, path: "imports", only: %i[ index show create ] do
+      get :template, on: :collection
+      member do
+        post :commit
+        post :reverse
+      end
+    end
     resource :stock_settings, only: %i[ edit update ]
     resource :business_details, only: %i[ edit update ]
     # Listings and sale cards (SE03, SE07, SE08, D164–D170).

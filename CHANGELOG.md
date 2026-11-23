@@ -331,6 +331,18 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   payments refunded first. Payments, documents and returns CSVs; buyer export includes
   payments and documents. `payments.manual`, `seller.receipts` and `seller.vat_invoices`
   marked implemented; help topics `order-payments`, `order-returns` and `business-details`.
+- CSV stock import with preview (B24): `stock_imports` (I-0001 per seller from
+  `sellers.last_import_number`) read a UTF-8 CSV or .xlsx (roo), at most 2 MB and 2,000
+  rows, into rows with per-row errors and warnings; the file itself isn't stored, only its
+  SHA-256 checksum (IM01, D202–D204, D207). Unknown locations, repeated SKUs, invalid
+  amounts, specimens with a quantity other than 1, and existing SKUs without "Add to
+  existing" are errors; with it, existing rows only receive quantity (D199–D201).
+  `StockImport#commit!` rechecks every row and creates items and `receipt` movements
+  through `Stock::Ledger` in one transaction, once; a file already imported needs
+  confirmation (IM02, D205). `#reverse!` writes `loss` movements and archives emptied
+  created items, all or nothing, while every imported unit is still available (D206).
+  Previews expire after 24 hours (`StockImport.expire_stale!`, hourly). Owners and
+  managers only; `seller.csv_import` marked implemented; help topic `stock-import`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

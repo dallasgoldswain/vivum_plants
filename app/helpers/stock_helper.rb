@@ -25,4 +25,17 @@ module StockHelper
   end
 
   def location_options(locations) = locations.map { [ it.name, it.id ] }
+
+  # A price as typed in an import file: "R1 200" when it's an amount, as written when not.
+  def import_price(value)
+    cents = Order.cents(value)
+    cents.negative? ? value : rands(cents)
+  end
+
+  # Stock imports (D204–D207): a preview past its 24 hours reads expired before the job runs.
+  def import_state_badge(import)
+    state = import.previewed? && !import.open? ? "expired" : import.state
+    label = { "previewed" => "Preview", "imported" => "Imported", "reversed" => "Reversed", "expired" => "Expired" }.fetch(state)
+    tag.span(label, class: state == "imported" ? "badge-secondary" : "badge-outline")
+  end
 end

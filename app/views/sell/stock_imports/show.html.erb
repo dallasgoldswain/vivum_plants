@@ -1,0 +1,214 @@
+<% content_for :title, "#{@import.reference} · Import stock · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "stock-import" %>
+
+<div>
+  <%= link_to "← Imports", sell_stock_imports_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2 flex flex-wrap items-center gap-2">
+    <%= @import.reference %> · <%= @import.filename %>
+    <%= import_state_badge(@import) %>
+  </h2>
+
+  <p class="vv-caption mt-1">
+    Uploaded <%= l(@import.created_at, format: :short) %> · rows without a
+    location go to <%= @import.stock_location.name %>
+    <% if @import.add_to_existing %>
+      · adding to existing SKUs
+    <% end %>
+    <% if @import.imported_at %>
+      · imported <%= l(@import.imported_at, format: :short) %>
+    <% end %>
+    <% if @import.reversed_at %>
+      · reversed <%= l(@import.reversed_at, format: :short) %>
+    <% end %>
+  </p>
+</div>
+
+<% if @import.previewed? %>
+  <div class="card max-w-3xl" id="summary">
+    <header>
+      <h2>Preview</h2>
+
+      <p>
+        <%= pluralize(@import.new_rows.size, "new item") %> and
+        <%= pluralize(@import.existing_rows.size, "existing item") %>,
+        <%= pluralize(@import.units, "plant") %> in all. Nothing has changed
+        yet.
+      </p>
+    </header>
+
+    <section class="grid gap-3">
+      <% if !@import.open? %>
+        <p>
+          This preview has expired. Upload the file again to import it.
+        </p>
+      <% elsif @import.errors? %>
+        <p id="problems">
+          <strong><%= pluralize(@import.error_count, "problem") %></strong> to
+          fix before anything can be imported. Fix the file and upload it again.
+        </p>
+
+        <div>
+          <%= link_to "Download the problems (CSV)", sell_stock_import_path(@import, format: :csv), class: "btn-outline" %>
+        </div>
+      <% else %>
+        <%= form_with url: commit_sell_stock_import_path(@import), class: "form grid gap-3" do |form| %>
+          <% if (earlier = @import.duplicate_of) %>
+            <label class="flex items-start gap-2 text-sm">
+              <%= form.check_box :confirm_duplicate, {}, "1", nil %>
+
+              <span>
+                <%= earlier.reference %> already imported this file on
+                <%= l(earlier.imported_at.to_date, format: :long) %>. Import it
+                again anyway.
+              </span>
+            </label>
+          <% end %>
+
+          <div>
+            <%= form.submit "Import #{pluralize(@import.units, 'plant')}", class: "btn", data: { turbo_submits_with: "Importing…" } %>
+          </div>
+        <% end %>
+
+        <p class="vv-caption">
+          The preview can be imported until
+          <%= l(@import.expires_at, format: :short) %>.
+        </p>
+      <% end %>
+    </section>
+  </div>
+
+  <div class="card max-w-3xl" id="rows">
+    <header>
+      <h2>Rows</h2>
+    </header>
+
+    <section>
+      <ul class="grid gap-2">
+        <% @import.rows.each do |row| %>
+          <li
+            class="grid gap-1 rounded-md border border-border p-3 text-sm"
+            id="row_<%= row["line"] %>"
+          >
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <span>
+                <span class="font-medium">
+                  <%= row["quantity"] %> ×
+                  <%= [ row["name"], row["cultivar"].presence && "‘#{row["cultivar"]}’" ].compact.join(" ") %>
+                </span>
+
+                <span class="vv-caption block">
+                  Line <%= row["line"] %>
+                  <%= "· #{row["sku"]}" if row["sku"].present? %>
+                  <%= "· #{row["type"]}" if row["type"].present? %>
+                  <%= "· #{import_price(row["price"])}" if row["price"].present? %>
+                  ·
+                  <%= row["location"].presence || @import.stock_location.name %>
+                </span>
+              </span>
+
+              <% if row["errors"].present? %>
+                <span class="badge-destructive">Problem</span>
+              <% elsif row["item_id"] %>
+                <span class="badge-outline">Add stock</span>
+              <% else %>
+                <span class="badge-secondary">New</span>
+              <% end %>
+            </div>
+
+            <% if row["errors"].present? || row["warnings"].present? %>
+              <ul class="grid gap-0.5">
+                <% row["errors"].to_a.each do |message| %>
+                  <li class="text-destructive"><%= message %></li>
+                <% end %>
+
+                <% row["warnings"].to_a.each do |message| %>
+                  <li class="vv-caption"><%= message %></li>
+                <% end %>
+              </ul>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  </div>
+<% elsif @import.expired? %>
+  <div class="card max-w-3xl">
+    <section>
+      <p>
+        This preview expired without being imported. Upload the file again to
+        import it.
+      </p>
+    </section>
+  </div>
+<% else %>
+  <div class="card max-w-3xl" id="report">
+    <header>
+      <h2>What was imported</h2>
+
+      <p>
+        <%= pluralize(@import.report.count { it["action"] == "created" }, "item") %>
+        created,
+        <%= pluralize(@import.report.count { it["action"] == "added" }, "item") %>
+        restocked,
+        <%= pluralize(@import.report.sum { it["quantity"].to_i }, "plant") %>
+        received.
+      </p>
+    </header>
+
+    <section class="grid gap-3">
+      <ul class="grid gap-2">
+        <% @import.report.each do |line| %>
+          <li
+            class="
+              flex flex-wrap items-center justify-between gap-2 rounded-md
+              border border-border p-3 text-sm
+            "
+          >
+            <span>
+              <%= link_to "#{line["sku"]} · #{line["name"]}", sell_stock_item_path(line["item_id"]), class: "font-medium underline-offset-4 hover:underline" %>
+
+              <span class="vv-caption block">
+                Line <%= line["line"] %> · <%= line["quantity"] %> at
+                <%= line["location"] %>
+              </span>
+            </span>
+
+            <span class="badge-outline"><%= line["action"] == "created" ? "Created" : "Added" %></span>
+          </li>
+        <% end %>
+      </ul>
+
+      <div>
+        <%= link_to "Download the report (CSV)", sell_stock_import_path(@import, format: :csv, kind: "report"), class: "btn-ghost" %>
+      </div>
+    </section>
+  </div>
+
+  <% if @import.imported? %>
+    <div class="card max-w-3xl" id="reverse">
+      <header>
+        <h2>Reverse this import</h2>
+
+        <p>
+          Takes every imported plant back out of stock and archives items the
+          import created. Only possible while none of them has been held, sold
+          or moved.
+        </p>
+      </header>
+
+      <section>
+        <details>
+          <summary class="btn-outline cursor-pointer">
+            Reverse <%= @import.reference %>
+          </summary>
+
+          <%= form_with url: reverse_sell_stock_import_path(@import), class: "mt-3" do |form| %>
+            <%= form.submit "Yes, reverse #{@import.reference}", class: "btn-destructive" %>
+          <% end %>
+        </details>
+      </section>
+    </div>
+  <% end %>
+<% end %>

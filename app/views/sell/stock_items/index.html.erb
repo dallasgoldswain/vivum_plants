@@ -13,6 +13,9 @@
 
     <% if allowed_to?(:create?, StockItem) %>
       <%= link_to "Download CSV", sell_stock_export_path(format: :csv), class: "btn-ghost" %>
+      <% if capability?("seller.csv_import") %>
+        <%= link_to "Import", sell_stock_imports_path, class: "btn-ghost" %>
+      <% end %>
       <%= link_to "Add stock", new_sell_stock_item_path, class: "btn" %>
     <% end %>
   </div>

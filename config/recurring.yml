@@ -10,6 +10,9 @@
 #     schedule: at 5am every day
 
 development:
+  expire_stock_imports:
+    command: "StockImport.expire_stale!"
+    schedule: every hour at minute 20
   delete_old_sale_cards:
     class: DeleteOldSaleCardsJob
     schedule: every day at 4am
@@ -24,6 +27,9 @@ development:
     schedule: every day at 3am
 
 production:
+  expire_stock_imports:
+    command: "StockImport.expire_stale!"
+    schedule: every hour at minute 20
   delete_old_sale_cards:
     class: DeleteOldSaleCardsJob
     schedule: every day at 4am

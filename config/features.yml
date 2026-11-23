@@ -84,7 +84,7 @@ seller.paid_branding: { domain: seller, state: pilot, depends_on: [seller.profil
 seller.stock: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Stock items, lots and the stock ledger (SE01, SE02)" }
 seller.listings: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Listings (SE03)" }
 seller.sale_cards: { domain: seller, state: core, implemented: true, depends_on: [seller.listings], description: "Sale card images and captions (SE07)" }
-seller.csv_import: { domain: seller, state: core, depends_on: [seller.stock], description: "CSV stock import with preview (IM01, IM02)" }
+seller.csv_import: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "CSV stock import with preview (IM01, IM02)" }
 seller.orders: { domain: seller, state: core, implemented: true, depends_on: [seller.reservations, seller.buyers], description: "Orders (SE05)" }
 seller.reservations: { domain: seller, state: core, implemented: true, depends_on: [seller.stock], description: "Holds and reservations (SE06)", off: "No new holds; existing holds can still be released and expire" }
 seller.receipts: { domain: seller, state: core, implemented: true, depends_on: [seller.orders], description: "Receipts (RC01)" }

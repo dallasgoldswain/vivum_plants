@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -891,6 +891,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
     t.string "phone"
     t.string "contact_email"
     t.integer "last_document_number", default: 0, null: false
+    t.integer "last_import_number", default: 0, null: false
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 
@@ -938,6 +939,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
     t.index ["stock_item_id"], name: "index_stock_holds_on_stock_item_id"
     t.index ["stock_location_id"], name: "index_stock_holds_on_stock_location_id"
     t.check_constraint "quantity > 0", name: "stock_holds_quantity_positive"
+  end
+
+  create_table "stock_imports", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.integer "number", null: false
+    t.string "reference", null: false
+    t.string "state", default: "previewed", null: false
+    t.string "filename", null: false
+    t.string "checksum", null: false
+    t.bigint "stock_location_id", null: false
+    t.boolean "add_to_existing", default: false, null: false
+    t.jsonb "rows", default: [], null: false
+    t.jsonb "report", default: [], null: false
+    t.bigint "created_by_id"
+    t.datetime "imported_at"
+    t.bigint "imported_by_id"
+    t.datetime "reversed_at"
+    t.bigint "reversed_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_stock_imports_on_created_by_id"
+    t.index ["imported_by_id"], name: "index_stock_imports_on_imported_by_id"
+    t.index ["reversed_by_id"], name: "index_stock_imports_on_reversed_by_id"
+    t.index ["seller_id", "checksum"], name: "index_stock_imports_on_seller_id_and_checksum"
+    t.index ["seller_id", "number"], name: "index_stock_imports_on_seller_id_and_number", unique: true
+    t.index ["seller_id"], name: "index_stock_imports_on_seller_id"
+    t.index ["stock_location_id"], name: "index_stock_imports_on_stock_location_id"
   end
 
   create_table "stock_items", force: :cascade do |t|
@@ -1137,6 +1165,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_22_090000) do
   add_foreign_key "stock_holds", "stock_items"
   add_foreign_key "stock_holds", "stock_locations"
   add_foreign_key "stock_holds", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "stock_imports", "sellers"
+  add_foreign_key "stock_imports", "stock_locations"
+  add_foreign_key "stock_imports", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "stock_imports", "users", column: "imported_by_id", on_delete: :nullify
+  add_foreign_key "stock_imports", "users", column: "reversed_by_id", on_delete: :nullify
   add_foreign_key "stock_items", "photos", column: "cover_photo_id", on_delete: :nullify
   add_foreign_key "stock_items", "plants", on_delete: :nullify
   add_foreign_key "stock_items", "sellers"

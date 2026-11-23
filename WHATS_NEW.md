@@ -110,6 +110,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   If you're VAT-registered, receipts are tax invoices with VAT shown. Record refunds and
   returns, and add your business details for receipts. Paid orders keep their plants
   held until you've dealt with them.
+- Add stock from a spreadsheet: upload a CSV or Excel file, check the preview, then
+  import it in one go. Add to items you already have, and undo an import if it was a
+  mistake.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.
