@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.orders]
 prerequisites: [orders]
 keywords: [return, returned, send back, damaged, refund, stock, inspection]
+reviewed: 2026-11-23
+reviewed_digest: 23ce05cbcdcedf29b1003e120e75a810ff9db29459884d4fc51dd9bb4e6e2e71
 ---
 
 When a buyer sends plants back after an order was collected or shipped, record
