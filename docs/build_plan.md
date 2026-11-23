@@ -35,7 +35,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B21 | Buyers, aliases and phone verification | BY01–BY03, D171–D178 | B02 | Done |
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
-| B24 | CSV stock import with preview | IM01, IM02 | B19 | Planned |
+| B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Discussed |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
@@ -1036,3 +1036,42 @@ Tests cover the acceptance cases. A browser check covered part paying, paying in
 (the tax invoice page), refunding with a credit note, the order at phone width and
 Business details. Help topics `order-payments`, `order-returns` and `business-details`
 need review.
+
+### B24 CSV stock import with preview — discussed 2026-11-23
+
+**Scope**
+- **Upload and template (IM01, D202, D203, D207):** owners and managers upload a UTF-8
+  CSV or .xlsx (2 MB, 2,000 rows) from Sell → Stock, choosing a default location. A CSV
+  template downloads with the headers SKU, name, cultivar, type, quantity, price,
+  location, botanical name, size, cost and notes. Headers match ignoring case and spacing.
+- **Preview (IM01, D199–D201, D204):** `stock_imports` (seller, reference I-0001 from a
+  per-seller counter, state previewed, committed, reversed or expired, file checksum,
+  default location, add-to-existing flag, parsed rows and per-row errors and warnings as
+  JSON, report, member, committed at, reversed at). Parsing writes nothing to stock. Row
+  errors: missing required columns, malformed rows, invalid quantity or amounts, a
+  specimen quantity other than 1, an unknown type or location, SKUs repeated in the file,
+  and an existing SKU without "Add to existing". Differences on existing SKUs are
+  warnings. Errors download as CSV; a file with errors can't be committed.
+- **Commit (IM02, D205):** one transaction, locking the import then the affected items;
+  every row is rechecked. New rows create items (blank SKU gets the S-0001 code) and a
+  `receive` movement; existing rows add a `receive` movement only. Movements carry the
+  import reference. A second submit finds the import committed and changes nothing; a
+  checksum matching an earlier committed import needs a confirm tick. The report records
+  what each row did; `stock_import.committed` is audited.
+- **Reversal (IM02, D206):** once per import, all or nothing: refused, with the blocking
+  rows, if any imported quantity is no longer saleable at its location (held, sold or
+  moved). Otherwise `lose` movements reverse each row and created items with no stock
+  left are archived. Audited as `stock_import.reversed`.
+- **Housekeeping (D207):** previews older than 24 hours expire and their files are purged.
+- **Roles (D208):** owners and managers; `seller.csv_import` becomes implemented, with a
+  help topic.
+
+**Deferred:** updating item details from a file; stock counts by import; an .xlsx
+template with dropdowns; photo import.
+
+**Acceptance:** a file with one bad row writes nothing and its errors download; a
+specimen with quantity 2 is an error; an existing SKU is an error unless "Add to
+existing" is ticked, then only its quantity grows; an unknown location is an error;
+submitting commit twice creates one set of items; reversal after a unit is held is
+refused and changes nothing; reversal of an untouched import leaves stock as before;
+hosts and packers can't open imports.
