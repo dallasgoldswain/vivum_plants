@@ -6,6 +6,8 @@ audience: seller
 capabilities: [payments.manual, seller.receipts, seller.vat_invoices]
 prerequisites: [orders]
 keywords: [payment, paid, eft, cash, card, refund, receipt, invoice, tax invoice, vat, credit note, void, balance]
+reviewed: 2026-11-23
+reviewed_digest: dd52cd3c341a5958c737f6d8d8a979f3e2201924c6be9c7cac56eedf0d534875
 ---
 
 VIVUM doesn't take payments for you yet. When a buyer pays you, record it on
