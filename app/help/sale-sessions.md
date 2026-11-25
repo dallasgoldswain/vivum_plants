@@ -6,6 +6,8 @@ audience: seller
 capabilities: [sales.sessions, sales.auctions, sales.backup_bidder]
 prerequisites: [stock-holds, buyers]
 keywords: [session, auction, live sale, lot, bid, winner, host, host view, pass, backup bidder, backup, payment deadline, relist, whatsapp group]
+reviewed: 2026-11-25
+reviewed_digest: eed825e71fd8ae583c5afedc4a446261343ed5848d323efe9dc00eb1b79127ed
 ---
 
 Bidding stays in your WhatsApp group. A session is where you record what
