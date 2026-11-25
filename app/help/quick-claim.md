@@ -6,6 +6,8 @@ audience: seller
 capabilities: [sales.sessions, sales.quick_claim, sales.waitlist]
 prerequisites: [sale-sessions]
 keywords: [claim, quick claim, mine, first come, waitlist, waiting list, sold out, group claim]
+reviewed: 2026-11-25
+reviewed_digest: dc526800f41b87a2005b256b005a3a6ffcc16b628335d74f8de2f79a47d39096
 ---
 
 For plants sold at a fixed price to whoever claims first, add them to a session
