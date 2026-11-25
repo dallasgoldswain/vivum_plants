@@ -36,7 +36,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
-| B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14 | B22 | Planned |
+| B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Discussed |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
@@ -1085,3 +1085,44 @@ through the stock item's own validations, so the same length and SKU format rule
 Tests cover the acceptance cases. A browser check covered the upload page, a file with
 problems, a preview adding to an existing SKU, the import report at phone width and a
 reversal. The `stock-import` help topic needs review.
+
+### B25 Live sale sessions, auctions, Quick Claim and backup bidder — discussed 2026-11-25
+
+**Scope**
+- **Sessions (LS01, D209, D210, D216):** `sale_sessions` (seller, name, channel, host
+  member, planned start and close, status draft, live, paused or closed, payment deadline
+  hours, backup window hours). Going live needs both durations; the form prefills the
+  seller's last values. Pause blocks new lots and claims; close needs no open lot.
+- **Lots (LS02, D211, D212):** `sale_lots` (session, number, stock item, location,
+  quantity, state queued, open, won, passed, payment missed, transferred, returned,
+  winner buyer or alias, final price, backup buyer or alias, backup bid, hold, member and
+  times). Opening creates an exclusive `StockHold` labelled with the session and lot; one
+  open lot per session. Closing with a winner turns the hold into the winner's
+  reservation expiring at the deadline, in one transaction; passing releases it once.
+  Hosts can type a new alias inline.
+- **Missed payment and transfer (LS03, D213):** the hold-expiry job leaves win and claim
+  holds alone and marks unpaid ones "Payment missed", keeping the hold pinned until the
+  backup window ends. Offer to backup (new reservation at the backup bid with a fresh
+  deadline), relist as a new lot, or return to stock; the window's end returns stock
+  automatically. History keeps the original winner and price.
+- **Quick Claim and waitlist (LS04, D214, D215):** claim items on a session (stock item,
+  location, fixed price from the listing or item); `sale_claims` (claim item, buyer or
+  alias, quantity, message reference, state, hold, member). A claim that can't be held
+  joins a numbered waitlist; returned stock shows "offer to #1" and the host gives it on
+  a tap. Nothing reserves automatically.
+- **Host View and roles (D217):** a phone-first screen for the open lot or active claim
+  item. Host/packers see and enter bids and claim prices for their session only, with
+  no costs, other prices, totals, payments or contacts.
+- **Records (D218):** results, claims, transfers and waitlist changes are audited and in
+  the seller export; the five `sales.*` flags become implemented, with help topics.
+
+**Deferred:** grouping wins into orders and the order sources auction and claim (B26
+Closeout); DM claims and automatic reserving (B39); notifying waitlisted buyers (B34).
+
+**Acceptance:** a session without both timings can't go live; opening a lot on a held
+specimen fails; a DM-style claim can't take a held lot; closing a won lot leaves one
+reservation for the winner; passing twice releases once; a missed payment keeps the hold
+until the backup window ends, then returns stock; offering to the backup leaves one
+active reservation and the original winner in history; a claim on sold-out stock joins
+the waitlist and nothing is reserved until the seller offers it; a paused session takes
+no new claims; host/packers never see costs or order totals.
