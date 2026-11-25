@@ -1,0 +1,171 @@
+<% content_for :title, "Host View · #{@sale_session.name} · VIVUM Plants" %>
+
+<div class="grid gap-1">
+  <div class="flex items-start justify-between gap-3">
+    <%= link_to allowed_to?(:show?, @sale_session) ? "← #{@sale_session.name}" : "← Sessions", allowed_to?(:show?, @sale_session) ? sell_sale_session_path(@sale_session) : sell_sale_sessions_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+    <%= help_link "sale-sessions", anchor: "host-view" %>
+  </div>
+
+  <h1 class="vv-h2 flex flex-wrap items-center gap-2">
+    Host View <%= session_status_badge(@sale_session) %>
+  </h1>
+
+  <p class="vv-caption">
+    <%= [ @sale_session.name, @sale_session.channel ].compact.join(" · ") %>
+  </p>
+</div>
+
+<% unless @sale_session.live? %>
+  <div class="alert" role="status">
+    <h2>
+      <% if @sale_session.paused? %>
+        Paused
+      <% elsif @sale_session.closed? %>
+        Closed
+      <% else %>
+        Not live yet
+      <% end %>
+    </h2>
+
+    <section>
+      No new lots or claims until the session is live. You can still finish an
+      open lot.
+    </section>
+  </div>
+<% end %>
+
+<% if capability?("sales.auctions") %>
+  <% if @open_lot %>
+    <div class="card" id="open_lot">
+      <header>
+        <h2><%= @open_lot.label %> · <%= @open_lot.stock_item.name %></h2>
+
+        <p>
+          <%= @open_lot.stock_item.code %> · × <%= @open_lot.quantity %> · held
+          while bidding
+        </p>
+      </header>
+
+      <section class="grid gap-4">
+        <%= form_with url: win_sell_sale_session_lot_path(@sale_session, @open_lot), class: "form grid gap-4" do |form| %>
+          <%= render "sell/sale_sessions/holder_fields", prefix: "winner", label: "Winner" %>
+
+          <div class="grid gap-2">
+            <%= form.label :price, "Winning bid (R)" %>
+            <%= form.text_field :price, inputmode: "decimal", required: true %>
+          </div>
+
+          <details class="grid gap-3">
+            <summary class="cursor-pointer text-sm font-medium">
+              Backup bidder (optional)
+            </summary>
+
+            <div class="mt-3 grid gap-4">
+              <%= render "sell/sale_sessions/holder_fields", prefix: "backup", label: "Backup bidder" %>
+
+              <div class="grid gap-2">
+                <%= form.label :backup_bid, "Backup bid (R)" %>
+                <%= form.text_field :backup_bid, inputmode: "decimal" %>
+              </div>
+            </div>
+          </details>
+
+          <div><%= form.submit "Won", class: "btn w-full sm:w-auto" %></div>
+        <% end %>
+
+        <%= button_to "Pass (no sale)", pass_sell_sale_session_lot_path(@sale_session, @open_lot), class: "btn-outline w-full sm:w-auto", data: { turbo_confirm: "Pass #{@open_lot.label} and release its hold?" } %>
+      </section>
+    </div>
+  <% elsif @next_lot %>
+    <div class="card" id="next_lot">
+      <header>
+        <h2>
+          Up next: <%= @next_lot.label %> · <%= @next_lot.stock_item.name %>
+        </h2>
+
+        <p><%= @next_lot.stock_item.code %> · × <%= @next_lot.quantity %></p>
+      </header>
+
+      <section>
+        <% if @sale_session.live? %>
+          <%= button_to "Open #{@next_lot.label}", open_sell_sale_session_lot_path(@sale_session, @next_lot), class: "btn w-full sm:w-auto" %>
+        <% end %>
+      </section>
+    </div>
+  <% end %>
+<% end %>
+
+<% if capability?("sales.quick_claim") && @claim_items.any? %>
+  <div class="grid gap-3" id="quick_claim">
+    <h2 class="vv-h3">Quick Claim</h2>
+
+    <% @claim_items.each do |claim_item| %>
+      <div class="card" id="<%= dom_id(claim_item) %>">
+        <header>
+          <h3>
+            <%= claim_item.stock_item.name %> ·
+            <%= rands(claim_item.price_cents) %>
+          </h3>
+
+          <p>
+            <%= claim_item.available %> available
+            <% if (waiting = claim_item.waitlist.size).positive? %>
+              · <%= waiting %> waiting
+            <% end %>
+          </p>
+        </header>
+
+        <section class="grid gap-3">
+          <% if capability?("sales.waitlist") && claim_item.offer_ready? %>
+            <% next_waiting = claim_item.next_waiting %>
+            <%= button_to "Stock back: offer to ##{next_waiting.position} #{next_waiting.holder_name}", offer_sell_sale_session_claim_path(@sale_session, next_waiting), class: "btn-secondary w-full sm:w-auto" %>
+          <% end %>
+
+          <% if @sale_session.live? %>
+            <%= form_with url: sell_sale_session_claims_path(@sale_session), class: "form grid gap-3" do |form| %>
+              <%= hidden_field_tag :claim_item_id, claim_item.id, id: nil %>
+              <%= render "sell/sale_sessions/holder_fields", prefix: "claimer", label: "Claimed by" %>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="grid gap-2">
+                  <%= label_tag "quantity_#{claim_item.id}", "Quantity" %>
+                  <%= number_field_tag :quantity, 1, min: 1, step: 1, id: "quantity_#{claim_item.id}", readonly: claim_item.stock_item.specimen? %>
+                </div>
+
+                <div class="grid gap-2">
+                  <%= label_tag "message_reference_#{claim_item.id}", "Message (optional)" %>
+                  <%= text_field_tag :message_reference, nil, id: "message_reference_#{claim_item.id}", maxlength: 120, placeholder: "e.g. 10:02" %>
+                </div>
+              </div>
+
+              <div>
+                <%= form.submit "Claim", class: "btn w-full sm:w-auto" %>
+              </div>
+            <% end %>
+          <% end %>
+        </section>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% results = @lots.select(&:won?) %>
+
+<% if results.any? %>
+  <div class="card" id="results">
+    <header>
+      <h2>Won so far</h2>
+    </header>
+
+    <section>
+      <ul class="grid gap-1 text-sm">
+        <% results.each do |lot| %>
+          <li>
+            <%= lot.label %> · <%= lot.stock_item.name %> ·
+            <%= lot.holder_name %> · <%= rands(lot.holder_price_cents) %>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  </div>
+<% end %>

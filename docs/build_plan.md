@@ -36,7 +36,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B22 | Orders, holds and cancellations | SE05, SE06, D179–D188 | B19, B21 | Done |
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
-| B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Discussed |
+| B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
 | B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
@@ -1086,7 +1086,7 @@ Tests cover the acceptance cases. A browser check covered the upload page, a fil
 problems, a preview adding to an existing SKU, the import report at phone width and a
 reversal. The `stock-import` help topic needs review.
 
-### B25 Live sale sessions, auctions, Quick Claim and backup bidder — discussed 2026-11-25
+### B25 Live sale sessions, auctions, Quick Claim and backup bidder — discussed and built 2026-11-25
 
 **Scope**
 - **Sessions (LS01, D209, D210, D216):** `sale_sessions` (seller, name, channel, host
@@ -1126,3 +1126,19 @@ until the backup window ends, then returns stock; offering to the backup leaves 
 active reservation and the original winner in history; a claim on sold-out stock joins
 the waitlist and nothing is reserved until the seller offers it; a paused session takes
 no new claims; host/packers never see costs or order totals.
+
+**Built notes:** A win doesn't change the hold in place: it releases the session's hold and
+creates the winner's in the same transaction, so the stock history shows both. That hold
+already ends at the payment deadline plus the backup window, so a missed payment needs no
+job to keep it held; "Payment missed" is shown from the deadline, and the expiry job marks
+the lot or claim returned when the hold runs out. A claim joins the waitlist when anyone is
+already waiting, so nobody jumps the line; with `sales.waitlist` off, a claim that can't be
+held is refused. Names the host types become aliases in the session's group (the channel)
+and are reused for the same name. A host/packer can only open Host View for sessions they
+host, and settling results (backup, relist, return, removing claims) is for owners and
+managers. Until Closeout (B26), payment is tracked outside VIVUM, so every unpaid win shows
+as missed after its deadline. The Sell tabs now wrap at phone width. Tests cover the
+acceptance cases. A browser check covered setting up and going live, opening and winning a
+lot with a backup, claims and the waitlist offer at phone width, and a transfer to the
+backup after a missed payment. The `sale-sessions` and `quick-claim` help topics need
+review.

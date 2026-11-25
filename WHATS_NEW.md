@@ -113,6 +113,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - Add stock from a spreadsheet: upload a CSV or Excel file, check the preview, then
   import it in one go. Add to items you already have, and undo an import if it was a
   mistake.
+- Run WhatsApp group auctions and claim sales in a session. Line up lots, then capture
+  each winner, bid and backup bidder from your phone in Host View. Wins and claims hold the
+  plants until the payment deadline you set. If someone doesn't pay, offer the plant to
+  the backup bidder, relist it or return it to stock. Sold-out claims join a waitlist.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

@@ -9,7 +9,7 @@
   </div>
 <% end %>
 
-<nav class="flex gap-2" aria-label="Sell">
+<nav class="flex flex-wrap gap-2" aria-label="Sell">
   <%= nav_link_to "Overview", sell_root_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
 
   <% if capability?("seller.stock") %>
@@ -18,6 +18,10 @@
 
   <% if capability?("seller.listings") && Current.membership.manager_or_owner? %>
     <%= nav_link_to "Listings", sell_listings_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
+  <% end %>
+
+  <% if capability?("sales.sessions") %>
+    <%= nav_link_to "Sessions", sell_sale_sessions_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>
 
   <% if capability?("seller.orders") && Current.membership.manager_or_owner? %>

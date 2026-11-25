@@ -343,6 +343,20 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   created items, all or nothing, while every imported unit is still available (D206).
   Previews expire after 24 hours (`StockImport.expire_stale!`, hourly). Owners and
   managers only; `seller.csv_import` marked implemented; help topic `stock-import`.
+- Live sale sessions (B25, LS01–LS04, D209–D218): `sale_sessions` (draft, live, paused,
+  closed) need a payment deadline and backup window in hours before going live, prefilled
+  from the seller's last session (D14, D210). `sale_lots` open with a pinned
+  `StockHold` (`Stock::Ledger#hold!` gains `pinned:`); `SaleLot#win!` swaps it for the
+  winner's hold, which lasts to the deadline plus the backup window, in one transaction,
+  and `#pass!` releases once (D211, D212). After a missed payment `#transfer_to_backup!`,
+  `#relist!` or `#return_to_stock!`; `ExpireStockHoldsJob` marks lots and claims whose
+  hold ran out as returned (D213). Quick Claim: `sale_claim_items` at a fixed price and
+  `sale_claims`, held in order or numbered on a waitlist, offered by hand (D214, D215).
+  Host View at `/sell/sessions/:id/host` for owners, managers and the session's
+  host/packer (`SaleSessionPolicy`, D217). Names typed by the host become aliases in the
+  session's group. Results CSV, audit events, buyer merge, data export and deletion
+  cover lots and claims. `sales.*` flags marked implemented; help topics
+  `sale-sessions` and `quick-claim`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

@@ -1,0 +1,214 @@
+<% content_for :title, "#{@sale_session.name} · Sessions · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "sale-sessions" %>
+
+<div>
+  <%= link_to "← Sessions", sell_sale_sessions_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2 flex flex-wrap items-center gap-2">
+    <%= @sale_session.name %>
+    <%= session_status_badge(@sale_session) %>
+  </h2>
+
+  <p class="vv-caption mt-1">
+    <%= [ @sale_session.channel, @sale_session.host_member && "hosted by #{@sale_session.host_member.email_address}" ].compact.join(" · ").presence || "No group or host set" %>
+    ·
+    <% if @sale_session.timings_set? %>
+      pay within <%= pluralize(@sale_session.payment_hours, "hour") %>, then
+      <%= pluralize(@sale_session.backup_hours, "hour") %> for the backup
+    <% else %>
+      payment deadline and backup window not set
+    <% end %>
+  </p>
+</div>
+
+<div class="flex flex-wrap gap-2" id="actions">
+  <%= link_to "Host View", sell_sale_session_host_path(@sale_session), class: "btn" %>
+
+  <% unless @sale_session.closed? %>
+    <%= link_to "Edit", edit_sell_sale_session_path(@sale_session), class: "btn-outline" %>
+  <% end %>
+
+  <% if @sale_session.draft? || @sale_session.paused? %>
+    <%= button_to "Go live", sell_sale_session_status_path(@sale_session), method: :patch, params: { status: "live" }, class: "btn-outline" %>
+  <% end %>
+
+  <% if @sale_session.live? %>
+    <%= button_to "Pause", sell_sale_session_status_path(@sale_session), method: :patch, params: { status: "paused" }, class: "btn-outline" %>
+  <% end %>
+
+  <% unless @sale_session.closed? %>
+    <%= button_to "Close session", sell_sale_session_status_path(@sale_session), method: :patch, params: { status: "closed" }, class: "btn-ghost", data: { turbo_confirm: "Close #{@sale_session.name}? Lots not yet opened stay unsold, and the waitlist ends." } %>
+  <% end %>
+</div>
+
+<% if capability?("sales.auctions") %>
+  <div class="card" id="lots">
+    <header>
+      <h2>Lots</h2>
+
+      <p>
+        Each lot holds its plants while open. A win holds them for the winner
+        until the payment deadline, then through the backup window.
+      </p>
+    </header>
+
+    <section class="grid gap-4">
+      <% if @lots.any? %>
+        <ul class="grid gap-2">
+          <% @lots.each do |lot| %>
+            <li class="vv-plant-row flex-wrap" id="<%= dom_id(lot) %>">
+              <span class="grid min-w-0 flex-1 basis-full gap-0.5 sm:basis-auto">
+                <span class="font-medium"><%= lot.label %> · <%= lot.stock_item.name %></span>
+
+                <span class="vv-caption">
+                  <%= [ lot.stock_item.code, "× #{lot.quantity}", lot.stock_location.name ].join(" · ") %>
+
+                  <% if lot.winner_name %>
+                    · won by <%= lot.winner_name %> for
+                    <%= rands(lot.price_cents) %>
+                  <% end %>
+
+                  <% if lot.backup? %>
+                    · backup <%= lot.backup_name %> at
+                    <%= rands(lot.backup_bid_cents) %>
+                  <% end %>
+
+                  <% if lot.transferred? %>
+                    · offered to the backup
+                    <%= l(lot.transferred_at, format: :short) %>
+                  <% end %>
+
+                  <% if lot.holding? %>
+                    · pay by <%= l(lot.payment_due_at, format: :short) %>
+                  <% end %>
+                </span>
+              </span>
+
+              <span class="badge-outline"><%= lot_state_label(lot) %></span>
+
+              <span class="flex flex-wrap gap-2">
+                <% if lot.queued? %>
+                  <%= button_to "Remove", sell_sale_session_lot_path(@sale_session, lot), method: :delete, class: "btn-sm-ghost" %>
+                <% end %>
+
+                <% if lot.offer_to_backup? && capability?("sales.backup_bidder") %>
+                  <%= button_to "Offer to backup", transfer_sell_sale_session_lot_path(@sale_session, lot), class: "btn-sm", data: { turbo_confirm: "Hold #{lot.label} for #{lot.backup_name} at #{rands(lot.backup_bid_cents)}, with a new payment deadline?" } %>
+                <% end %>
+
+                <% if lot.won? %>
+                  <% unless @sale_session.closed? %>
+                    <%= button_to "Relist", relist_sell_sale_session_lot_path(@sale_session, lot), class: "btn-sm-outline", data: { turbo_confirm: "Release #{lot.holder_name}'s hold and add the plant as a new lot?" } %>
+                  <% end %>
+                  <%= button_to "Return to stock", return_stock_sell_sale_session_lot_path(@sale_session, lot), class: "btn-sm-ghost", data: { turbo_confirm: "Release #{lot.holder_name}'s hold and return the plant to stock?" } %>
+                <% end %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p>No lots yet.</p>
+      <% end %>
+
+      <% unless @sale_session.closed? %>
+        <%= form_with url: sell_sale_session_lots_path(@sale_session), class: "form grid gap-3 sm:grid-cols-4 sm:items-end", id: "add_lot" do |form| %>
+          <div class="grid gap-2 sm:col-span-2">
+            <%= form.label :stock_item_id, "Plant", for: "lot_item" %>
+            <%= form.select :stock_item_id, @items.map { [ "#{it.name} (#{it.code})", it.id ] }, { prompt: "Choose a plant…" }, id: "lot_item", required: true, class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :stock_location_id, "From", for: "lot_location" %>
+            <%= form.select :stock_location_id, location_options(@locations), {}, id: "lot_location", class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :quantity, "Quantity", for: "lot_quantity" %>
+            <%= form.number_field :quantity, value: 1, min: 1, step: 1, id: "lot_quantity" %>
+          </div>
+
+          <div><%= form.submit "Add lot", class: "btn-outline" %></div>
+        <% end %>
+      <% end %>
+    </section>
+  </div>
+<% end %>
+
+<% if capability?("sales.quick_claim") %>
+  <div class="card" id="claims">
+    <header>
+      <h2>Quick Claim</h2>
+
+      <p>
+        Plants up for "first to say MINE" at a fixed price. Claims hold stock in
+        order; when it runs out, later claims join the waitlist.
+      </p>
+    </header>
+
+    <section class="grid gap-4">
+      <% @claim_items.each do |claim_item| %>
+        <div class="grid gap-2" id="<%= dom_id(claim_item) %>">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-medium">
+              <%= claim_item.stock_item.name %> ·
+              <%= rands(claim_item.price_cents) %>
+              <span class="vv-caption"><%= claim_item.available %> available at <%= claim_item.stock_location.name %></span>
+            </span>
+
+            <% if claim_item.removed? %>
+              <span class="badge-outline">Off claims</span>
+            <% else %>
+              <%= button_to "Take off claims", sell_sale_session_claim_item_path(@sale_session, claim_item), method: :delete, class: "btn-sm-ghost" %>
+            <% end %>
+          </div>
+
+          <% if claim_item.claims.any? %>
+            <ul class="grid gap-1 text-sm">
+              <% claim_item.claims.each do |claim| %>
+                <li
+                  class="flex flex-wrap items-center justify-between gap-2"
+                  id="<%= dom_id(claim) %>"
+                >
+                  <span>
+                    <%= claim.holder_name %> × <%= claim.quantity %>
+                    <% if claim.message_reference %>
+                      <span class="vv-caption">(<%= claim.message_reference %>)</span>
+                    <% end %>
+                    <span class="badge-outline"><%= claim_state_label(claim) %></span>
+                  </span>
+
+                  <% if claim.held? %>
+                    <%= button_to "Return to stock", return_stock_sell_sale_session_claim_path(@sale_session, claim), class: "btn-sm-ghost", data: { turbo_confirm: "Release #{claim.holder_name}'s hold?" } %>
+                  <% elsif claim.waitlisted? %>
+                    <%= button_to "Remove", remove_sell_sale_session_claim_path(@sale_session, claim), class: "btn-sm-ghost" %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% unless @sale_session.closed? %>
+        <%= form_with url: sell_sale_session_claim_items_path(@sale_session), class: "form grid gap-3 sm:grid-cols-4 sm:items-end", id: "add_claim_item" do |form| %>
+          <div class="grid gap-2 sm:col-span-2">
+            <%= form.label :stock_item_id, "Plant", for: "claim_plant" %>
+            <%= form.select :stock_item_id, @items.map { [ "#{it.name} (#{it.code})", it.id ] }, { prompt: "Choose a plant…" }, id: "claim_plant", required: true, class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :stock_location_id, "From", for: "claim_location" %>
+            <%= form.select :stock_location_id, location_options(@locations), {}, id: "claim_location", class: "select" %>
+          </div>
+
+          <div class="grid gap-2">
+            <%= form.label :price, "Price (R)", for: "claim_price" %>
+            <%= form.text_field :price, inputmode: "decimal", id: "claim_price", placeholder: "Item price" %>
+          </div>
+
+          <div><%= form.submit "Add for claims", class: "btn-outline" %></div>
+        <% end %>
+      <% end %>
+    </section>
+  </div>
+<% end %>

@@ -1,0 +1,13 @@
+<% content_for :title, "New session · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "sale-sessions" %>
+
+<div>
+  <%= link_to "← Sessions", sell_sale_sessions_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2">New session</h2>
+</div>
+
+<div class="card max-w-2xl">
+  <section><%= render "form", sale_session: @sale_session %></section>
+</div>

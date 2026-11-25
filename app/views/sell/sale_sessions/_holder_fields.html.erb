@@ -1,0 +1,7 @@
+<%# Who a result or claim is for (D172, D212): a buyer, an alias, or a new name. %>
+<div class="grid gap-2">
+  <%= label_tag "#{prefix}_choice", label %>
+  <%= select_tag "#{prefix}_choice", grouped_options_for_select(holder_options), id: "#{prefix}_choice", include_blank: "New name (type below)", class: "select" %>
+  <%= label_tag "#{prefix}_name", "Or group name", class: "sr-only" %>
+  <%= text_field_tag "#{prefix}_name", nil, id: "#{prefix}_name", maxlength: 120, placeholder: "Name in the group, e.g. Sam 🌿" %>
+</div>

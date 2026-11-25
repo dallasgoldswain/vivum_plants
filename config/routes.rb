@@ -176,6 +176,31 @@ Rails.application.routes.draw do
         resources :documents, only: :show
       end
     end
+    # Live sales (LS01–LS04, D209–D218).
+    resources :sale_sessions, path: "sessions", except: :destroy do
+      scope module: :sale_sessions do
+        resource :status, only: :update
+        resource :host, only: :show
+        resources :lots, only: %i[ create destroy ] do
+          member do
+            post :open
+            post :win
+            post :pass
+            post :transfer
+            post :relist
+            post :return_stock
+          end
+        end
+        resources :claim_items, only: %i[ create destroy ]
+        resources :claims, only: :create do
+          member do
+            post :offer
+            post :return_stock
+            post :remove
+          end
+        end
+      end
+    end
     resources :buyer_aliases, path: "aliases", only: %i[ create update destroy ]
     resources :members, only: %i[ index update destroy ], controller: "memberships"
     resources :invitations, only: %i[ create destroy ] do

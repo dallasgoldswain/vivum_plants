@@ -1,0 +1,43 @@
+<% content_for :title, "Sessions · #{Current.seller.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "sale-sessions" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <h2 class="vv-h3">Sessions</h2>
+
+  <% if allowed_to?(:create?, SaleSession) %>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Download results", sell_sale_sessions_path(format: :csv), class: "btn-ghost" %>
+      <%= link_to "New session", new_sell_sale_session_path, class: "btn" %>
+    </div>
+  <% end %>
+</div>
+
+<% if @sale_sessions.any? %>
+  <ul class="grid gap-2" id="sessions">
+    <% @sale_sessions.each do |sale_session| %>
+      <li>
+        <%= link_to allowed_to?(:show?, sale_session) ? sell_sale_session_path(sale_session) : sell_sale_session_host_path(sale_session), class: "vv-plant-row" do %>
+          <span class="grid min-w-0 flex-1 gap-0.5">
+            <span class="truncate font-medium"><%= sale_session.name %></span>
+            <span class="vv-caption truncate"><%= [ sale_session.channel, sale_session.starts_at && l(sale_session.starts_at, format: :short), sale_session.host_member&.email_address ].compact.join(" · ") %></span>
+          </span>
+
+          <%= session_status_badge(sale_session) %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <div class="card">
+    <section>
+      <% if allowed_to?(:create?, SaleSession) %>
+        <p>
+          No sessions yet. Set one up for your next group auction or claim sale.
+        </p>
+      <% else %>
+        <p>No sessions to host yet. An owner or manager makes you the host.</p>
+      <% end %>
+    </section>
+  </div>
+<% end %>

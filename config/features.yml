@@ -94,11 +94,11 @@ seller.closeout: { domain: seller, state: core, depends_on: [sales.sessions, sel
 seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
 
 # --- Live sales ---
-sales.sessions: { domain: sales, state: core, depends_on: [seller.reservations], description: "Sale sessions and Host View (LS01)" }
-sales.auctions: { domain: sales, state: core, depends_on: [sales.sessions, seller.stock, seller.reservations], description: "Auction lots and results (LS02)" }
-sales.backup_bidder: { domain: sales, state: core, depends_on: [sales.auctions], description: "Transfer a failed win to the backup bidder (LS03)" }
-sales.quick_claim: { domain: sales, state: core, depends_on: [sales.sessions], description: "Quick Claim for group claims (LS04)" }
-sales.waitlist: { domain: sales, state: core, depends_on: [sales.quick_claim], description: "Waitlist when stock runs out (LS04)" }
+sales.sessions: { domain: sales, state: core, implemented: true, depends_on: [seller.reservations], description: "Sale sessions and Host View (LS01)" }
+sales.auctions: { domain: sales, state: core, implemented: true, depends_on: [sales.sessions, seller.stock, seller.reservations], description: "Auction lots and results (LS02)" }
+sales.backup_bidder: { domain: sales, state: core, implemented: true, depends_on: [sales.auctions], description: "Transfer a failed win to the backup bidder (LS03)" }
+sales.quick_claim: { domain: sales, state: core, implemented: true, depends_on: [sales.sessions], description: "Quick Claim for group claims (LS04)" }
+sales.waitlist: { domain: sales, state: core, implemented: true, depends_on: [sales.quick_claim], description: "Waitlist when stock runs out (LS04)" }
 
 # --- WhatsApp ---
 whatsapp.share: { domain: whatsapp, state: core, implemented: true, depends_on: [seller.sale_cards], description: "Share and download sale cards (SE08)" }

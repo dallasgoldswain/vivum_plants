@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -227,7 +227,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
     t.index ["library_profile_id"], name: "index_care_schedules_on_library_profile_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
-    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
+    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying::text, 'week'::character varying::text, 'month'::character varying::text]))", name: "care_schedules_interval_valid"
     t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "care_schedules_one_subject"
   end
 
@@ -494,7 +494,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
     t.index ["seller_id", "reference"], name: "index_listings_on_seller_id_and_reference", unique: true
     t.index ["seller_id"], name: "index_listings_on_seller_id"
     t.index ["stock_item_id"], name: "index_listings_on_stock_item_id"
-    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY ((ARRAY['active'::character varying, 'paused'::character varying])::text[]))"
+    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY (ARRAY[('active'::character varying)::text, ('paused'::character varying)::text]))"
     t.check_constraint "listed_quantity IS NULL OR listed_quantity > 0", name: "listings_listed_quantity_positive"
     t.check_constraint "price_cents >= 0", name: "listings_price_not_negative"
   end
@@ -536,7 +536,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -874,6 +874,103 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
     t.index ["listing_id"], name: "index_sale_cards_on_listing_id"
   end
 
+  create_table "sale_claim_items", force: :cascade do |t|
+    t.bigint "sale_session_id", null: false
+    t.bigint "stock_item_id", null: false
+    t.bigint "stock_location_id", null: false
+    t.integer "price_cents", null: false
+    t.datetime "removed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sale_session_id"], name: "index_sale_claim_items_on_sale_session_id"
+    t.index ["stock_item_id"], name: "index_sale_claim_items_on_stock_item_id"
+    t.index ["stock_location_id"], name: "index_sale_claim_items_on_stock_location_id"
+  end
+
+  create_table "sale_claims", force: :cascade do |t|
+    t.bigint "sale_claim_item_id", null: false
+    t.bigint "buyer_id"
+    t.bigint "buyer_alias_id"
+    t.string "holder_name", null: false
+    t.integer "quantity", null: false
+    t.string "message_reference"
+    t.string "state", null: false
+    t.integer "position"
+    t.bigint "stock_hold_id"
+    t.datetime "payment_due_at"
+    t.datetime "settled_at"
+    t.bigint "created_by_id"
+    t.bigint "settled_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["buyer_alias_id"], name: "index_sale_claims_on_buyer_alias_id"
+    t.index ["buyer_id"], name: "index_sale_claims_on_buyer_id"
+    t.index ["created_by_id"], name: "index_sale_claims_on_created_by_id"
+    t.index ["sale_claim_item_id"], name: "index_sale_claims_on_sale_claim_item_id"
+    t.index ["settled_by_id"], name: "index_sale_claims_on_settled_by_id"
+    t.index ["stock_hold_id"], name: "index_sale_claims_on_stock_hold_id"
+  end
+
+  create_table "sale_lots", force: :cascade do |t|
+    t.bigint "sale_session_id", null: false
+    t.integer "number", null: false
+    t.bigint "stock_item_id", null: false
+    t.bigint "stock_location_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.string "state", default: "queued", null: false
+    t.bigint "stock_hold_id"
+    t.bigint "winner_buyer_id"
+    t.bigint "winner_alias_id"
+    t.string "winner_name"
+    t.integer "price_cents"
+    t.bigint "backup_buyer_id"
+    t.bigint "backup_alias_id"
+    t.string "backup_name"
+    t.integer "backup_bid_cents"
+    t.datetime "payment_due_at"
+    t.datetime "opened_at"
+    t.datetime "resolved_at"
+    t.datetime "transferred_at"
+    t.datetime "settled_at"
+    t.bigint "resolved_by_id"
+    t.bigint "settled_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["backup_alias_id"], name: "index_sale_lots_on_backup_alias_id"
+    t.index ["backup_buyer_id"], name: "index_sale_lots_on_backup_buyer_id"
+    t.index ["resolved_by_id"], name: "index_sale_lots_on_resolved_by_id"
+    t.index ["sale_session_id", "number"], name: "index_sale_lots_on_sale_session_id_and_number", unique: true
+    t.index ["sale_session_id"], name: "index_sale_lots_on_sale_session_id"
+    t.index ["sale_session_id"], name: "index_sale_lots_one_open_per_session", unique: true, where: "((state)::text = 'open'::text)"
+    t.index ["settled_by_id"], name: "index_sale_lots_on_settled_by_id"
+    t.index ["stock_hold_id"], name: "index_sale_lots_on_stock_hold_id"
+    t.index ["stock_item_id"], name: "index_sale_lots_on_stock_item_id"
+    t.index ["stock_location_id"], name: "index_sale_lots_on_stock_location_id"
+    t.index ["winner_alias_id"], name: "index_sale_lots_on_winner_alias_id"
+    t.index ["winner_buyer_id"], name: "index_sale_lots_on_winner_buyer_id"
+  end
+
+  create_table "sale_sessions", force: :cascade do |t|
+    t.bigint "seller_id", null: false
+    t.string "name", null: false
+    t.string "channel"
+    t.bigint "host_member_id"
+    t.datetime "starts_at"
+    t.datetime "closes_at"
+    t.string "status", default: "draft", null: false
+    t.integer "payment_hours"
+    t.integer "backup_hours"
+    t.datetime "went_live_at"
+    t.datetime "closed_at"
+    t.bigint "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_sale_sessions_on_created_by_id"
+    t.index ["host_member_id"], name: "index_sale_sessions_on_host_member_id"
+    t.index ["seller_id", "status"], name: "index_sale_sessions_on_seller_id_and_status"
+    t.index ["seller_id"], name: "index_sale_sessions_on_seller_id"
+  end
+
   create_table "sellers", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -1155,6 +1252,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_23_090000) do
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "sale_cards", "listings", on_delete: :cascade
   add_foreign_key "sale_cards", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "sale_claim_items", "sale_sessions"
+  add_foreign_key "sale_claim_items", "stock_items"
+  add_foreign_key "sale_claim_items", "stock_locations"
+  add_foreign_key "sale_claims", "buyer_aliases", on_delete: :nullify
+  add_foreign_key "sale_claims", "buyers", on_delete: :nullify
+  add_foreign_key "sale_claims", "sale_claim_items"
+  add_foreign_key "sale_claims", "stock_holds", on_delete: :nullify
+  add_foreign_key "sale_claims", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "sale_claims", "users", column: "settled_by_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "buyer_aliases", column: "backup_alias_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "buyer_aliases", column: "winner_alias_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "buyers", column: "backup_buyer_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "buyers", column: "winner_buyer_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "sale_sessions"
+  add_foreign_key "sale_lots", "stock_holds", on_delete: :nullify
+  add_foreign_key "sale_lots", "stock_items"
+  add_foreign_key "sale_lots", "stock_locations"
+  add_foreign_key "sale_lots", "users", column: "resolved_by_id", on_delete: :nullify
+  add_foreign_key "sale_lots", "users", column: "settled_by_id", on_delete: :nullify
+  add_foreign_key "sale_sessions", "sellers"
+  add_foreign_key "sale_sessions", "users", column: "created_by_id", on_delete: :nullify
+  add_foreign_key "sale_sessions", "users", column: "host_member_id", on_delete: :nullify
   add_foreign_key "sellers", "plans"
   add_foreign_key "sessions", "sellers", on_delete: :nullify
   add_foreign_key "sessions", "users"

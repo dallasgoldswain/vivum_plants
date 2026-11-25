@@ -4,6 +4,7 @@ class Seller < ApplicationRecord
   has_many :users, through: :memberships
   belongs_to :plan
   has_many :stock_imports, dependent: :delete_all
+  has_many :sale_sessions, dependent: :destroy
   has_many :stock_items, dependent: :destroy
   has_many :stock_locations, dependent: :destroy
   has_many :stock_movements, dependent: :delete_all

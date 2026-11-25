@@ -10,6 +10,9 @@ module Buyer::Merging
       other.aliases.update_all(buyer_id: id)
       other.holds.update_all(buyer_id: id)
       other.orders.update_all(buyer_id: id)
+      SaleLot.where(winner_buyer_id: other.id).update_all(winner_buyer_id: id)
+      SaleLot.where(backup_buyer_id: other.id).update_all(backup_buyer_id: id)
+      SaleClaim.where(buyer_id: other.id).update_all(buyer_id: id)
       other.addresses.update_all(buyer_id: id, default: false)
       other.consents.update_all(buyer_id: id)
       self.email ||= other.email
