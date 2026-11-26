@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.closeout, sales.sessions, seller.orders]
 prerequisites: [sale-sessions]
 keywords: [closeout, close out, orders from a sale, unresolved, alias, awaiting payment, backup, split order, cancel line, export]
+reviewed: 2026-11-26
+reviewed_digest: 58766e8836e33788040e61f3259957725ab2baf5846c0574f7e47b2052690c95
 ---
 
 Closeout gathers everything won or claimed in a live session and puts each buyer's
