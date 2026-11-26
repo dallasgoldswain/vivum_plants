@@ -37,7 +37,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
-| B26 | Sale Closeout | SC01, SC02 | B25 | Planned |
+| B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Discussed |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
 | B29 | Seller business profile and standard branding | BR01 | B02 | Planned |
@@ -1142,3 +1142,33 @@ acceptance cases. A browser check covered setting up and going live, opening and
 lot with a backup, claims and the waitlist offer at phone width, and a transfer to the
 backup after a missed payment. The `sale-sessions` and `quick-claim` help topics need
 review.
+
+### B26 Sale Closeout — discussed 2026-11-26
+
+**Scope**
+- **Closeout page (SC01, D219, D226):** per session, the won lots and held claims grouped
+  by buyer, with views Unresolved, Awaiting payment, Expiring (holds ending within 24
+  hours), Backup offers, Ready to pack and Completed. Each order row shows items, price
+  snapshots, subtotal, payment state, hold expiry and a copy order link.
+- **Create orders (D219, D220, D222):** one tap creates a reserved order per resolved buyer
+  per session, source "Live sale", one line per lot or claim at its bid or claim price.
+  Lines link to their lot or claim (unique, so a repeat tap adds nothing) and take over
+  the existing hold without releasing it. A payment pins the holds as for any order.
+- **Unresolved aliases (D221):** link an alias to an existing buyer or create a buyer from
+  it in Closeout; never automatic.
+- **Exceptions (SC02, D223–D225):** Move to backup cancels the winner's line ("Payment
+  missed") and transfers the lot; the backup's line joins their session order. Split
+  unpaid orders and cancel lines, recording previous total, new total and reason. All
+  three are refused on part-paid and paid orders, which point to refunds and returns.
+- **Roles, export and records (D227, D228):** owners and managers only; CSV of the current
+  view; audited; `seller.closeout` becomes implemented, with a help topic.
+
+**Deferred:** payment attempts for a changed total (B40); packing and host/packer access
+(B27); buyer order links (B30); combining orders across sessions.
+
+**Acceptance:** three wins for one buyer become one order with no re-entry; tapping Create
+orders twice adds no lines; an unlinked alias's wins never join an order until linked, and
+matching names never merge; an ordered line keeps the lot's hold and deadline; moving a
+missed payment to the backup cancels the winner's line and leaves one active hold for the
+backup; splitting or cancelling an unpaid order records the previous total and reason; a
+paid order can't be split or have lines cancelled; host/packers can't open Closeout.
