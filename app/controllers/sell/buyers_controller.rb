@@ -39,6 +39,8 @@ class Sell::BuyersController < Sell::BaseController
   def create
     authorize! Buyer, to: :create?
     @buyer = Current.seller.buyers.new(buyer_params)
+    return create_for_alias if params[:alias_id].present?
+
     if @buyer.save
       redirect_to sell_buyer_path(@buyer), notice: "#{@buyer.name} added."
     else
@@ -65,6 +67,20 @@ class Sell::BuyersController < Sell::BaseController
   end
 
   private
+    # From Closeout's unresolved aliases (D221): the new buyer takes the alias, by hand.
+    def create_for_alias
+      buyer_alias = authorized_scope(BuyerAlias.all).unlinked.find(params[:alias_id])
+      authorize! buyer_alias, to: :update?
+      Buyer.transaction do
+        @buyer.save!
+        buyer_alias.update!(buyer: @buyer)
+      end
+      Audit.record("buyer_alias.linked", target: buyer_alias, details: { buyer_id: @buyer.id, created: true })
+      redirect_back_or_to sell_buyer_path(@buyer), notice: "#{@buyer.name} added and linked to #{buyer_alias.label}."
+    rescue ActiveRecord::RecordInvalid => error
+      redirect_back_or_to sell_buyers_path, alert: error.record.errors.full_messages.to_sentence
+    end
+
     def set_buyer
       @buyer = authorized_scope(Buyer.active).find(params[:id])
       authorize! @buyer

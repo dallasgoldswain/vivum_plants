@@ -168,6 +168,7 @@ Rails.application.routes.draw do
         resources :lines, only: %i[ create update destroy ]
         resource :reservation, only: :create
         resource :cancellation, only: :create
+        resource :split, only: :create
         resource :fulfilment, only: :create
         resources :payments, only: :create do
           post :void, on: :member
@@ -181,6 +182,7 @@ Rails.application.routes.draw do
       scope module: :sale_sessions do
         resource :status, only: :update
         resource :host, only: :show
+        resource :closeout, only: %i[ show create ]
         resources :lots, only: %i[ create destroy ] do
           member do
             post :open

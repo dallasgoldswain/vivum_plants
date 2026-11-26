@@ -1,0 +1,3 @@
+<%= result.closeout_label %> × <%= result.quantity %> ·
+<%= rands(result.quantity * result.closeout_unit_cents) %>
+<span class="vv-caption">· held until <%= l(result.stock_hold.expires_at, format: :short) %></span>

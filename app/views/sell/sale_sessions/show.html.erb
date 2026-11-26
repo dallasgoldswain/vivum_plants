@@ -25,6 +25,10 @@
 <div class="flex flex-wrap gap-2" id="actions">
   <%= link_to "Host View", sell_sale_session_host_path(@sale_session), class: "btn" %>
 
+  <% if capability?("seller.closeout") %>
+    <%= link_to "Closeout", sell_sale_session_closeout_path(@sale_session), class: "btn-outline" %>
+  <% end %>
+
   <% unless @sale_session.closed? %>
     <%= link_to "Edit", edit_sell_sale_session_path(@sale_session), class: "btn-outline" %>
   <% end %>

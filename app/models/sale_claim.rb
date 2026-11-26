@@ -10,6 +10,7 @@ class SaleClaim < ApplicationRecord
   belongs_to :stock_hold, optional: true
   belongs_to :created_by, class_name: "User", optional: true
   belongs_to :settled_by, class_name: "User", optional: true
+  has_many :order_lines, dependent: :nullify
 
   enum :state, STATES.index_by(&:itself), validate: true
 
@@ -19,7 +20,16 @@ class SaleClaim < ApplicationRecord
 
   delegate :sale_session, :stock_item, :stock_location, :price_cents, to: :claim_item
 
-  def payment_missed? = held? && payment_due_at.past?
+  def payment_missed? = held? && payment_due_at.past? && !paid?
+
+  # Closeout (D219–D222): the line holding this claim's hold, and who it's for.
+  def order_line = stock_hold_id && order_lines.find { it.active? && it.stock_hold_id == stock_hold_id }
+  def paid? = order_line&.order&.any_payment? || false
+  def closeout_pending? = held? && stock_hold&.current? && order_line.nil?
+  def closeout_label = "Claim · #{stock_item.name}"
+  def closeout_alias = buyer_alias
+  def closeout_buyer = buyer || buyer_alias&.buyer.then { it unless it&.deleted? }
+  def closeout_unit_cents = price_cents
 
   # Holds the units for the claimer (D214); the caller holds the item's lock.
   def hold!(member)
@@ -47,6 +57,16 @@ class SaleClaim < ApplicationRecord
 
   def return_to_stock!(member:) = settle!(member, "returned", from: "held")
   def remove!(member:) = settle!(member, "removed", from: "waitlisted")
+
+  # Its order line was cancelled, which let the hold go: the units are back in stock.
+  def order_line_cancelled!(member)
+    with_lock do
+      next unless held? && !stock_hold&.current?
+
+      update!(state: "returned", settled_at: Time.current, settled_by: member)
+      Audit.record("sale_claim.returned", actor: member, target: self, details: { quantity: quantity, order_line_cancelled: true })
+    end
+  end
 
   def self.settle_expired!
     held.joins(:stock_hold).where(stock_holds: { state: "expired" }).update_all(state: "returned", settled_at: Time.current, updated_at: Time.current)

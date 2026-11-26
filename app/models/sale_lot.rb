@@ -16,6 +16,7 @@ class SaleLot < ApplicationRecord
   belongs_to :backup_alias, class_name: "BuyerAlias", optional: true
   belongs_to :resolved_by, class_name: "User", optional: true
   belongs_to :settled_by, class_name: "User", optional: true
+  has_many :order_lines, dependent: :nullify
 
   enum :state, STATES.index_by(&:itself), validate: true, default: "queued"
 
@@ -30,9 +31,18 @@ class SaleLot < ApplicationRecord
   def holder_name = transferred? ? backup_name : winner_name
   def holder_price_cents = transferred? ? backup_bid_cents : price_cents
   def backup? = backup_name.present?
-  def payment_missed? = won? && payment_due_at.past?
+  def payment_missed? = won? && payment_due_at.past? && !paid?
   def holding? = won? && stock_hold&.current?
   def offer_to_backup? = payment_missed? && holding? && backup? && !transferred?
+
+  # Closeout (D219–D223): the line holding this lot's current hold, and who it's for.
+  def order_line = stock_hold_id && order_lines.find { it.active? && it.stock_hold_id == stock_hold_id }
+  def paid? = order_line&.order&.any_payment? || false
+  def closeout_pending? = holding? && order_line.nil?
+  def closeout_label = "#{label} · #{stock_item.name}"
+  def closeout_alias = transferred? ? backup_alias : winner_alias
+  def closeout_buyer = (transferred? ? backup_buyer : winner_buyer) || closeout_alias&.buyer.then { it unless it&.deleted? }
+  def closeout_unit_cents = holder_price_cents / quantity
 
   def open!(member:)
     transaction do
@@ -57,6 +67,8 @@ class SaleLot < ApplicationRecord
     raise SaleSession::Refused, "Enter the winning bid in rands." if price_cents.nil? || price_cents.negative?
     raise SaleSession::Refused, "Enter the backup bid in rands." if backup && (backup_bid_cents.nil? || backup_bid_cents.negative?)
     raise SaleSession::Refused, "The backup bidder can't be the winner." if backup && backup == winner
+    refuse_uneven!(price_cents)
+    refuse_uneven!(backup_bid_cents) if backup
 
     transaction do
       lock!
@@ -95,10 +107,13 @@ class SaleLot < ApplicationRecord
       return self if transferred?
       raise SaleSession::Refused, "#{label} can go to the backup bidder only after a missed payment, within the backup window." unless offer_to_backup?
 
+      # An ordered win leaves the winner's order first (D223); the hold goes in the swap.
+      order_line&.then { it.order.drop_sale_line!(it, reason: "Payment missed", member: member) }
       due = sale_session.payment_due_from
       hold = swap_hold!(member, { buyer: backup_buyer, buyer_alias: backup_alias }, backup_name, due)
       update!(stock_hold: hold, payment_due_at: due, transferred_at: Time.current, settled_by: member)
       Audit.record("sale_lot.transferred", actor: member, target: self, details: { reference: reference, price_cents: backup_bid_cents })
+      closeout_buyer&.then { sale_session.open_order_for(it)&.add_sale_line!(self, member: member) }
     end
     self
   end
@@ -126,12 +141,30 @@ class SaleLot < ApplicationRecord
     self
   end
 
+  # Its order line was cancelled, which let the hold go: the plant is back in stock.
+  def order_line_cancelled!(member)
+    with_lock do
+      next unless won? && !stock_hold&.current?
+
+      update!(state: "returned", settled_at: Time.current, settled_by: member)
+      Audit.record("sale_lot.returned", actor: member, target: self, details: { reference: reference, order_line_cancelled: true })
+    end
+  end
+
   # Won lots whose hold ran out at the end of the backup window are back in stock (D213).
   def self.settle_expired!
     won.joins(:stock_hold).where(stock_holds: { state: "expired" }).update_all(state: "returned", settled_at: Time.current, updated_at: Time.current)
   end
 
   private
+    # A lot's bid is for all its plants; the order line needs an exact price each.
+    def refuse_uneven!(cents)
+      return if quantity == 1 || cents.nil? || (cents % quantity).zero?
+
+      even = cents - (cents % quantity)
+      raise SaleSession::Refused, "R#{format('%.2f', cents / 100.0)} doesn't split evenly over #{quantity} plants; enter R#{format('%.2f', even / 100.0)} or R#{format('%.2f', (even + quantity) / 100.0)}."
+    end
+
     def ledger(member) = Stock::Ledger.new(stock_item, member: member)
 
     def swap_hold!(member, holder, name, due)

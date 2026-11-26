@@ -1,0 +1,183 @@
+<% content_for :title, "Closeout · #{@sale_session.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "closeout" %>
+
+<div>
+  <%= link_to "← #{@sale_session.name}", sell_sale_session_path(@sale_session), class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <h2 class="vv-h3 mt-2 flex flex-wrap items-center gap-2">
+    Closeout <%= session_status_badge(@sale_session) %>
+  </h2>
+
+  <p class="vv-caption mt-1">
+    Each buyer's wins and claims from this session, on one order.
+  </p>
+</div>
+
+<nav class="flex flex-wrap gap-2" aria-label="Closeout views" id="views">
+  <% SaleSession::Closeout::VIEWS.each do |key, label| %>
+    <%= link_to sell_sale_session_closeout_path(@sale_session, view: key),
+    class: "btn-sm-ghost aria-[current=page]:bg-surface",
+    aria: {
+      current: (@view == key ? "page" : nil),
+    } do %>
+      <%= label %>
+      <span class="vv-caption">(<%= @closeout.count(key) %>)</span>
+    <% end %>
+  <% end %>
+</nav>
+
+<div class="flex flex-wrap gap-2" id="actions">
+  <% if @closeout.ready.any? %>
+    <%= button_to "Create orders (#{@closeout.ready.size})", sell_sale_session_closeout_path(@sale_session), params: { view: @view }, class: "btn" %>
+  <% end %>
+
+  <%= link_to "Download CSV", sell_sale_session_closeout_path(@sale_session, view: @view, format: :csv), class: "btn-ghost" %>
+</div>
+
+<% case @view %>
+<% when "unresolved" %>
+  <div class="card" id="unresolved">
+    <header>
+      <h2>Unresolved</h2>
+
+      <p>
+        These names aren't linked to a buyer yet, so their results can't go on
+        an order. Link each one to a buyer or add them as a new buyer. Names
+        that match are never linked for you.
+      </p>
+    </header>
+
+    <section class="grid gap-4">
+      <% if @closeout.unresolved.any? %>
+        <% @closeout.unresolved.each do |buyer_alias, results| %>
+          <div
+            class="grid gap-3 border-t border-border pt-3"
+            id="<%= dom_id(buyer_alias) %>"
+          >
+            <div>
+              <span class="font-medium"><%= buyer_alias.label %></span>
+
+              <ul class="vv-caption mt-1 grid gap-0.5">
+                <% results.each do |result| %>
+                  <li>
+                    <%= render "sell/sale_sessions/closeouts/result", result: result %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <% if @buyers.any? %>
+                <%= form_with url: sell_buyer_alias_path(buyer_alias), method: :patch, class: "form flex flex-wrap items-end gap-2" do |form| %>
+                  <div class="grid min-w-0 flex-1 gap-2">
+                    <%= form.label :buyer_id, "Link to a buyer", for: "link_#{buyer_alias.id}" %>
+                    <%= form.select :buyer_id, @buyers.map { [ it.name, it.id ] }, { prompt: "Choose a buyer…" }, id: "link_#{buyer_alias.id}", required: true, class: "select" %>
+                  </div>
+
+                  <%= form.submit "Link", class: "btn-outline" %>
+                <% end %>
+              <% end %>
+
+              <%= form_with url: sell_buyers_path, class: "form flex flex-wrap items-end gap-2" do |form| %>
+                <%= hidden_field_tag :alias_id, buyer_alias.id, id: "alias_#{buyer_alias.id}" %>
+
+                <div class="grid min-w-0 flex-1 gap-2">
+                  <%= label_tag "new_name_#{buyer_alias.id}", "New buyer" %>
+                  <%= text_field_tag "buyer[name]", buyer_alias.name, id: "new_name_#{buyer_alias.id}", required: true, maxlength: 120 %>
+                </div>
+
+                <div class="grid min-w-0 flex-1 gap-2">
+                  <%= label_tag "new_phone_#{buyer_alias.id}", "Phone" %>
+                  <%= telephone_field_tag "buyer[phone]", nil, id: "new_phone_#{buyer_alias.id}", required: true, placeholder: "082 123 4567" %>
+                </div>
+
+                <%= form.submit "Add buyer", class: "btn-outline" %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <p>Every result is for a known buyer.</p>
+      <% end %>
+    </section>
+  </div>
+<% when "backup" %>
+  <div class="card" id="backup_offers">
+    <header>
+      <h2>Backup offers</h2>
+
+      <p>
+        Wins whose payment deadline has passed, with a backup bidder still
+        inside the backup window. Moving one cancels the winner's line and holds
+        the plant for the backup at their bid, with a new deadline.
+      </p>
+    </header>
+
+    <section class="grid gap-2">
+      <% if @closeout.backup_offers.any? %>
+        <ul class="grid gap-2">
+          <% @closeout.backup_offers.each do |lot| %>
+            <li class="vv-plant-row flex-wrap" id="<%= dom_id(lot) %>">
+              <span class="grid min-w-0 flex-1 basis-full gap-0.5 sm:basis-auto">
+                <span class="font-medium"><%= lot.closeout_label %></span>
+
+                <span class="vv-caption">
+                  <%= lot.winner_name %> missed paying
+                  <%= rands(lot.price_cents) %>
+                  <% if lot.order_line %>
+                    on
+                    <%= link_to lot.order_line.order.reference, sell_order_path(lot.order_line.order), class: "underline-offset-4 hover:underline" %>
+                  <% end %>
+                  · backup <%= lot.backup_name %> at
+                  <%= rands(lot.backup_bid_cents) %> · held until
+                  <%= l(lot.stock_hold.expires_at, format: :short) %>
+                </span>
+              </span>
+
+              <% if capability?("sales.backup_bidder") %>
+                <%= button_to "Move to backup", transfer_sell_sale_session_lot_path(@sale_session, lot), class: "btn-sm", data: { turbo_confirm: "Cancel #{lot.winner_name}'s line and hold #{lot.label} for #{lot.backup_name} at #{rands(lot.backup_bid_cents)}?" } %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p>No backup offers waiting.</p>
+      <% end %>
+    </section>
+  </div>
+<% else %>
+  <% pending = { "awaiting" => @closeout.ready, "expiring" => @closeout.pending_expiring }.fetch(@view, []) %>
+  <% if pending.any? %>
+    <div class="card" id="pending">
+      <header>
+        <h2>Not on an order yet</h2>
+
+        <p>
+          Create orders to put these on each buyer's order for this session.
+        </p>
+      </header>
+
+      <section>
+        <ul class="grid gap-1 text-sm">
+          <% pending.each do |result| %>
+            <li>
+              <span class="font-medium"><%= result.closeout_buyer.name %></span>
+              ·
+              <%= render "sell/sale_sessions/closeouts/result", result: result %>
+            </li>
+          <% end %>
+        </ul>
+      </section>
+    </div>
+  <% end %>
+
+  <% orders = @closeout.orders_for(@view) %>
+  <% if orders.any? %>
+    <div class="grid gap-3" id="orders">
+      <%= render partial: "sell/sale_sessions/closeouts/order", collection: orders %>
+    </div>
+  <% elsif pending.none? %>
+    <p class="vv-caption" id="orders">Nothing here yet.</p>
+  <% end %>
+<% end %>

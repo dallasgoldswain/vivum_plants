@@ -1,0 +1,93 @@
+<% changeable = order.open? && !order.any_payment? && !order.receipted? %>
+
+<div class="card" id="<%= dom_id(order) %>">
+  <header>
+    <h2 class="flex flex-wrap items-center gap-2">
+      <%= link_to order.reference, sell_order_path(order), class: "underline-offset-4 hover:underline" %>
+      · <%= order.buyer_name %> <%= payment_badge(order) %>
+      <%= order_state_badge(order) %>
+    </h2>
+
+    <p>
+      Subtotal <%= rands(order.lines_cents) %>
+      <% if order.open? && order.hold_expires_at %>
+        · held until <%= l(order.hold_expires_at, format: :short) %>
+      <% end %>
+      <span
+        data-controller="copy"
+        data-copy-text-value="<%= sell_order_url(order) %>"
+      >
+        ·
+        <button type="button" class="underline underline-offset-4" data-action="copy#copy">Copy link</button>
+        <span data-copy-target="status" role="status"></span>
+      </span>
+    </p>
+  </header>
+
+  <section class="grid gap-3">
+    <ul class="grid gap-2 text-sm">
+      <% order.lines.each do |line| %>
+        <li class="grid gap-1" id="<%= dom_id(line) %>">
+          <span class="flex flex-wrap justify-between gap-2">
+            <span class="<%= 'line-through' if line.cancelled? %>">
+              <%= line.quantity %> × <%= line.description %>
+              <span class="vv-caption"><%= rands(line.unit_price_cents) %> each <%= "· cancelled: #{line.cancel_reason}" if line.cancelled? %></span>
+            </span>
+
+            <span class="font-medium"><%= rands(line.total_cents) unless line.cancelled? %></span>
+          </span>
+
+          <% if changeable && line.active? %>
+            <details>
+              <summary class="vv-caption cursor-pointer underline-offset-4 hover:underline">
+                Cancel line
+              </summary>
+
+              <%= form_with url: sell_order_line_path(order, line), method: :delete, class: "form mt-2 flex flex-wrap items-end gap-2" do |form| %>
+                <div class="grid min-w-0 flex-1 gap-1">
+                  <%= label_tag "cancel_reason_#{line.id}", "Why cancel this line" %>
+                  <%= text_field_tag :reason, nil, id: "cancel_reason_#{line.id}", required: true, maxlength: 200, placeholder: "e.g. buyer pulled out" %>
+                </div>
+
+                <%= form.submit "Cancel line", class: "btn-sm-ghost" %>
+              <% end %>
+            </details>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+
+    <% if changeable && order.active_lines.size > 1 %>
+      <details>
+        <summary class="btn-sm-outline cursor-pointer">Split order</summary>
+
+        <%= form_with url: sell_order_split_path(order), class: "form mt-3 grid gap-3" do |form| %>
+          <fieldset class="grid gap-1">
+            <legend class="text-sm font-medium">Move to a new order</legend>
+
+            <% order.active_lines.each do |line| %>
+              <label class="flex items-center gap-2 text-sm">
+                <%= check_box_tag "line_ids[]", line.id, false, id: "split_#{line.id}" %>
+                <%= line.description %>
+              </label>
+            <% end %>
+          </fieldset>
+
+          <div class="grid gap-1">
+            <%= label_tag "split_reason_#{order.id}", "Why" %>
+            <%= text_field_tag :reason, nil, id: "split_reason_#{order.id}", required: true, maxlength: 200, placeholder: "e.g. shipping these separately" %>
+          </div>
+
+          <div><%= form.submit "Split", class: "btn-sm" %></div>
+        <% end %>
+      </details>
+    <% end %>
+
+    <% if order.open? && order.any_payment? %>
+      <p class="vv-caption">
+        This order has payments, so its lines can't be split or cancelled here.
+        Use refunds and returns on the order instead.
+      </p>
+    <% end %>
+  </section>
+</div>

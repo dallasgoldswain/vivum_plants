@@ -13,7 +13,8 @@ module OrderScoped
       authorize! @order, to: :update?
     end
 
-    def back_to_order(**flash) = redirect_to(sell_order_path(@order), **flash)
+    # Back to the page the member acted from: the order, or Closeout (B26).
+    def back_to_order(**flash) = redirect_back_or_to(sell_order_path(@order), **flash)
 
     # Runs an order action and goes back to the order with its outcome.
     def change_order(notice)

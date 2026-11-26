@@ -8,6 +8,8 @@ class OrderLine < ApplicationRecord
   belongs_to :stock_item
   belongs_to :listing, optional: true
   belongs_to :stock_hold, optional: true
+  belongs_to :sale_lot, optional: true
+  belongs_to :sale_claim, optional: true
   has_many :returns, class_name: "OrderReturn", dependent: :restrict_with_error
 
   enum :state, STATES.index_by(&:itself), validate: true, default: "active"
@@ -25,4 +27,6 @@ class OrderLine < ApplicationRecord
   def returned_quantity = returns.sum(&:quantity)
   def returnable_quantity = active? ? quantity - returned_quantity : 0
   def held? = stock_hold&.current? || false
+  # The won lot or held claim this line came from in Closeout (D219).
+  def sale_source = sale_lot || sale_claim
 end

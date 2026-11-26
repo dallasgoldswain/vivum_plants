@@ -90,7 +90,7 @@ seller.reservations: { domain: seller, state: core, implemented: true, depends_o
 seller.receipts: { domain: seller, state: core, implemented: true, depends_on: [seller.orders], description: "Receipts (RC01)" }
 seller.vat_invoices: { domain: seller, state: core, implemented: true, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
 seller.buyers: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
-seller.closeout: { domain: seller, state: core, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
+seller.closeout: { domain: seller, state: core, implemented: true, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
 seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
 
 # --- Live sales ---

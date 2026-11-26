@@ -117,6 +117,10 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   each winner, bid and backup bidder from your phone in Host View. Wins and claims hold the
   plants until the payment deadline you set. If someone doesn't pay, offer the plant to
   the backup bidder, relist it or return it to stock. Sold-out claims join a waitlist.
+- Close out a live sale in one tap: each buyer's wins and claims go on one order, with
+  nothing typed twice. Link names from the group chat to your buyers, see who still has to
+  pay and which holds end soon, move a missed payment to the backup bidder, and split or
+  trim unpaid orders. Download any view as a spreadsheet.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

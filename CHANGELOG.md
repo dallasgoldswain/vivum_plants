@@ -357,6 +357,21 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   session's group. Results CSV, audit events, buyer merge, data export and deletion
   cover lots and claims. `sales.*` flags marked implemented; help topics
   `sale-sessions` and `quick-claim`.
+- Sale Closeout (B26, SC01, SC02, D219–D228): `orders.sale_session_id`,
+  `order_lines.sale_lot_id` and `sale_claim_id`, and the `live_sale` order source.
+  `SaleSession::Closeout` groups pending won lots and held claims by buyer; Create orders
+  (`/sell/sessions/:id/closeout`) adds them to the buyer's unpaid order for the session or a
+  new reserved one, each line taking over the result's hold (the unique
+  `order_lines.stock_hold_id` stops duplicates). Unlinked aliases wait in Unresolved;
+  `Sell::BuyersController#create` takes `alias_id` to add and link a buyer. Views for
+  awaiting payment, expiring (24 hours), backup offers, ready to pack and completed, with a
+  CSV of each. `SaleLot#transfer_to_backup!` cancels an ordered winner's line and adds the
+  backup's to their session order (D223). `Order#split!` and line cancellations record the
+  previous and new totals; live sale orders with payments refuse both (D224, D225).
+  Cancelling a live sale line returns its lot or claim. A paid result no longer shows as a
+  missed payment. A lot of several plants needs a bid that splits evenly into cents.
+  `OrderScoped` now redirects back to the referring page. `seller.closeout` marked
+  implemented; help topic `closeout`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

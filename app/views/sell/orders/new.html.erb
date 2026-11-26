@@ -32,7 +32,7 @@
 
         <div class="grid gap-2">
           <%= form.label :source, "Where it came from" %>
-          <%= form.select :source, Order::SOURCES.invert, {}, class: "select" %>
+          <%= form.select :source, Order::MANUAL_SOURCES.invert, {}, class: "select" %>
         </div>
 
         <div class="grid gap-2">

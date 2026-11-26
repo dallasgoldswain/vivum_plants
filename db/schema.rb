@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_26_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -227,7 +227,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
     t.index ["library_profile_id"], name: "index_care_schedules_on_library_profile_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
-    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying::text, 'week'::character varying::text, 'month'::character varying::text]))", name: "care_schedules_interval_valid"
+    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
     t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "care_schedules_one_subject"
   end
 
@@ -494,7 +494,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
     t.index ["seller_id", "reference"], name: "index_listings_on_seller_id_and_reference", unique: true
     t.index ["seller_id"], name: "index_listings_on_seller_id"
     t.index ["stock_item_id"], name: "index_listings_on_stock_item_id"
-    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY (ARRAY[('active'::character varying)::text, ('paused'::character varying)::text]))"
+    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY ((ARRAY['active'::character varying, 'paused'::character varying])::text[]))"
     t.check_constraint "listed_quantity IS NULL OR listed_quantity > 0", name: "listings_listed_quantity_positive"
     t.check_constraint "price_cents >= 0", name: "listings_price_not_negative"
   end
@@ -536,7 +536,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
@@ -600,8 +600,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
     t.bigint "stock_hold_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "sale_lot_id"
+    t.bigint "sale_claim_id"
     t.index ["listing_id"], name: "index_order_lines_on_listing_id"
     t.index ["order_id"], name: "index_order_lines_on_order_id"
+    t.index ["sale_claim_id"], name: "index_order_lines_on_sale_claim_id"
+    t.index ["sale_lot_id"], name: "index_order_lines_on_sale_lot_id"
     t.index ["stock_hold_id"], name: "index_order_lines_on_stock_hold_id", unique: true
     t.index ["stock_item_id"], name: "index_order_lines_on_stock_item_id"
     t.check_constraint "quantity > 0", name: "order_lines_quantity_positive"
@@ -669,10 +673,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
     t.bigint "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "sale_session_id"
     t.index ["buyer_id"], name: "index_orders_on_buyer_id"
     t.index ["cancelled_by_id"], name: "index_orders_on_cancelled_by_id"
     t.index ["created_by_id"], name: "index_orders_on_created_by_id"
     t.index ["fulfilled_by_id"], name: "index_orders_on_fulfilled_by_id"
+    t.index ["sale_session_id"], name: "index_orders_on_sale_session_id"
     t.index ["seller_id", "number"], name: "index_orders_on_seller_id_and_number", unique: true
     t.index ["seller_id"], name: "index_orders_on_seller_id"
     t.check_constraint "shipping_cents >= 0 AND discount_cents >= 0", name: "orders_amounts_not_negative"
@@ -1214,6 +1220,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
   add_foreign_key "order_documents", "users", column: "issued_by_id", on_delete: :nullify
   add_foreign_key "order_lines", "listings", on_delete: :nullify
   add_foreign_key "order_lines", "orders", on_delete: :cascade
+  add_foreign_key "order_lines", "sale_claims", on_delete: :nullify
+  add_foreign_key "order_lines", "sale_lots", on_delete: :nullify
   add_foreign_key "order_lines", "stock_holds"
   add_foreign_key "order_lines", "stock_items"
   add_foreign_key "order_payments", "orders"
@@ -1223,6 +1231,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_25_090000) do
   add_foreign_key "order_returns", "stock_locations"
   add_foreign_key "order_returns", "users", column: "member_id", on_delete: :nullify
   add_foreign_key "orders", "buyers"
+  add_foreign_key "orders", "sale_sessions", on_delete: :nullify
   add_foreign_key "orders", "sellers"
   add_foreign_key "orders", "users", column: "cancelled_by_id", on_delete: :nullify
   add_foreign_key "orders", "users", column: "created_by_id", on_delete: :nullify

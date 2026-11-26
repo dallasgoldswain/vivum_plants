@@ -37,7 +37,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B23 | Manual payments, returns and receipts / VAT invoices | PY03 manual, RC01, D08, D189–D198 | B22 | Done |
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
-| B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Discussed |
+| B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Done |
 | B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
 | B29 | Seller business profile and standard branding | BR01 | B02 | Planned |
@@ -1143,7 +1143,7 @@ lot with a backup, claims and the waitlist offer at phone width, and a transfer 
 backup after a missed payment. The `sale-sessions` and `quick-claim` help topics need
 review.
 
-### B26 Sale Closeout — discussed 2026-11-26
+### B26 Sale Closeout — discussed and built 2026-11-26
 
 **Scope**
 - **Closeout page (SC01, D219, D226):** per session, the won lots and held claims grouped
@@ -1172,3 +1172,17 @@ matching names never merge; an ordered line keeps the lot's hold and deadline; m
 missed payment to the backup cancels the winner's line and leaves one active hold for the
 backup; splitting or cancelling an unpaid order records the previous total and reason; a
 paid order can't be split or have lines cancelled; host/packers can't open Closeout.
+
+**Built notes:** Closeout is a page per session (`/sell/sessions/:id/closeout`), linked from
+the session page. Results join the buyer's unpaid order for that session, so a part-paid
+order gets a new order for later results rather than a changed total. A result counts as
+on an order while an active line holds its current hold; the existing unique index on
+`order_lines.stock_hold_id` stops a second line. Lines from a lot or claim can't change
+quantity, and cancelling one returns the lot or claim and its stock. A paid result no
+longer shows "Payment missed", and the payment pins the hold so the expiry job leaves it.
+Because order lines need an exact price each, a lot of several plants now needs a winning
+and backup bid that splits evenly into cents; Host View suggests the nearest amounts. Order
+actions (lines, split) now go back to the page they came from, so Closeout stays in view.
+Tests cover the acceptance cases. A browser check covered linking a name by adding a buyer,
+creating orders, splitting one, the backup offers view, and phone width. The `closeout`
+help topic needs review.

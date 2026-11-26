@@ -14,6 +14,7 @@ class SaleSession < ApplicationRecord
   has_many :lots, -> { order(:number) }, class_name: "SaleLot", dependent: :delete_all, inverse_of: :sale_session
   has_many :claim_items, -> { order(:id) }, class_name: "SaleClaimItem", dependent: :destroy, inverse_of: :sale_session
   has_many :claims, through: :claim_items
+  has_many :orders, dependent: :nullify
 
   enum :status, STATUSES.index_by(&:itself), validate: true, default: "draft"
 
@@ -32,6 +33,11 @@ class SaleSession < ApplicationRecord
     last = seller.sale_sessions.where.not(payment_hours: nil).order(:created_at).last
     seller.sale_sessions.new(payment_hours: last&.payment_hours, backup_hours: last&.backup_hours)
   end
+
+  # Results join the buyer's unpaid order for this session, or a new one (D219, D220).
+  def open_order_for(buyer) = orders.open.where(buyer: buyer, payment_state: "unpaid").order(:id).first
+
+  def closeout = Closeout.new(self)
 
   def timings_set? = payment_hours.present? && backup_hours.present?
   def running? = live? || paused?

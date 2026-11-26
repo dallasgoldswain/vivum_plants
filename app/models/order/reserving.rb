@@ -27,6 +27,7 @@ module Order::Reserving
       line.lock!
       raise Refused, "That line is cancelled." unless line.active?
       next line if line.quantity == quantity.to_i
+      raise Refused, "That line came from #{line.sale_source.closeout_label}; cancel it instead." if line.sale_source
 
       let_go!(line, member) if line.stock_hold&.active?
       line.update!(quantity: quantity.to_i, stock_hold: nil)
@@ -58,10 +59,14 @@ module Order::Reserving
         line.destroy!
       else
         raise Refused, "Give a reason for cancelling the line." if reason.to_s.strip.empty?
+        raise Refused, "#{reference} has payments, so its live sale lines can't be cancelled; record a refund or return instead (D225)." if live_sale? && any_payment?
 
+        before = total_cents
         let_go!(line, member) if line.stock_hold&.active?
         line.update!(state: "cancelled", cancel_reason: reason)
-        Audit.record("order.line_cancelled", actor: member, target: self, details: { line_id: line.id, reason: line.cancel_reason })
+        line.sale_source&.order_line_cancelled!(member)
+        lines.reset
+        Audit.record("order.line_cancelled", actor: member, target: self, details: { line_id: line.id, reason: line.cancel_reason, from_cents: before, to_cents: total_cents })
       end
       line
     end
@@ -102,7 +107,10 @@ module Order::Reserving
       raise Refused, "Refund the payments before cancelling (D197)." if any_payment?
       raise Refused, "Give a reason for cancelling." if reason.to_s.strip.empty?
 
-      lines.active.includes(:stock_hold, :stock_item).each { let_go!(it, member) if it.stock_hold&.active? }
+      lines.active.includes(:stock_hold, :stock_item).each do |line|
+        let_go!(line, member) if line.stock_hold&.active?
+        line.sale_source&.order_line_cancelled!(member)
+      end
       update!(state: "cancelled", cancel_reason: reason, cancelled_at: Time.current, cancelled_by: member)
       Audit.record("order.cancelled", actor: member, target: self, details: { reason: cancel_reason })
       self

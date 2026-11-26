@@ -6,10 +6,12 @@ class Order < ApplicationRecord
   include Order::Reserving
   include Order::Payments
   include Order::Returns
+  include Order::LiveSale
 
   STATES = %w[ draft reserved fulfilled cancelled ].freeze
   OPEN_STATES = %w[ draft reserved ].freeze
-  SOURCES = { "chat" => "Chat", "in_person" => "In person", "request" => "Request", "other" => "Other" }.freeze
+  SOURCES = { "chat" => "Chat", "in_person" => "In person", "request" => "Request", "live_sale" => "Live sale", "other" => "Other" }.freeze
+  MANUAL_SOURCES = SOURCES.except("live_sale").freeze
   DELIVERY_METHODS = { "pickup" => "Pickup", "shipping" => "Shipping" }.freeze
   ADDRESS_FIELDS = %w[ recipient street suburb city province postal_code ].freeze
 
