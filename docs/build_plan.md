@@ -10,7 +10,13 @@ seller domain (Phase 3) before the collector domain (Phase 2), because the pilot
 seller-led. Each feature ships with its flag(s) (§28), help topic
 (HM02), tests and a CHANGELOG entry, and a WHATS_NEW entry if users would notice it.
 
-**Status:** Done · Partial · Next · Planned · Discussing
+**Status:** Done · Partial · Next · Planned · Discussing · After pilot
+
+**Re-scope (2026-11-27, D239–D249):** the pilot is for one- or two-person sellers who sell
+through WhatsApp, so the simplest flow that works wins. Remaining pilot order: B27 To ship
+list → B29 business profile → B30 buyer links → B45 WhatsApp message links → B46
+paste-to-claims → B28 requests and Wanted List → B34 notifications → B35 PWA install → B44
+pilot readiness. Batches marked "After pilot" wait for feedback from real sellers.
 
 ## Phase 1 — Foundation
 
@@ -38,13 +44,15 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
 | B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Done |
-| B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual), D229–D238 | B22 | Discussed |
+| B27 | To ship list, order slips, pickup and manual tracking | PK01, PK02, SH (manual), D240–D244 | B22 | Discussed (re-scoped, D229–D238 superseded) |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
 | B29 | Seller business profile and standard branding | BR01 | B02 | Planned |
-| B30 | Buyer links (order, tracking, receipt) | WB01 | B22, B23 | Planned |
-| B31 | Care sheets, care packs, PDF, QR labels (seller-written templates until the library, B18, exists) | CP01, CP02, QR01 | B22 | Planned |
-| B32 | Copy to collection from a care pack (after the collector domain) | CP03, BY04 | B31, B10 | Planned |
-| B33 | Plant Sitter | PS01, PS02 | B14 | Planned |
+| B30 | Buyer links (order, tracking, receipt, EFT details) | WB01, D247 | B22, B23 | Planned |
+| B31 | Care sheets, care packs, PDF, QR labels (seller-written templates until the library, B18, exists) | CP01, CP02, QR01 | B22 | After pilot (D248) |
+| B32 | Copy to collection from a care pack (after the collector domain) | CP03, BY04 | B31, B10 | After pilot (D248, D249) |
+| B33 | Plant Sitter | PS01, PS02 | B14 | After pilot (D249) |
+| B45 | WhatsApp message links (wa.me, pre-filled) | WA03 (lite), D245 | B30 | Planned |
+| B46 | Paste-to-claims from WhatsApp group comments | LS02, D246 | B25 | Planned |
 
 ## Phase 3 — Collector domain
 
@@ -65,26 +73,26 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
 | B34 | Notifications: in-app, email digest, web push | NT01, NT02, NT04 | B14 | Planned |
-| B35 | PWA install and offline care logging | OF02 | B13 | Planned |
-| B36 | Hotwire Native iOS and Android apps, native push | OF01, D12, D27 | B34 | Planned |
+| B35 | PWA install and offline care logging | OF02, D249 | B13 | Planned (PWA install in pilot; offline care logging after pilot) |
+| B36 | Hotwire Native iOS and Android apps, native push | OF01, D12, D27 | B34 | After pilot (D248) |
 
 ## Phase 5 — Connected flows (each behind a pilot flag)
 
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
-| B37 | AI care suggestions | GU02, GU04, AI01–AI04, D23, D24 | B18, B05 | Planned |
-| B38 | WhatsApp connection and outbound templates | WA01, WA03, WA04, NT03, D22 | B21 | Planned |
-| B39 | WhatsApp DM claims and request capture (AI extraction) | WA02, RQ01, AI02 | B38, B25, B28 | Planned |
-| B40 | Bob Pay checkout | PY01, PY02 | B23, B30 | Planned |
-| B41 | Yoco checkout | PY01, PY02, O6 | B40 | Planned |
-| B42 | Bob Go shipping | SH01, SH02 | B27 | Planned |
-| B43 | Paystack seller subscriptions and paid branding | SB01, SB02, BR02 | B07, B29 | Planned |
+| B37 | AI care suggestions | GU02, GU04, AI01–AI04, D23, D24 | B18, B05 | After pilot (D249) |
+| B38 | WhatsApp connection and outbound templates | WA01, WA03, WA04, NT03, D22 | B21 | After pilot (D245) |
+| B39 | WhatsApp DM claims and request capture (AI extraction) | WA02, RQ01, AI02 | B38, B25, B28 | After pilot (replaced by B46, D246) |
+| B40 | Bob Pay checkout | PY01, PY02 | B23, B30 | After pilot (D247) |
+| B41 | Yoco checkout | PY01, PY02, O6 | B40 | After pilot (D247) |
+| B42 | Bob Go shipping | SH01, SH02 | B27 | After pilot (D248) |
+| B43 | Paystack seller subscriptions and paid branding | SB01, SB02, BR02 | B07, B29 | After pilot (D248) |
 
 ## Phase 6 — Pilot
 
 | ID | Feature | PRD | Depends on | Status |
 |---|---|---|---|---|
-| B44 | Pilot readiness: POPIA review, app store review, production deploy, rollout | §31 step 6, D25–D27 | all pilot features | Planned |
+| B44 | Pilot readiness: POPIA review, production deploy, rollout (app store review moves with B36) | §31 step 6, D25–D27, D248 | all pilot features | Planned |
 
 ---
 
@@ -1187,33 +1195,35 @@ Tests cover the acceptance cases. A browser check covered linking a name by addi
 creating orders, splitting one, the backup offers view, and phone width. The `closeout`
 help topic needs review.
 
-### B27 Packing checklist and parcel slips; pickup and manual tracking — discussed 2026-11-27
+### B27 To ship list, order slips, pickup and manual tracking — discussed 2026-11-27, re-scoped 2026-11-27
+
+The first discussion (D229–D238) planned parcels, per-line packed quantities, short picks and
+a packer view. It was replaced the same day by a simpler scope for one- or two-person
+sellers (D239–D244).
 
 **Scope**
-- **Packing list (PK01, D229):** reserved orders that are paid or overpaid, oldest payment
-  first, under Sell → Packing.
-- **Checklist (D231, D232):** per line the photo, code, kind, quantity, buyer and order;
-  packed quantity with member and time. A short line needs a reason and blocks Packed until
-  an owner or manager changes or cancels it.
-- **Parcels (D230):** shipping orders start with one parcel of every line; add parcels and
-  move lines or part quantities, every unit in exactly one parcel. Pickup has no parcels.
-- **Slips (PK02, D234):** print-ready page per parcel with business name, order, "Parcel n
-  of m", recipient and address or Pickup, items, codes and quantities, no prices; Print all.
-- **Shipping and collection (D235, D236):** one courier and tracking reference per order;
-  shipped or collected fulfils the holds and removes stock, as now. Owners and managers can
-  mark a shipped order delivered.
-- **Undo (D237):** reopen a packed order with a reason before it ships; a line change on a
-  packed order reopens packing.
-- **Roles and records (D233, D238):** host/packers pack, print, ship and collect without
-  prices, totals, payments or contacts. Audited; `seller.packing`, `shipping.pickup` and
-  `shipping.manual` become implemented, with a help topic.
+- **To ship list (PK01, D240):** reserved orders that are paid or overpaid, oldest payment
+  first, under Sell → To ship. Only owners and managers can see it.
+- **Packed (D241):** an optional tick per order with member and time, which can be unticked
+  before shipping. A missing or damaged plant is handled by changing or cancelling the line
+  on the order.
+- **Slips (PK02, D242):** one print-ready slip per order with the business name, order,
+  recipient with address or Pickup, and items with codes and quantities, but no prices.
+  Print all prints every order on the list.
+- **Shipping and collection (D243):** one courier and tracking reference per order. Shipped
+  or Collected fulfils the holds and removes stock, as now.
+- **Records (D244):** audited; `seller.packing`, `shipping.pickup` and `shipping.manual`
+  become implemented, with a help topic.
 
-**Deferred:** care packs on slips (B31); buyer tracking links (B30); Bob Go booking,
-waybills, booked state and per-parcel tracking (B42); delivery confirmation from couriers.
+**Deferred:** parcels and part quantities, the short-pick workflow, host/packer access, the
+delivered state, care packs on slips (B31), buyer tracking links (B30), and Bob Go booking
+and waybills (B42).
 
-**Acceptance:** an unpaid order never appears on the packing list; two plants of the same
-cultivar for different buyers show distinct codes, buyers and orders; a short pick blocks
-Packed; one parcel of three lines prints one slip; a split prints two slips with the right
-items; slips and packing pages show no prices; a host/packer can't open an order page or
-see totals; shipping removes stock once and a repeat does nothing; reopening a packed order
-records the reason.
+**Acceptance:**
+- Unpaid and part-paid orders never appear on To ship.
+- Host/packers can't open To ship or slips.
+- A slip lists every active line with its code and quantity, and shows no prices.
+- Print all prints one slip per listed order.
+- Packed can be unticked before shipping, and each change is audited.
+- Shipping removes stock once, and a repeat does nothing.
+- A pickup order's slip shows "Pickup" instead of an address.

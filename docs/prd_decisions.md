@@ -428,6 +428,8 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 
 ## Round 37 — Packing, parcel slips, pickup and manual tracking (2026-11-27)
 
+Superseded by D240–D244 (Round 38): B27 was re-scoped to a simpler To ship list.
+
 | ID | Question | Decision |
 |----|----------|----------|
 | D229 | Packing list | The packing list shows reserved orders that are paid or overpaid, oldest payment first (PK01). Unpaid and part-paid orders never appear; an owner or manager can still fulfil an unpaid pickup on purpose from the order page, as now (D181). |
@@ -440,3 +442,19 @@ Decisions made while setting up the codebase. They implement the PRD; none chang
 | D236 | Fulfilment steps | Fulfilment shows paid, packed, then shipped or collected, each with member and time (§20 fulfilment states). Stock leaves when the order is shipped or collected, as now (D182). An owner or manager can mark a shipped order delivered by hand; booked comes with Bob Go (B42). |
 | D237 | Undo | Before shipping or collection, a packed order can be reopened with a reason (for example a damaged plant), which clears the packed state. A change to a packed order's lines reopens packing too. After shipping or collection, problems go through returns (B23). |
 | D238 | Gating and records | Gated by `seller.packing`, `shipping.pickup` and `shipping.manual`. Packing, short picks, parcels, reopening, shipping, collection and delivery are audited with the member. Help covers packing, parcels and slips, short picks, and shipping or collection. |
+
+## Round 38 — Re-scope for small sellers: B27 and the pilot roadmap (2026-11-27)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D239 | Who the pilot is for | The pilot targets one- or two-person nurseries and plant sellers who flip imports and sell through WhatsApp. They want a better WhatsApp experience, not warehouse software, so the simplest flow that works wins. B01–B26 stay as built. This revises D01–D03: integrations and AI are no longer all in the launch build (D247, D248). |
+| D240 | To ship list (B27) | Sell → To ship lists reserved orders that are paid or overpaid, oldest payment first. Only owners and managers see it; host/packers get no packing access in the pilot. Supersedes D229 and D233. |
+| D241 | Packing (B27) | An order can be ticked Packed, recorded with member and time, and unticked before it ships. There are no parcels, per-line packed quantities or short-pick workflow. A missing or damaged plant is handled by changing or cancelling the line on the order, as now. Supersedes D230–D232 and D237. |
+| D242 | Slips (B27) | One print-ready slip per order, printed or saved as PDF from the browser. It shows the business name, order number, recipient with address or "Pickup", and items with codes and quantities, with no prices. "Print all" prints a slip for every order on the To ship list. Supersedes D234. |
+| D243 | Shipping and collection (B27) | One courier and tracking reference per order, on the order's existing fields. Shipped or Collected fulfils the holds and removes stock, as now (D182). There is no delivered state in the pilot; tracking reaches the buyer through the buyer link (B30). Supersedes D235 and D236. |
+| D244 | Gating and records (B27) | Gated by `seller.packing`, `shipping.pickup` and `shipping.manual`. Packed, unpacked, shipped and collected are audited with the member. Help covers the To ship list, slips, and shipping or collection. Supersedes D238. |
+| D245 | WhatsApp messages | VIVUM talks to buyers through `wa.me` links first: buttons that open WhatsApp with a pre-filled message to the buyer, such as the order total with payment details and the order link, or the tracking reference. There is no Meta Business API, template approval or per-message fee. This is a new batch, B45, after buyer links (B30). The WhatsApp Cloud API (B38) moves after the pilot. |
+| D246 | Paste-to-claims | A new batch, B46: the seller pastes comments from a WhatsApp group into a live session, and VIVUM matches phone numbers and names to buyers or aliases, and codes or "claim"/"mine" to lots or claim items. The seller confirms each match before it becomes a claim. There is no AI and no WhatsApp API. This replaces DM claims (B39) for the pilot. |
+| D247 | Pilot payments | The pilot is paid by EFT with proof of payment. The buyer link shows the seller's bank details and the order reference, and the seller records the payment (B23). Bob Pay (B40) and Yoco (B41) checkout move after the pilot. |
+| D248 | After the pilot | These batches move after the pilot: B31 care packs and B32 copy to collection, B36 native apps (the pilot uses the web app installed as a PWA), B38 and B39 WhatsApp Cloud API, B40 and B41 checkout, B42 Bob Go, and B43 Paystack subscriptions. The app store part of B44 goes with B36. B28 plant requests and Wanted List stays in the pilot. |
+| D249 | Collector side | The collector domain (B10–B18) stays as built and switched on, but new collector work waits for the pilot: B33 Plant Sitter, offline care logging (B35), B37 AI care suggestions and B32. PWA install stays in the pilot for sellers. |
