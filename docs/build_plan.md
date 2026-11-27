@@ -38,7 +38,7 @@ seller-led. Each feature ships with its flag(s) (§28), help topic
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
 | B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Done |
-| B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual) | B22 | Planned |
+| B27 | Packing checklist and parcel slips; pickup and manual tracking | PK01, PK02, SH (manual), D229–D238 | B22 | Discussed |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
 | B29 | Seller business profile and standard branding | BR01 | B02 | Planned |
 | B30 | Buyer links (order, tracking, receipt) | WB01 | B22, B23 | Planned |
@@ -1186,3 +1186,34 @@ actions (lines, split) now go back to the page they came from, so Closeout stays
 Tests cover the acceptance cases. A browser check covered linking a name by adding a buyer,
 creating orders, splitting one, the backup offers view, and phone width. The `closeout`
 help topic needs review.
+
+### B27 Packing checklist and parcel slips; pickup and manual tracking — discussed 2026-11-27
+
+**Scope**
+- **Packing list (PK01, D229):** reserved orders that are paid or overpaid, oldest payment
+  first, under Sell → Packing.
+- **Checklist (D231, D232):** per line the photo, code, kind, quantity, buyer and order;
+  packed quantity with member and time. A short line needs a reason and blocks Packed until
+  an owner or manager changes or cancels it.
+- **Parcels (D230):** shipping orders start with one parcel of every line; add parcels and
+  move lines or part quantities, every unit in exactly one parcel. Pickup has no parcels.
+- **Slips (PK02, D234):** print-ready page per parcel with business name, order, "Parcel n
+  of m", recipient and address or Pickup, items, codes and quantities, no prices; Print all.
+- **Shipping and collection (D235, D236):** one courier and tracking reference per order;
+  shipped or collected fulfils the holds and removes stock, as now. Owners and managers can
+  mark a shipped order delivered.
+- **Undo (D237):** reopen a packed order with a reason before it ships; a line change on a
+  packed order reopens packing.
+- **Roles and records (D233, D238):** host/packers pack, print, ship and collect without
+  prices, totals, payments or contacts. Audited; `seller.packing`, `shipping.pickup` and
+  `shipping.manual` become implemented, with a help topic.
+
+**Deferred:** care packs on slips (B31); buyer tracking links (B30); Bob Go booking,
+waybills, booked state and per-parcel tracking (B42); delivery confirmation from couriers.
+
+**Acceptance:** an unpaid order never appears on the packing list; two plants of the same
+cultivar for different buyers show distinct codes, buyers and orders; a short pick blocks
+Packed; one parcel of three lines prints one slip; a split prints two slips with the right
+items; slips and packing pages show no prices; a host/packer can't open an order page or
+see totals; shipping removes stock once and a repeat does nothing; reopening a packed order
+records the reason.
