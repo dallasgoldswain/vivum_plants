@@ -170,12 +170,18 @@ Rails.application.routes.draw do
         resource :cancellation, only: :create
         resource :split, only: :create
         resource :fulfilment, only: :create
+        resource :packing, only: %i[ create destroy ]
+        resource :slip, only: :show
         resources :payments, only: :create do
           post :void, on: :member
         end
         resources :returns, only: :create
         resources :documents, only: :show
       end
+    end
+    # To ship and slips (PK01, PK02, D240–D243).
+    resource :to_ship, only: :show, path: "to-ship", controller: "to_ship" do
+      get :slips
     end
     # Live sales (LS01–LS04, D209–D218).
     resources :sale_sessions, path: "sessions", except: :destroy do

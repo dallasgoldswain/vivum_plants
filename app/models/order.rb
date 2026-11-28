@@ -7,6 +7,7 @@ class Order < ApplicationRecord
   include Order::Payments
   include Order::Returns
   include Order::LiveSale
+  include Order::Packing
 
   STATES = %w[ draft reserved fulfilled cancelled ].freeze
   OPEN_STATES = %w[ draft reserved ].freeze
@@ -70,6 +71,8 @@ class Order < ApplicationRecord
   def total_cents = [ lines_cents + shipping_cents - discount_cents, 0 ].max
 
   def shipping_lines = ADDRESS_FIELDS.map { shipping_address&.dig(it) }.compact_blank
+  def recipient_name = shipping_address&.dig("recipient").presence || buyer_name
+  def address_lines = ADDRESS_FIELDS.drop(1).map { shipping_address&.dig(it) }.compact_blank
 
   # Copies one of the buyer's addresses (D182): later edits to the buyer never change it.
   def ship_to!(address)

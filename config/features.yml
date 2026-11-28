@@ -91,7 +91,7 @@ seller.receipts: { domain: seller, state: core, implemented: true, depends_on: [
 seller.vat_invoices: { domain: seller, state: core, implemented: true, depends_on: [seller.receipts], description: "Tax invoices and credit notes for VAT sellers (RC01)" }
 seller.buyers: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Seller-scoped buyers and aliases (BY01, BY02)" }
 seller.closeout: { domain: seller, state: core, implemented: true, depends_on: [sales.sessions, seller.orders], description: "Sale Closeout (SC01, SC02)" }
-seller.packing: { domain: seller, state: core, depends_on: [seller.orders], description: "Packing checklist and parcel slips (PK01, PK02)" }
+seller.packing: { domain: seller, state: core, implemented: true, depends_on: [seller.orders], description: "To ship list and order slips (PK01, PK02)" }
 
 # --- Live sales ---
 sales.sessions: { domain: sales, state: core, implemented: true, depends_on: [seller.reservations], description: "Sale sessions and Host View (LS01)" }
@@ -119,8 +119,8 @@ requests.wanted_list: { domain: requests, state: core, depends_on: [requests.man
 payments.manual: { domain: payments, state: core, implemented: true, depends_on: [seller.orders], description: "Manual payment records" }
 payments.bob_pay: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Bob Pay hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
 payments.yoco: { domain: payments, state: pilot, depends_on: [seller.orders, buyer.order_link], description: "Yoco hosted checkout (PY01, PY02)", off: "No new checkouts; existing payments still reconcile" }
-shipping.pickup: { domain: shipping, state: core, depends_on: [seller.orders], description: "Pickup fulfilment" }
-shipping.manual: { domain: shipping, state: core, depends_on: [seller.orders], description: "Manual tracking references" }
+shipping.pickup: { domain: shipping, state: core, implemented: true, depends_on: [seller.orders], description: "Pickup fulfilment" }
+shipping.manual: { domain: shipping, state: core, implemented: true, depends_on: [seller.orders], description: "Manual tracking references" }
 shipping.bob_go: { domain: shipping, state: pilot, depends_on: [seller.packing], description: "Bob Go quotes, bookings and tracking (SH01)", off: "No new bookings; tracking for existing parcels stays available" }
 shipping.tracking: { domain: shipping, state: core, depends_on: [seller.orders], description: "Shipment status tracking" }
 

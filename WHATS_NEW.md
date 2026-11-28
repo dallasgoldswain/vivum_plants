@@ -121,6 +121,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
   nothing typed twice. Link names from the group chat to your buyers, see who still has to
   pay and which holds end soon, move a missed payment to the backup bidder, and split or
   trim unpaid orders. Download any view as a spreadsheet.
+- See what's left to send under To ship: every paid order, oldest payment first. Tick
+  orders packed as you go, print a slip for the box (no prices), add the courier and
+  tracking number, and mark it shipped or collected.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

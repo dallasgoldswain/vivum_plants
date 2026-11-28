@@ -1,0 +1,69 @@
+<% content_for :title, "Slips · #{Current.seller.name} · VIVUM Plants" %>
+
+<div
+  class="flex flex-wrap items-center justify-between gap-2 print:hidden"
+  data-controller="print"
+>
+  <%= link_to "← To ship", sell_to_ship_path, class: "vv-kicker underline-offset-4 hover:underline" %>
+
+  <% if @orders.any? %>
+    <button type="button" class="btn" data-action="print#print">
+      Print <%= @orders.one? ? "slip" : "#{@orders.size} slips" %>
+    </button>
+  <% end %>
+</div>
+
+<% if @orders.empty? %>
+  <p class="print:hidden">Nothing to ship right now.</p>
+<% end %>
+
+<% @orders.each do |order| %>
+  <article
+    class="
+      grid gap-4 rounded-md border border-black/20 p-6 break-after-page
+      print:rounded-none print:border-0
+    "
+    id="<%= dom_id(order, :slip) %>"
+  >
+    <header class="flex flex-wrap items-start justify-between gap-2">
+      <div>
+        <p class="text-sm"><%= Current.seller.name %></p>
+        <h1 class="text-2xl font-semibold">Order <%= order.reference %></h1>
+      </div>
+
+      <p class="text-sm"><%= l(Date.current, format: :long) %></p>
+    </header>
+
+    <section>
+      <p class="text-xs uppercase tracking-wide">
+        <%= order.pickup? ? "Pickup" : "Ship to" %>
+      </p>
+
+      <p class="text-lg font-medium"><%= order.recipient_name %></p>
+
+      <% if order.shipping? %>
+        <p class="whitespace-pre-line"><%= order.address_lines.join("\n") %></p>
+      <% end %>
+    </section>
+
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-black/30 text-left">
+          <th class="py-2">Code</th>
+          <th class="py-2">Item</th>
+          <th class="py-2 text-right">Qty</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% order.lines.select(&:active?).each do |line| %>
+          <tr class="border-b border-black/10">
+            <td class="py-2 font-mono"><%= line.stock_item.code %></td>
+            <td class="py-2"><%= line.description %></td>
+            <td class="py-2 text-right"><%= line.quantity %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </article>
+<% end %>

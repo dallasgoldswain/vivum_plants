@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_26_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -674,10 +674,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_26_090000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "sale_session_id"
+    t.datetime "packed_at"
+    t.bigint "packed_by_id"
     t.index ["buyer_id"], name: "index_orders_on_buyer_id"
     t.index ["cancelled_by_id"], name: "index_orders_on_cancelled_by_id"
     t.index ["created_by_id"], name: "index_orders_on_created_by_id"
     t.index ["fulfilled_by_id"], name: "index_orders_on_fulfilled_by_id"
+    t.index ["packed_by_id"], name: "index_orders_on_packed_by_id"
     t.index ["sale_session_id"], name: "index_orders_on_sale_session_id"
     t.index ["seller_id", "number"], name: "index_orders_on_seller_id_and_number", unique: true
     t.index ["seller_id"], name: "index_orders_on_seller_id"
@@ -1236,6 +1239,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_26_090000) do
   add_foreign_key "orders", "users", column: "cancelled_by_id", on_delete: :nullify
   add_foreign_key "orders", "users", column: "created_by_id", on_delete: :nullify
   add_foreign_key "orders", "users", column: "fulfilled_by_id", on_delete: :nullify
+  add_foreign_key "orders", "users", column: "packed_by_id", on_delete: :nullify
   add_foreign_key "otp_backup_codes", "users", on_delete: :cascade
   add_foreign_key "photos", "acquisitions", on_delete: :cascade
   add_foreign_key "photos", "care_events", on_delete: :cascade

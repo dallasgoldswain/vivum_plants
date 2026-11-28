@@ -44,7 +44,7 @@ pilot readiness. Batches marked "After pilot" wait for feedback from real seller
 | B24 | CSV stock import with preview | IM01, IM02, D199–D208 | B19 | Done |
 | B25 | Live sale sessions, auctions, Quick Claim, backup bidder | LS01–LS04, D14, D209–D218 | B22 | Done |
 | B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Done |
-| B27 | To ship list, order slips, pickup and manual tracking | PK01, PK02, SH (manual), D240–D244 | B22 | Discussed (re-scoped, D229–D238 superseded) |
+| B27 | To ship list, order slips, pickup and manual tracking | PK01, PK02, SH (manual), D240–D244 | B22 | Done (re-scoped, D229–D238 superseded) |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
 | B29 | Seller business profile and standard branding | BR01 | B02 | Planned |
 | B30 | Buyer links (order, tracking, receipt, EFT details) | WB01, D247 | B22, B23 | Planned |
@@ -1195,7 +1195,7 @@ Tests cover the acceptance cases. A browser check covered linking a name by addi
 creating orders, splitting one, the backup offers view, and phone width. The `closeout`
 help topic needs review.
 
-### B27 To ship list, order slips, pickup and manual tracking — discussed 2026-11-27, re-scoped 2026-11-27
+### B27 To ship list, order slips, pickup and manual tracking — discussed 2026-11-27, re-scoped 2026-11-27, built 2026-11-28
 
 The first discussion (D229–D238) planned parcels, per-line packed quantities, short picks and
 a packer view. It was replaced the same day by a simpler scope for one- or two-person
@@ -1227,3 +1227,12 @@ and waybills (B42).
 - Packed can be unticked before shipping, and each change is audited.
 - Shipping removes stock once, and a repeat does nothing.
 - A pickup order's slip shows "Pickup" instead of an address.
+
+**Built notes:** `Order::Packing` adds the `to_ship` scope and audited `pack!`/`unpack!` on
+`orders.packed_at` and `packed_by_id`. A fully paid order already has a receipt, which
+fixes its lines, so a packed order's contents can't change and Unpack is the only undo.
+Sell → To ship (`Sell::ToShipController`) has the per-order slip and Print all, both on a
+bare `print` layout with a Print button, and the existing fulfilment action for shipped or
+collected. The order page shows Mark packed and Slip for to-ship orders. Pickup orders
+are listed only with `shipping.pickup`, and courier and tracking fields need
+`shipping.manual`. The help topic `to-ship` needs review.

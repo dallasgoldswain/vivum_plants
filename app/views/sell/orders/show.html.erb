@@ -378,9 +378,22 @@
           <p>The plants leave your stock.</p>
         </header>
 
-        <section>
+        <section class="grid gap-3">
+          <% if @order.to_ship? && capability?("seller.packing") %>
+            <div class="flex flex-wrap items-center gap-2">
+              <% if @order.packed? %>
+                <span class="badge-secondary">Packed <%= l(@order.packed_at, format: :short) %></span>
+                <%= button_to "Unpack", sell_order_packing_path(@order), method: :delete, class: "btn-sm-ghost" %>
+              <% else %>
+                <%= button_to "Mark packed", sell_order_packing_path(@order), class: "btn-sm-outline" %>
+              <% end %>
+
+              <%= link_to "Slip", sell_order_slip_path(@order), class: "btn-sm-ghost", data: { turbo: false } %>
+            </div>
+          <% end %>
+
           <%= form_with url: sell_order_fulfilment_path(@order), class: "form grid gap-3" do |form| %>
-            <% if @order.shipping? %>
+            <% if @order.shipping? && capability?("shipping.manual") %>
               <div class="grid gap-3 sm:grid-cols-2">
                 <div class="grid gap-2">
                   <%= label_tag :fulfil_courier, "Courier (optional)" %><%= text_field_tag :courier, nil, id: "fulfil_courier", maxlength: 200 %>

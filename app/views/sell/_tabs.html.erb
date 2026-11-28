@@ -28,6 +28,10 @@
     <%= nav_link_to "Orders", sell_orders_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>
 
+  <% if capability?("seller.orders") && capability?("seller.packing") && Current.membership.manager_or_owner? %>
+    <%= nav_link_to "To ship", sell_to_ship_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
+  <% end %>
+
   <% if capability?("seller.buyers") %>
     <%= nav_link_to "Buyers", sell_buyers_path, class: "btn-sm-ghost aria-[current=page]:bg-surface" %>
   <% end %>

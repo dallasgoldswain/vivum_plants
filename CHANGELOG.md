@@ -372,6 +372,14 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   missed payment. A lot of several plants needs a bid that splits evenly into cents.
   `OrderScoped` now redirects back to the referring page. `seller.closeout` marked
   implemented; help topic `closeout`.
+- To ship and order slips (B27, PK01, PK02, D239–D244): `orders.packed_at` and
+  `packed_by_id`; `Order::Packing` with the `to_ship` scope (reserved, paid or overpaid,
+  oldest first payment first) and audited `pack!`/`unpack!`. Sell → To ship
+  (`/sell/to-ship`) for owners and managers, with packed, slip and shipped/collected
+  actions; slips at `/sell/orders/:id/slip` and Print all at `/sell/to-ship/slips` use a
+  bare `print` layout and show no prices. Pickup orders are listed with `shipping.pickup`,
+  and courier and tracking fields need `shipping.manual`. `seller.packing`,
+  `shipping.pickup` and `shipping.manual` marked implemented; help topic `to-ship`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).

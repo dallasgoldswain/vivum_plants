@@ -1,0 +1,89 @@
+<% content_for :title, "To ship · #{Current.seller.name} · VIVUM Plants" %>
+
+<%= render "sell/stock_items/header", help: "to-ship" %>
+
+<div class="flex flex-wrap items-center justify-between gap-2">
+  <div>
+    <h2 class="vv-h3">To ship</h2>
+    <p class="vv-caption">Paid orders waiting to go, oldest payment first.</p>
+  </div>
+
+  <% if @orders.any? %>
+    <%= link_to "Print all slips", slips_sell_to_ship_path, class: "btn-outline", data: { turbo: false } %>
+  <% end %>
+</div>
+
+<% if @orders.empty? %>
+  <div class="card">
+    <header>
+      <h2>Nothing to ship</h2>
+      <p>Orders appear here once they're reserved and paid in full.</p>
+    </header>
+  </div>
+<% end %>
+
+<% @orders.each do |order| %>
+  <div class="card" id="<%= dom_id(order) %>">
+    <header>
+      <h2 class="flex flex-wrap items-center gap-2">
+        <%= link_to order.reference, sell_order_path(order), class: "underline-offset-4 hover:underline" %>
+        · <%= order.buyer_name %>
+        <span class="badge-outline"><%= order.pickup? ? "Pickup" : "Shipping" %></span>
+
+        <% if order.packed? %>
+          <span class="badge-secondary">Packed</span>
+        <% end %>
+      </h2>
+
+      <p>
+        <% if order.shipping? %>
+          <%= order.shipping_lines.join(", ") %>
+        <% else %>
+          Collecting
+        <% end %>
+
+        <% if order.packed? %>
+          · packed <%= l(order.packed_at, format: :short) %>
+        <% end %>
+      </p>
+    </header>
+
+    <section class="grid gap-3">
+      <ul class="grid gap-1 text-sm">
+        <% order.lines.select(&:active?).each do |line| %>
+          <li>
+            <%= line.quantity %> ×
+            <span class="font-mono"><%= line.stock_item.code %></span>
+            <%= line.description %>
+          </li>
+        <% end %>
+      </ul>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <% if order.packed? %>
+          <%= button_to "Unpack", sell_order_packing_path(order), method: :delete, class: "btn-sm-ghost" %>
+        <% else %>
+          <%= button_to "Mark packed", sell_order_packing_path(order), class: "btn-sm-outline" %>
+        <% end %>
+
+        <%= link_to "Slip", sell_order_slip_path(order), class: "btn-sm-ghost", data: { turbo: false } %>
+      </div>
+
+      <%= form_with url: sell_order_fulfilment_path(order), class: "form flex flex-wrap items-end gap-2" do |form| %>
+        <% if order.shipping? && capability?("shipping.manual") %>
+          <div class="grid min-w-0 flex-1 gap-1">
+            <%= label_tag "courier_#{order.id}", "Courier (optional)" %>
+            <%= text_field_tag :courier, nil, id: "courier_#{order.id}", maxlength: 200, placeholder: "e.g. PUDO" %>
+          </div>
+
+          <div class="grid min-w-0 flex-1 gap-1">
+            <%= label_tag "tracking_#{order.id}", "Tracking (optional)" %>
+            <%= text_field_tag :tracking_reference, nil, id: "tracking_#{order.id}", maxlength: 200 %>
+          </div>
+        <% end %>
+
+        <%= form.submit order.pickup? ? "Mark collected" : "Mark shipped", class: "btn-sm" %>
+      <% end %>
+    </section>
+  </div>
+<% end %>
