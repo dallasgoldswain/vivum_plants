@@ -1,3 +1,5 @@
+require "vips"
+
 # A dated photo of a plant (on its own or with a timeline event) or of an environment
 # (PL04, OF03, D83, D94).
 # Uploads are processed before storage: rotated upright, resized to 2560 px on the long edge
