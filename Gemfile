@@ -63,7 +63,7 @@ gem "flipper-active_record"
 gem "flipper-ui"
 
 # Database functions and triggers kept in schema.rb (audit log protection)
-gem "fx", "~> 0.11.0"
+gem "fx", "~> 0.13.0"
 
 # Referral codes and links [https://github.com/excid3/refer]
 gem "refer"

@@ -164,9 +164,9 @@ GEM
     fugit (1.14.0)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
-    fx (0.11.0)
-      activerecord (>= 7.2)
-      railties (>= 7.2)
+    fx (0.13.0)
+      activerecord (>= 8.1)
+      railties (>= 8.1)
     globalid (1.4.0)
       activesupport (>= 6.1)
     hashery (2.2.2)
@@ -553,7 +553,7 @@ DEPENDENCIES
   flipper
   flipper-active_record
   flipper-ui
-  fx (~> 0.11.0)
+  fx (~> 0.13.0)
   herb
   image_processing (~> 2.2)
   importmap-rails
@@ -643,7 +643,7 @@ CHECKSUMS
   flipper-active_record (1.5.0) sha256=54d5b23003478adb12edfc88bd20a67b98da970afa788e59e88e5c8b403063ce
   flipper-ui (1.5.0) sha256=98e7cc03a048e81ed36f6b7d8188ef1a95442358d405909092efcda9fa67e2c0
   fugit (1.14.0) sha256=e311a9cc85a54bb67649df45060e721282a1e2c8ebad40e41874a3a7d576f37e
-  fx (0.11.0) sha256=537f2c0359b54da8b17574acaedcaecea806ead14dcd9239a16f70ee66c70f7d
+  fx (0.13.0) sha256=c3cb44e7e8bd6e6c8d616b4fe6c646287a6a0463b9e5335d31839d1a6953a220
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   hashery (2.2.2) sha256=786b64d98ecb889caa854c7dc916ee016a87c817a7af0dd8d0df66bb585f19e5
   herb (0.11.2) sha256=926f16b6c552a077755f686d30f795db049a5596814a0dfd8133cbe36be787ba
