@@ -227,7 +227,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
     t.index ["library_profile_id"], name: "index_care_schedules_on_library_profile_id"
     t.index ["plant_id"], name: "index_care_schedules_on_plant_id"
     t.index ["user_id"], name: "index_care_schedules_on_user_id"
-    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying, 'week'::character varying, 'month'::character varying]::text[]))", name: "care_schedules_interval_valid"
+    t.check_constraint "\"interval\" IS NULL OR \"interval\" > 0 AND (interval_unit::text = ANY (ARRAY['day'::character varying::text, 'week'::character varying::text, 'month'::character varying::text]))", name: "care_schedules_interval_valid"
     t.check_constraint "num_nonnulls(plant_id, environment_id) = 1", name: "care_schedules_one_subject"
   end
 
@@ -494,7 +494,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
     t.index ["seller_id", "reference"], name: "index_listings_on_seller_id_and_reference", unique: true
     t.index ["seller_id"], name: "index_listings_on_seller_id"
     t.index ["stock_item_id"], name: "index_listings_on_stock_item_id"
-    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY ((ARRAY['active'::character varying, 'paused'::character varying])::text[]))"
+    t.index ["stock_item_id"], name: "index_listings_one_live_per_item", unique: true, where: "((state)::text = ANY (ARRAY[('active'::character varying)::text, ('paused'::character varying)::text]))"
     t.check_constraint "listed_quantity IS NULL OR listed_quantity > 0", name: "listings_listed_quantity_positive"
     t.check_constraint "price_cents >= 0", name: "listings_price_not_negative"
   end
@@ -536,7 +536,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
     t.index ["seller_id", "user_id"], name: "index_memberships_on_seller_id_and_user_id", unique: true
     t.index ["seller_id"], name: "index_memberships_on_seller_id"
     t.index ["user_id"], name: "index_memberships_on_user_id"
-    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying, 'manager'::character varying, 'host_packer'::character varying]::text[])", name: "memberships_role_check"
+    t.check_constraint "role::text = ANY (ARRAY['owner'::character varying::text, 'manager'::character varying::text, 'host_packer'::character varying::text])", name: "memberships_role_check"
   end
 
   create_table "noticed_events", force: :cascade do |t|
