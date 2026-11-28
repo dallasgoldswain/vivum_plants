@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.packing, shipping.pickup, shipping.manual, seller.orders]
 prerequisites: [orders, order-payments]
 keywords: [to ship, packing, packed, pack, slip, packing slip, print, label, courier, tracking, ship, shipped, pickup, collect, collected, dispatch]
+reviewed: 2026-11-28
+reviewed_digest: 16248a47b3e462dcc02e5e71e51ef38882689817206ce5b9c1cf0fbadfec526a
 ---
 
 **To ship** lists every order that's reserved and paid in full, with the oldest payment
