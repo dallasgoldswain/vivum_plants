@@ -11,7 +11,7 @@ reviewed_digest: 4ec12f40c530661dc6f005dcdb49e58b28f2d38c270486a365a3ba6a944b17f
 ---
 
 Receipts and tax invoices show your business details. Owners set them in
-**Sell → Orders → Business details**.
+**Sell → Orders → Business profile**.
 
 - **Registered name** if it's different from your trading name.
 - **VAT number** if you're VAT-registered: 10 digits starting with 4. With a VAT

@@ -380,12 +380,25 @@ Unreleased. Reference PRD requirement or decision IDs (e.g. SO02, D35) where the
   bare `print` layout and show no prices. Pickup orders are listed with `shipping.pickup`,
   and courier and tracking fields need `shipping.manual`. `seller.packing`,
   `shipping.pickup` and `shipping.manual` marked implemented; help topic `to-ship`.
+- Business profile, logo and links (B29, BR01, D250–D258): `Seller::Identity` with a
+  logo (`has_one_attached :logo, dependent: false`, fitted into 800 px and stored as PNG)
+  and Instagram, Facebook, YouTube and WhatsApp links, each with a show toggle and stored
+  as a clean URL or +27 number; `sellers.card_link` picks the one link on sale cards.
+  Business details is now Business profile (owners only, audited). Sale cards draw the logo
+  beside the name and card link and store `business_label` and `logo_blob_id`, so a change
+  flags them stale. Receipt snapshots keep the logo blob and shown links; the PDF draws
+  them. Slips show the logo. `seller.profile`, `seller.logo` and `seller.social_links`
+  marked implemented; help topic `logo-and-links`.
 - Git `pre-push` hook (`.githooks/pre-push`, installed by `bin/setup`) running Brakeman,
   bundler-audit with `--update`, and importmap audit before each push.
 - Docs: PRD v1.3 and the decision log (D01–D44).
 
 ### Fixed
 
+- Photos, sale cards and logos failed with `uninitialized constant Vips`: image_processing
+  2.x no longer depends on ruby-vips, so `ruby-vips` is now in the Gemfile.
+- System tests failed in teardown on Chrome 158 (`* is not a valid URL`): Capybara 3.40's
+  reset now clears the app server's origin instead of `*`.
 - Editing a plant or an environment was refused ("You don't have access to that"): Action
   Policy has no default `edit?` rule. `PlantPolicy` (and so `EnvironmentPolicy` and
   `RecipePolicy`) now aliases `edit?` to `update?`, with tests for both edit pages.

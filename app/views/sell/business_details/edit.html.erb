@@ -1,19 +1,19 @@
-<% content_for :title, "Business details · VIVUM Plants" %>
+<% content_for :title, "Business profile · VIVUM Plants" %>
 
 <%= render "sell/stock_items/header", help: "business-details" %>
 
 <div class="card max-w-2xl">
   <header>
-    <h2>Business details</h2>
+    <h2>Business profile</h2>
 
     <p>
-      Receipts and tax invoices show these. Changing them later never changes a
-      receipt you've already issued.
+      Receipts, tax invoices, sale cards and slips show these. Changing them
+      later never changes a receipt you've already issued.
     </p>
   </header>
 
   <section>
-    <%= form_with model: Current.seller, scope: :seller, url: sell_business_details_path, method: :patch, class: "form grid gap-3" do |form| %>
+    <%= form_with model: Current.seller, scope: :seller, url: sell_business_details_path, method: :patch, multipart: true, class: "form grid gap-3" do |form| %>
       <% if Current.seller.errors.any? %>
         <div class="alert-destructive" role="alert">
           <h3>Couldn't save</h3>
@@ -53,6 +53,62 @@
           <%= form.label :contact_email, "Email" %><%= form.email_field :contact_email, maxlength: 254 %>
         </div>
       </div>
+
+      <% if capability?("seller.logo") %>
+        <fieldset class="grid gap-2" id="logo">
+          <legend class="text-sm font-medium">Logo</legend>
+
+          <% if Current.seller.logo.attached? %>
+            <%= image_tag Current.seller.logo, alt: "#{Current.seller.name} logo", class: "max-h-20 max-w-56 object-contain" %>
+
+            <label class="flex items-center gap-2 text-sm">
+              <%= form.check_box :remove_logo, {}, "1", nil %> Remove the logo
+            </label>
+          <% end %>
+
+          <%= form.label :logo, Current.seller.logo.attached? ? "Replace the logo" : "Upload a logo", class: "sr-only" %>
+          <%= form.file_field :logo, accept: Seller::Identity::LOGO_TYPES.join(",") %>
+
+          <p class="vv-caption">
+            PNG, JPEG or WebP up to 5 MB. It keeps its shape and is never
+            cropped.
+          </p>
+        </fieldset>
+      <% end %>
+
+      <% if capability?("seller.social_links") %>
+        <fieldset class="grid gap-3" id="links">
+          <legend class="text-sm font-medium">Links</legend>
+
+          <p class="vv-caption">
+            Type an @handle or paste the link. Only links you show appear on
+            cards, receipts and slips.
+          </p>
+
+          <% [ [ "instagram", :instagram_url, "@yourshop" ], [ "facebook", :facebook_url, "facebook.com/yourshop" ], [ "youtube", :youtube_url, "@yourchannel" ], [ "whatsapp", :whatsapp_number, "082 123 4567" ] ].each do |key, field, placeholder| %>
+            <div class="grid gap-1">
+              <%= form.label field, Seller::Identity::LINK_NAMES[key] %>
+
+              <div class="flex flex-wrap items-center gap-3">
+                <% if key == "whatsapp" %>
+                  <%= form.telephone_field field, maxlength: 20, placeholder: placeholder, class: "min-w-0 flex-1" %>
+                <% else %>
+                  <%= form.text_field field, maxlength: 200, placeholder: placeholder, class: "min-w-0 flex-1" %>
+                <% end %>
+
+                <label class="flex items-center gap-2 text-sm">
+                  <%= form.check_box :"show_#{key}" %> Show
+                </label>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="grid gap-1">
+            <%= form.label :card_link, "Link on sale cards" %>
+            <%= form.select :card_link, Seller::Identity::LINKS.map { [ Seller::Identity::LINK_NAMES[it], it ] }, { include_blank: "None, just the name" } %>
+          </div>
+        </fieldset>
+      <% end %>
 
       <div><%= form.submit "Save", class: "btn" %></div>
     <% end %>

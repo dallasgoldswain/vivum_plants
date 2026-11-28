@@ -29,6 +29,7 @@ module OrderDocument::Snapshot
   end
 
   def seller(seller)
-    { "name" => seller.name, "legal_name" => seller.legal_name, "vat_number" => seller.vat_number, "address" => seller.address, "phone" => seller.phone, "email" => seller.contact_email }
+    { "name" => seller.name, "legal_name" => seller.legal_name, "vat_number" => seller.vat_number, "address" => seller.address, "phone" => seller.phone, "email" => seller.contact_email,
+      "logo_blob_id" => seller.shown_logo_blob&.id, "links" => seller.shown_links.map { { "name" => it.name, "text" => it.text } } }
   end
 end

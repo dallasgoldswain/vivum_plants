@@ -24,7 +24,7 @@
     </details>
 
     <% if allowed_to?(:update?, Current.seller) %>
-      <%= link_to "Business details", edit_sell_business_details_path, class: "btn-ghost" %>
+      <%= link_to "Business profile", edit_sell_business_details_path, class: "btn-ghost" %>
     <% end %>
 
     <%= link_to "New order", new_sell_order_path, class: "btn" %>

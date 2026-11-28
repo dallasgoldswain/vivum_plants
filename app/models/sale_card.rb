@@ -1,5 +1,6 @@
 # A rendered sale card image (SE07, D166, D167), stored with the title, price and photo it
-# shows so a later change can flag it as stale. Kept for 90 days.
+# shows, and the business name, card link and logo (D255), so a later change can flag it
+# as stale. Kept for 90 days.
 class SaleCard < ApplicationRecord
   FORMATS = { "square" => [ 1080, 1080 ], "status" => [ 1080, 1920 ] }.freeze
   FILE_TYPES = %w[ jpeg png ].freeze
@@ -17,10 +18,12 @@ class SaleCard < ApplicationRecord
   # Renders and stores a card for the listing as it is now.
   def self.render!(listing, format:, file_type:, created_by:)
     photo = listing.card_photo
-    card = listing.sale_cards.new(format: format, file_type: file_type, price_cents: listing.price_cents, title: listing.title, photo_id: photo&.id, created_by: created_by)
+    logo = listing.seller.shown_logo_blob
+    card = listing.sale_cards.new(format: format, file_type: file_type, price_cents: listing.price_cents, title: listing.title, photo_id: photo&.id,
+                                  business_label: listing.seller.card_label, logo_blob_id: logo&.id, created_by: created_by)
     raise ActiveRecord::RecordInvalid, card unless card.valid?
 
-    data = SaleCard::Renderer.new(listing, photo: photo, size: FORMATS.fetch(format), file_type: file_type).call
+    data = SaleCard::Renderer.new(listing, photo: photo, logo: logo, size: FORMATS.fetch(format), file_type: file_type).call
     card.image.attach(io: StringIO.new(data), filename: "#{listing.reference}-#{format}.#{file_type == 'png' ? 'png' : 'jpg'}", content_type: "image/#{file_type}")
     card.save!
     card
@@ -36,6 +39,7 @@ class SaleCard < ApplicationRecord
     elsif listing.price_cents != price_cents then "Shows #{rands(price_cents)}; the price is now #{rands(listing.price_cents)}."
     elsif listing.title != title then "Shows an older name."
     elsif listing.card_photo&.id != photo_id then "Shows a different photo."
+    elsif listing.seller.card_label != business_label || listing.seller.shown_logo_blob&.id != logo_blob_id then "Shows older business details."
     end
   end
 

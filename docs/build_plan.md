@@ -46,7 +46,7 @@ pilot readiness. Batches marked "After pilot" wait for feedback from real seller
 | B26 | Sale Closeout | SC01, SC02, D219–D228 | B25 | Done |
 | B27 | To ship list, order slips, pickup and manual tracking | PK01, PK02, SH (manual), D240–D244 | B22 | Done (re-scoped, D229–D238 superseded) |
 | B28 | Plant requests, offers and Wanted List | RQ01, RQ02, WL01 | B19, B21 | Planned |
-| B29 | Seller business profile and standard branding | BR01, D250–D258 | B02 | Discussed |
+| B29 | Seller business profile and standard branding | BR01, D250–D258 | B02 | Done |
 | B30 | Buyer links (order, tracking, receipt, EFT details) | WB01, D247 | B22, B23 | Planned |
 | B31 | Care sheets, care packs, PDF, QR labels (seller-written templates until the library, B18, exists) | CP01, CP02, QR01 | B22 | After pilot (D248) |
 | B32 | Copy to collection from a care pack (after the collector domain) | CP03, BY04 | B31, B10 | After pilot (D248, D249) |
@@ -1237,7 +1237,7 @@ collected. The order page shows Mark packed and Slip for to-ship orders. Pickup 
 are listed only with `shipping.pickup`, and courier and tracking fields need
 `shipping.manual`. The help topic `to-ship` needs review.
 
-### B29 Seller business profile and standard branding — discussed 2026-11-28
+### B29 Seller business profile and standard branding — discussed and built 2026-11-28
 
 **Scope**
 - **Logo (BR01, D251):** one PNG, JPEG or WebP logo up to 5 MB, kept at its own shape and
@@ -1267,3 +1267,15 @@ logo on care sheets and QR labels (B31); TikTok and other links.
 - Changing the logo flags existing sale cards as stale.
 - Managers and host/packers can't change the logo or links.
 - A seller with no paid plan can use the logo and links.
+
+**Built notes:** `Seller::Identity` holds the logo and the four links. Each link is parsed
+from an @handle or a link for its own site into a clean URL, or a +27 number, and the
+display text and `wa.me` link are derived from that. The logo is fitted into 800 px and
+stored as a PNG with `dependent: false`, so replacing or removing it keeps the old file
+for receipts that show it. Receipt snapshots add `logo_blob_id` and the shown links, and
+the PDF draws the logo above the title and the links in the From block. Sale cards store
+`business_label` and `logo_blob_id`; existing cards were backfilled with the business
+name so they don't show as stale. The page keeps its `business_details` route but is
+titled Business profile. Help topic `logo-and-links` is new, and `business-details` and
+`order-payments` were reworded, so all three need review. image_processing 2.x no longer
+pulls in ruby-vips, so it is now in the Gemfile.

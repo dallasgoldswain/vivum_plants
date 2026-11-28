@@ -78,8 +78,8 @@
     <% unless Current.seller.legal_name || Current.seller.address %>
       <p class="vv-caption">
         Receipts show your
-        <%= link_to_if allowed_to?(:update?, Current.seller), "business details", edit_sell_business_details_path, class: "underline underline-offset-4" %>;
-        add them before your first receipt.
+        <%= link_to_if allowed_to?(:update?, Current.seller), "business profile", edit_sell_business_details_path, class: "underline underline-offset-4" %>;
+        fill it in before your first receipt.
       </p>
     <% end %>
   </section>

@@ -1,5 +1,7 @@
+require "vips"
+
 # Draws a sale card with libvips (SE07, D166): the photo on top and a panel with the name,
-# the price and a line with the size and business name. The price is drawn on its own and
+# the price and a line with the size, business name and card link, beside the logo (D253). The price is drawn on its own and
 # sized first, so a long name shrinks or is shortened rather than hiding it. Nothing private
 # is drawn.
 class SaleCard::Renderer
@@ -10,9 +12,12 @@ class SaleCard::Renderer
   MARGIN = 56
   NAME_SIZES = [ 56, 48, 40 ].freeze
 
-  def initialize(listing, photo:, size:, file_type:)
+  LOGO_BOX = [ 220, 88 ].freeze
+
+  def initialize(listing, photo:, size:, file_type:, logo: nil)
     @listing = listing
     @photo = photo
+    @logo = logo
     @width, @height = size
     @file_type = file_type
   end
@@ -24,14 +29,19 @@ class SaleCard::Renderer
 
     text_width = @width - (2 * MARGIN)
     price = text("<b>#{escape(rands(@listing.price_cents))}</b>", 76, text_width)
-    meta = text(escape([ @listing.size, @listing.seller.name ].compact_blank.join(" · ")), 32, text_width, MUTED)
+    logo = logo_image
+    logo_room = logo ? logo.width + 24 : 0
+    meta = text(escape([ @listing.size, @listing.seller.card_label ].compact_blank.join(" · ")), 32, text_width - logo_room, MUTED)
+    row = [ meta.height, logo&.height.to_i ].max
     top = @height - panel + 44
-    room = panel - 44 - 40 - price.height - 16 - meta.height - 20
+    room = panel - 44 - 40 - price.height - 16 - row - 20
     name = fit_name(text_width, room)
 
     canvas = canvas.composite2(name, :over, x: MARGIN, y: top)
     canvas = canvas.composite2(price, :over, x: MARGIN, y: top + name.height + 16)
-    canvas = canvas.composite2(meta, :over, x: MARGIN, y: @height - 40 - meta.height)
+    row_top = @height - 40 - row
+    canvas = canvas.composite2(logo, :over, x: MARGIN, y: row_top + ((row - logo.height) / 2)) if logo
+    canvas = canvas.composite2(meta, :over, x: MARGIN + logo_room, y: row_top + ((row - meta.height) / 2))
     canvas = canvas.flatten(background: BACKGROUND.to_a) if canvas.has_alpha?
     canvas = canvas.cast(:uchar)
     @file_type == "png" ? canvas.write_to_buffer(".png") : canvas.write_to_buffer(".jpg", Q: 88, strip: true)
@@ -45,6 +55,14 @@ class SaleCard::Renderer
       image = image.colourspace(:srgb)
       image = image.flatten(background: BACKGROUND.to_a) if image.has_alpha?
       canvas.insert(image.cast(:uchar), (@width - image.width) / 2, 0)
+    end
+
+    # Fitted into its box at its own shape, never cropped (D251).
+    def logo_image
+      return unless @logo
+
+      image = Vips::Image.thumbnail_buffer(@logo.download, LOGO_BOX.first, height: LOGO_BOX.last).colourspace(:srgb)
+      image.bands == 4 ? image : image.bandjoin(255)
     end
 
     # The largest size at which the name fits its room; shortened with an ellipsis if even

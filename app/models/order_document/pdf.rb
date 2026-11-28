@@ -24,7 +24,12 @@ class OrderDocument::Pdf
   private
     def title = "#{@document.title} #{@document.reference}"
 
+    # The logo it was issued with (D255), fitted into a box at its own shape (D251).
     def header(pdf)
+      if (logo = logo_data)
+        pdf.image StringIO.new(logo), fit: [ 180, 72 ]
+        pdf.move_down 12
+      end
       pdf.text text(@document.title.upcase), size: 18, style: :bold
       pdf.text text(@document.reference), size: 12
       pdf.move_down 16
@@ -33,7 +38,7 @@ class OrderDocument::Pdf
     def parties(pdf)
       seller = @details["seller"]
       from = [ seller["legal_name"] || seller["name"], (seller["name"] if seller["legal_name"]), seller["address"], seller["phone"], seller["email"],
-               ("VAT number #{seller['vat_number']}" if vat?) ].compact_blank
+               *Array(seller["links"]).map { "#{it['name']} #{it['text']}" }, ("VAT number #{seller['vat_number']}" if vat?) ].compact_blank
       buyer = [ @details.dig("buyer", "name"), *Array(@details.dig("buyer", "address")) ].compact_blank
       pdf.table([ [ text("From\n" + from.join("\n")), text("To\n" + buyer.join("\n")) ] ], width: pdf.bounds.width, cell_style: { borders: [], padding: [ 0, 12, 0, 0 ], size: 10 })
       pdf.move_down 20
@@ -72,6 +77,13 @@ class OrderDocument::Pdf
         row(0).font_style = :bold
         column(1).align = :right
       end
+    end
+
+    def logo_data
+      blob = ActiveStorage::Blob.find_by(id: @details.dig("seller", "logo_blob_id")) if @details.dig("seller", "logo_blob_id")
+      blob&.download
+    rescue ActiveStorage::FileNotFoundError
+      nil
     end
 
     def vat? = @document.vat_rate.present?

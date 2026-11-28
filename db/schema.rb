@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_28_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -879,6 +879,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
     t.bigint "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "business_label"
+    t.bigint "logo_blob_id"
     t.index ["created_by_id"], name: "index_sale_cards_on_created_by_id"
     t.index ["listing_id"], name: "index_sale_cards_on_listing_id"
   end
@@ -998,6 +1000,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_28_090000) do
     t.string "contact_email"
     t.integer "last_document_number", default: 0, null: false
     t.integer "last_import_number", default: 0, null: false
+    t.string "instagram_url"
+    t.string "facebook_url"
+    t.string "youtube_url"
+    t.string "whatsapp_number"
+    t.boolean "show_instagram", default: true, null: false
+    t.boolean "show_facebook", default: true, null: false
+    t.boolean "show_youtube", default: true, null: false
+    t.boolean "show_whatsapp", default: true, null: false
+    t.string "card_link"
     t.index ["plan_id"], name: "index_sellers_on_plan_id"
   end
 

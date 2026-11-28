@@ -33,11 +33,11 @@ buyer and the plants as they were when it was issued.
 After the receipt is issued, the order's plants and prices are fixed. To correct
 it, record a refund.
 
-Receipts show your **Business details**. Add them before your first receipt.
+Receipts show your **Business profile**. Add them before your first receipt.
 
 ## Tax invoices
 
-If your business has a VAT number in **Business details**, receipts are tax
+If your business has a VAT number in **Business profile**, receipts are tax
 invoices: they show your VAT number and the 15% VAT included in the total.
 Changing your VAT number later doesn't change invoices you've already issued.
 

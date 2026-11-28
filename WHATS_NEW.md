@@ -124,6 +124,9 @@ The first version of VIVUM Plants, for our pilot collectors and sellers.
 - See what's left to send under To ship: every paid order, oldest payment first. Tick
   orders packed as you go, print a slip for the box (no prices), add the courier and
   tracking number, and mark it shipped or collected.
+- Add your logo and your Instagram, Facebook, YouTube and WhatsApp links in Business
+  profile. Your sale cards, receipts and slips show them, and you choose which links
+  appear. No paid plan needed.
 - Move a plant from your own collection into your business's stock, and back again while
   nothing is held. Its history stays with the plant.
 - Find short guides under Help, search them, or use the Help link beside a page's heading.

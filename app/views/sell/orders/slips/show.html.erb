@@ -27,7 +27,12 @@
   >
     <header class="flex flex-wrap items-start justify-between gap-2">
       <div>
+        <% if Current.seller.logo_shown? %>
+          <%= image_tag Current.seller.logo, alt: "", class: "mb-2 max-h-16 max-w-48 object-contain" %>
+        <% end %>
+
         <p class="text-sm"><%= Current.seller.name %></p>
+
         <h1 class="text-2xl font-semibold">Order <%= order.reference %></h1>
       </div>
 

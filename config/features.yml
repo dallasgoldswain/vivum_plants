@@ -75,9 +75,9 @@ billing.comp_accounts: { domain: billing, state: core, depends_on: [seller.works
 seller.workspace: { domain: seller, state: core, implemented: true, description: "Seller workspace (Sell area) for invited sellers (SO03)" }
 seller.members: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Member management and roles (SO02)" }
 seller.invites: { domain: seller, state: core, implemented: true, description: "Operator-issued seller invites (SO03)" }
-seller.profile: { domain: seller, state: core, depends_on: [seller.workspace], description: "Business profile (BR01)" }
-seller.logo: { domain: seller, state: core, depends_on: [seller.profile], description: "Logo upload and display (BR01)" }
-seller.social_links: { domain: seller, state: core, depends_on: [seller.profile], description: "YouTube, Instagram and Facebook links (BR01)" }
+seller.profile: { domain: seller, state: core, implemented: true, depends_on: [seller.workspace], description: "Business profile (BR01)" }
+seller.logo: { domain: seller, state: core, implemented: true, depends_on: [seller.profile], description: "Logo upload and display (BR01)" }
+seller.social_links: { domain: seller, state: core, implemented: true, depends_on: [seller.profile], description: "Instagram, Facebook, YouTube and WhatsApp links (BR01, D252)" }
 seller.paid_branding: { domain: seller, state: pilot, depends_on: [seller.profile], entitlement: paid_branding, description: "Paid colour palettes and layouts (BR02)", off: "New output reverts to standard identity; saved files keep working" }
 
 # --- Seller foundation ---
