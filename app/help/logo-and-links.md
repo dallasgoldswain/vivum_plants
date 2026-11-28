@@ -6,6 +6,8 @@ audience: seller
 capabilities: [seller.profile, seller.logo, seller.social_links]
 prerequisites: [business-details]
 keywords: [logo, brand, branding, instagram, facebook, youtube, whatsapp, social, links, handle, contact, sale card, receipt, slip]
+reviewed: 2026-11-28
+reviewed_digest: aba302ffe40ec6a0e2b4c7149dc663a0226b783312b832fd56924cffc1804f1e
 ---
 
 Owners add a logo and links in **Sell → Orders → Business profile**. You don't need a
