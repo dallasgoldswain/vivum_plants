@@ -458,3 +458,17 @@ Superseded by D240–D244 (Round 38): B27 was re-scoped to a simpler To ship lis
 | D247 | Pilot payments | The pilot is paid by EFT with proof of payment. The buyer link shows the seller's bank details and the order reference, and the seller records the payment (B23). Bob Pay (B40) and Yoco (B41) checkout move after the pilot. |
 | D248 | After the pilot | These batches move after the pilot: B31 care packs and B32 copy to collection, B36 native apps (the pilot uses the web app installed as a PWA), B38 and B39 WhatsApp Cloud API, B40 and B41 checkout, B42 Bob Go, and B43 Paystack subscriptions. The app store part of B44 goes with B36. B28 plant requests and Wanted List stays in the pilot. |
 | D249 | Collector side | The collector domain (B10–B18) stays as built and switched on, but new collector work waits for the pilot: B33 Plant Sitter, offline care logging (B35), B37 AI care suggestions and B32. PWA install stays in the pilot for sellers. |
+
+## Round 39 — Seller business profile and standard branding (B29) (2026-11-28)
+
+| ID | Question | Decision |
+|----|----------|----------|
+| D250 | Where identity appears | The business identity appears on sale cards, receipt and invoice PDFs, and order slips. Cards and PDFs get the logo and a contact line; slips get the logo and business name. Buyer pages pick it up when they are built (B30). Standard identity needs no paid plan (BR01). |
+| D251 | Logo | One logo per business: PNG, JPEG or WebP up to 5 MB. It keeps its own shape and is fitted into a box wherever it is shown, with no cropping step. With no logo, the business name is shown alone. |
+| D252 | Links | Instagram, Facebook, YouTube and a WhatsApp number, each with its own show/hide toggle. A hidden or empty link never renders (BR01). |
+| D253 | Card contact line | A sale card shows the logo beside the business name, and one link the seller chooses from the shown links, such as an Instagram handle or the WhatsApp number. With none chosen, the card shows the name only. |
+| D254 | Who edits | Owners only, as with business details (D193). Changes to the logo and links are audited. |
+| D255 | Earlier output | A receipt or invoice keeps the logo and links it was issued with, as it already keeps the business details. Existing sale cards keep their image and are flagged stale when the logo, name or card link changes, so the seller can make them again. |
+| D256 | Link input | A link accepts an @handle or a full link for that site only, and is stored as a clean profile URL. The WhatsApp number accepts a South African number and is stored in +27 format. Anything else is refused with a message. |
+| D257 | Where it is edited | The logo and links are added as sections on the existing Business details page, which is renamed Business profile. |
+| D258 | Gating and records (B29) | Gated by `seller.profile`, `seller.logo` and `seller.social_links`, which become implemented. Logo and link changes are audited. Help covers the business profile, logo and links. Paid palettes and layouts stay in B43 (BR02). |
